@@ -54,22 +54,11 @@ class Monocms_Sniffs_CodeAnalisys_UndefinedVariableSniff implements PHP_CodeSnif
         $token = $tokens[$stackPtr];
 
         // the next token
-        //$next = ++$token['scope_opener'];
+        $next = ++$token['scope_opener'];
         // the last token (function closing curly braces)
-        //$end  = --$token['scope_closer'];
+        $end  = --$token['scope_closer'];
         
-        //get function parameters
-        //$params = array();
-        //   foreach ($phpcsFile->getMethodParameters($stackPtr) as $param) {
-        //      $params[] = $param['name'];
-        //}
-  
 	// check it this variable is getting a value assigned
-	
-		
-	var_dump($next_var);
-
-
 	$globals = array();
         $global_vars = array();
         $vars = array();
@@ -99,18 +88,9 @@ class Monocms_Sniffs_CodeAnalisys_UndefinedVariableSniff implements PHP_CodeSnif
             // current token code
             $code  = $token['code'];
             
-            $xPtr = $phpcsFile->findNext(T_WHITESPACE, ($stackPtr+1), null, true);
-	    $next_var = $tokens[$xPtr];
-		
-	    if ($next_var['type'] == "T_VARIABLE") {
-
-	    }
-
-
-	/*
-            // skip ignored tokens tokens
+	    // skip ignored tokens tokens
             if (in_array($token['type'], $ignored_tokens)) {
-                        continue;
+                continue;
             }
 
             // line with globals defined
@@ -208,11 +188,11 @@ class Monocms_Sniffs_CodeAnalisys_UndefinedVariableSniff implements PHP_CodeSnif
         // output warnings for undefined variables
         foreach ($read_vars as $read) {
             $read = explode("|", $read);
-            if(!in_array($read[0], array_unique($writes)) && !in_array($read[0], $globals) && !in_array($read[0], $ignored_vars) && !in_array($read[0], $others) && !in_array($read[0], $params)) {
+            if(!in_array($read[0], array_unique($writes)) && !in_array($read[0], $globals) && !in_array($read[0], $ignored_vars) && !in_array($read[0], $others) /*&& !in_array($read[0], $params)*/) {
                  $phpcsFile->addWarning("Variable " . $read[0] ." is undefined.", $read[1]);
             }
         }
-	*/
+	
     } //end process()
 
 }//end class
