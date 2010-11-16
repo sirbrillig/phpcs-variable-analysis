@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<ruleset name="Monocms">
+ <description>The coding standard for Monocms.</description>
+
+ <!-- Include some specific sniffs -->
+ <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter"/>
+</ruleset>
