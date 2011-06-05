@@ -26,7 +26,7 @@
  * @version   Release: 0.1
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class Monocms_Sniffs_CodeAnalysis_UnusedVariableSniff implements PHP_CodeSniffer_Sniff
+class Generic_Sniffs_CodeAnalysis_UnusedVariableSniff implements PHP_CodeSniffer_Sniff
 {
     /**
      * Returns an array of tokens this test wants to listen for.
@@ -55,6 +55,11 @@ class Monocms_Sniffs_CodeAnalysis_UnusedVariableSniff implements PHP_CodeSniffer
         // the T_FUNCTION token
            $token = $tokens[$stackPtr];
         
+        // Skip broken function declarations.
+        if (isset($token['scope_opener']) === false || isset($token['parenthesis_opener']) === false) {
+            return;
+        }
+
         // the next token
             $next = ++$token['scope_opener'];
         // the last token (function closing curly braces)
