@@ -14,10 +14,10 @@
  */
 
 /**
- * Checks the for unused function variables.
+ * Checks the for undefined function variables.
  *
  * This sniff checks that all function variables
- * are used  in the function body.
+ * are defined in the function body.
  *
  * @category  PHP
  * @package   PHP_CodeSniffer
@@ -26,7 +26,7 @@
  * @version   Release: 0.1
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class Monocms_Sniffs_CodeAnalisys_UnusedVariableSniff implements PHP_CodeSniffer_Sniff
+class Monocms_Sniffs_CodeAnalysis_UndefinedVariableSniff implements PHP_CodeSniffer_Sniff
 {
     /**
      * Returns an array of tokens this test wants to listen for.
@@ -50,21 +50,20 @@ class Monocms_Sniffs_CodeAnalisys_UnusedVariableSniff implements PHP_CodeSniffer
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
-        // all tokens
-            $tokens = $phpcsFile->getTokens();
-        // the T_FUNCTION token
-           $token = $tokens[$stackPtr];
-        
+        $tokens = $phpcsFile->getTokens();
+        $token = $tokens[$stackPtr];
+
         // the next token
-            $next = ++$token['scope_opener'];
+        $next = ++$token['scope_opener'];
         // the last token (function closing curly braces)
-            $end  = --$token['scope_closer'];
+        $end  = --$token['scope_closer'];
         
-            $globals = array();
+	// check it this variable is getting a value assigned
+	$globals = array();
         $global_vars = array();
         $vars = array();
         $global_line = 0;
-    
+
         $reads = array();
         $read_vars = array();
         $writes = array();
@@ -76,22 +75,22 @@ class Monocms_Sniffs_CodeAnalisys_UnusedVariableSniff implements PHP_CodeSniffer
         $write_tokens = array("T_EQUAL", "T_LIST", "T_OBJECT_OPERATOR", "T_OPEN_SQUARE_BRACKET", "T_CLOSE_SQUARE_BRACKET", "T_SEMICOLON", "T_DOUBLE_ARROW", "T_LIST");
         $read_tokens  = array(
                               "T_COMMA", "T_DOUBLE_ARROW", "T_AS", "T_BOOLEAN_AND", "T_BOOLEAN_OR", "T_IS_EQUAL", "T_IS_GREATER_OR_EQUAL", "T_IS_IDENTICAL", "T_IS_NOT_EQUAL",
-                      "T_IS_NOT_IDENTICAL", "T_IS_NOT_IDENTICAL", "T_EQUAL");
+                              "T_IS_NOT_IDENTICAL", "T_IS_NOT_IDENTICAL", "T_EQUAL");
 
         $ignored_vars = array("\$GLOBALS", "\$_SERVER", "\$_GET", "\$_POST", "\$_FILES", "\$_COOKIE", "\$_SESSION", "\$_REQUEST", "\$_ENV", "\$this");
 
         $comparisons = array("T_BOOLEAN_AND", "T_BOOLEAN_OR", "T_IS_EQUAL", "T_IS_GREATER_OR_EQUAL", "T_IS_IDENTICAL", "T_IS_NOT_EQUAL", "T_IS_NOT_IDENTICAL", "T_IS_NOT_IDENTICAL", "T_EQUAL");
 
         // scan through code
-         for (; $next <= $end; ++$next) {
+        for (; $next <= $end; ++$next) {
             // current token
-                   $token = $tokens[$next];
+            $token = $tokens[$next];
             // current token code
-                $code  = $token['code'];
+            $code  = $token['code'];
             
-            // skip ignored tokens tokens
+	    // skip ignored tokens tokens
             if (in_array($token['type'], $ignored_tokens)) {
-                        continue;
+                continue;
             }
 
             // line with globals defined
@@ -101,7 +100,7 @@ class Monocms_Sniffs_CodeAnalisys_UnusedVariableSniff implements PHP_CodeSniffer
 
             // global variables on that line
             if ($token['type'] == "T_VARIABLE" && $token['line'] == $global_line) {
-                $global_vars[] = $token['content'] ."|". $next;
+                $global_vars[] = $token['content'] ."|". $token['line'];
                 $globals[] = $token['content'];
             }
             // all other variables in function 
@@ -114,7 +113,7 @@ class Monocms_Sniffs_CodeAnalisys_UnusedVariableSniff implements PHP_CodeSniffer
     
                 // reading from a variable
                 if (in_array($tokens[$next-2]['type'], $read_tokens) || in_array($tokens[$next-1]['type'], $read_tokens)) {
-                    $read_vars[] = $token['content'] ."|". $token['line'];
+                    $read_vars[] = $token['content'] ."|". $next;
                     $reads[] = $token['content'];
                 } 
                 
@@ -175,40 +174,25 @@ class Monocms_Sniffs_CodeAnalisys_UnusedVariableSniff implements PHP_CodeSniffer
                 //rename($_FILES['image_file']['tmp_name'][$k], $image['orig']);
                 if (($tokens[$next-1]['content'] == "," || $tokens[$next-2]['content'] == ",") && $tokens[$next+1]['content'] == "[") {
                        $others[] = $token['content'];
-                                }
+                }
                 
                 //$news['published'] = 1;
                 if ($tokens[$next+1]['content'] == "[" && $tokens[$next+2]['type'] == "T_CONSTANT_ENCAPSED_STRING" && ($tokens[$next+3]['content'] == "]" || $tokens[$next+2]['content'] == "=")) {
                        $others[] = $token['content'];
-                                }
-                            
-                // $first[$second]
-                if ($tokens[$next-1]['content'] == "[" && $tokens[$next+1]['content'] == "]") {
-                    $others[] = $token['content'];
                 }
 
-                // [$portal_id."_".$old_id]
-                if ($tokens[$next-2]['type'] == "T_CONSTANT_ENCAPSED_STRING" && $tokens[$next-1]['content'] == ".") {
-                    $others[] = $token['content'];
-                }
-
-                // $i++, $i--, ++$i, --$i
-                if ($tokens[$next+1]['type'] == "T_INC" || $tokens[$next-1]['type'] == "T_INC" || $tokens[$next+1]['type'] == "T_DEC" || $tokens[$next-1]['type'] == "T_DEC") {
-                    $others[] = $token['content'];    
-                }
-                
-    
             } // end if
+
         } // end for
 
-        // output warnings for unused variables
-        foreach ($write_vars as $write) {
-            $write = explode("|", $write);
-            if(!in_array($write[0], array_unique($reads)) && !in_array($write[0], $globals) && !in_array($write[0], $ignored_vars) && !in_array($write[0], $others)) {
-                 $phpcsFile->addWarning("Variable " . $write[0] ." is never used.", $write[1]);
+        // output warnings for undefined variables
+        foreach ($read_vars as $read) {
+            $read = explode("|", $read);
+            if(!in_array($read[0], array_unique($writes)) && !in_array($read[0], $globals) && !in_array($read[0], $ignored_vars) && !in_array($read[0], $others) /*&& !in_array($read[0], $params)*/) {
+                 $phpcsFile->addWarning("Variable " . $read[0] ." is undefined.", $read[1]);
             }
         }
-        
+	
     } //end process()
 
 }//end class

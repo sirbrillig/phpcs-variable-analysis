@@ -27,7 +27,7 @@
  * @version   Release: 0.1
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class Monocms_Sniffs_CodeAnalisys_UnusedGlobalVariableSniff implements PHP_CodeSniffer_Sniff
+class Monocms_Sniffs_CodeAnalysis_UnusedGlobalVariableSniff implements PHP_CodeSniffer_Sniff
 {
     /**
      * Returns an array of tokens this test wants to listen for.
