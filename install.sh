@@ -57,7 +57,7 @@ fi
 if [ -n "$INSTALL_TESTS" ]; then
     if [ -d "${PHP_CODESNIFFER_DIR}/Standards/Generic/${TESTS_SUBDIR}" ]; then
         echo "Installing Tests to ${PHP_CODESNIFFER_DIR}/Standards/Generic/${TESTS_SUBDIR}";
-        for file in ${INSTALL_FROM_DIR}/${TESTS_SUBDIR}/*.php;
+        for file in ${INSTALL_FROM_DIR}/${TESTS_SUBDIR}/*.{php,inc};
         do
             cp -f $file ${PHP_CODESNIFFER_DIR}/Standards/Generic/${TESTS_SUBDIR}/`basename "$file"`
         done
