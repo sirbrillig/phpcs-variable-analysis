@@ -42,11 +42,17 @@ TESTS_SUBDIR="Tests/CodeAnalysis"
 ERRORS=0
 
 #  TODO: support copy install
-echo "Installing Sniffs to ${PHP_CODESNIFFER_DIR}/Standards/Generic/${SNIFFS_SUBDIR}";
-for file in ${INSTALL_FROM_DIR}/${SNIFFS_SUBDIR}/*.php;
-do
-    cp -f $file ${PHP_CODESNIFFER_DIR}/Standards/Generic/${SNIFFS_SUBDIR}/`basename "$file"`
-done
+if [ -d "${PHP_CODESNIFFER_DIR}/Standards/Generic/${SNIFFS_SUBDIR}" ]; then
+    echo "Installing Sniffs to ${PHP_CODESNIFFER_DIR}/Standards/Generic/${SNIFFS_SUBDIR}";
+    for file in ${INSTALL_FROM_DIR}/${SNIFFS_SUBDIR}/*.php;
+    do
+        cp -f $file ${PHP_CODESNIFFER_DIR}/Standards/Generic/${SNIFFS_SUBDIR}/`basename "$file"`
+    done
+else
+    echo "Error installing sniffs: ${PHP_CODESNIFFER_DIR}/Standards/Generic/${SNIFFS_SUBDIR}/ does not exist."
+    echo "Is PHP_Codesniffer installed to ${PHP_CODESNIFFER_DIR}? Try using -p option to your PEAR install, or -d to your PHP_Codesniffer dir."
+    ERRORS=1
+fi
 
 if [ -n "$INSTALL_TESTS" ]; then
     if [ -d "${PHP_CODESNIFFER_DIR}/Standards/Generic/${TESTS_SUBDIR}" ]; then
