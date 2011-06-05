@@ -19,5 +19,10 @@ Unused variable sniff:
  * are used  in the function body.
  *
 
-Place all files into /CodeSniffer/Standards/SomeDir/
-Run with phpcs --standard=SomeDir
+INSTALLATION
+
+Run ./install.sh -h to get install help.
+
+For a default install of PHP_Codesniffer via PEAR with PEAR in ~/pear you should be
+safe to just run ./install.sh to use the default options, then copy the rules from
+ruleset.xml into your own ruleset.xml.

@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
-<ruleset name="Monocms">
- <description>The coding standard for Monocms.</description>
+<ruleset name="PHP_Codesniffer Plugins Generic">
+ <description>Run ./install.sh and add the following rules to your standrd's ruleset.xml.</description>
 
- <!-- Include some specific sniffs -->
- <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter"/>
+ <!-- Rules provided by PHP_Codesniffer-Plugins -->
+ <rule ref="Generic.CodeAnalysis.UnusedVariable"/>
+ <rule ref="Generic.CodeAnalysis.UnusedGlobalVariable"/>
+ <rule ref="Generic.CodeAnalysis.UndefinedVariable"/>
 </ruleset>
