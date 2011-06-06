@@ -6,10 +6,9 @@
  *
  * @category  PHP
  * @package   PHP_CodeSniffer
- * @author    Alan Jancic <alan.jancic@monotek.net>
- * @copyright 2010 Monotek d.o.o.
+ * @author    Sam Graham <php-codesniffer-plugins BLAHBLAH illusori.co.uk>
+ * @copyright 2011 Sam Graham <php-codesniffer-plugins BLAHBLAH illusori.co.uk>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
- * @version   CVS: $Id: $
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
@@ -21,190 +20,249 @@
  *
  * @category  PHP
  * @package   PHP_CodeSniffer
- * @author    Alan Jancic <alan.jancic@monotek.net>
- * @copyright 2010 Monotek d.o.o.
- * @version   Release: 0.1
+ * @author    Sam Graham <php-codesniffer-plugins BLAHBLAH illusori.co.uk>
+ * @copyright 2011 Sam Graham <php-codesniffer-plugins BLAHBLAH illusori.co.uk>
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff implements PHP_CodeSniffer_Sniff
+class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer_Standards_AbstractVariableSniff
 {
-    /**
-     * Returns an array of tokens this test wants to listen for.
-     * 
-     * @return array
-     */
-    public function register()
-    {    
-        return array(T_FUNCTION);
-    }//end register()
+    private $_scopes = array();
 
+    function normalizeVarName($varName) {
+        $varName = preg_replace('/[{}$]/', '', $varName);
+        return $varName;
+    }
+
+    function scopeKey($currScope) {
+        if (is_null($currScope)) {
+            $currScope = 'file';
+        }
+        return $this->currentFile . ':' . $currScope;
+    }
+
+    function markVariableAssignment($varName, $stackPtr, $currScope) {
+        $scopeKey = $this->scopeKey($currScope);
+        if (isset($this->_scopes[$scopeKey]) &&
+            isset($this->_scopes[$scopeKey][$varName]) &&
+            ($this->_scopes[$scopeKey][$varName] <= $stackPtr)) {
+            return;
+        }
+//echo "Marking write to var {$varName} in {$scopeKey} at {$stackPtr}.\n";
+        $this->_scopes[$scopeKey][$varName] = $stackPtr;
+    }
+
+    function isVariableInitialized($varName, $stackPtr, $currScope) {
+        $scopeKey = $this->scopeKey($currScope);
+        if (isset($this->_scopes[$scopeKey]) &&
+            isset($this->_scopes[$scopeKey][$varName]) &&
+            ($this->_scopes[$scopeKey][$varName] <= $stackPtr)) {
+            return true;
+        }
+        return false;
+    }
+
+    function findVariableScope(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        if (empty($token['conditions'])) {
+            return null;
+        }
+
+//echo "Looking for scope for {$token['content']}.\n";
+        foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
+            // TODO: T_CLOSURE?
+            if ($scopeCode === T_FUNCTION) {
+//echo "Found scope {$tokens[$scopePtr]['content']}.\n";
+                return $scopePtr;
+            }
+//echo "Skipping scope {$tokens[$scopePtr]['content']}.\n";
+        }
+
+        return null;
+    }
+
+    function isNextThingAnAssign(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+
+        // Is the next non-whitespace an asignment?
+        $nextPtr = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true, null, true);
+        if ($nextPtr !== false) {
+            if ($tokens[$nextPtr]['code'] === T_EQUAL) {
+                return $nextPtr;
+            }
+        }
+        return false;
+    }
+
+    function findWhereAssignExecuted(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+
+        // Write should be recorded at the next statement to ensure we treat
+        // the assign as happening after the RHS execution.
+        // eg: $var = $var + 1; -> RHS could still be undef.
+        $execPtr = $phpcsFile->findNext(T_SEMICOLON, $stackPtr + 1, null, false, null, true);
+        if ($execPtr === false) {
+            // TODO: panic
+            $execPtr = $stackPtr;
+        }
+
+        // TODO: Handle: echo (($var = 12) && ($var == 12));
+
+        return $execPtr;
+    }
 
     /**
-     * Processes this test, when one of its tokens is encountered.
+     * Called to process class member vars.
      *
-     * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
-     * @param int                  $stackPtr  The position of the current token
-     *                                        in the stack passed in $tokens.
-     * 
+     * @param PHP_CodeSniffer_File $phpcsFile The PHP_CodeSniffer file where this
+     *                                        token was found.
+     * @param int                  $stackPtr  The position where the token was found.
+     *
      * @return void
      */
-    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
-    {
+    protected function processMemberVar(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr
+    ) {
         $tokens = $phpcsFile->getTokens();
-        $token = $tokens[$stackPtr];
+        $token  = $tokens[$stackPtr];
+        // TODO: don't care for now
+    }
 
-        // Skip broken function declarations.
-        if (isset($token['scope_opener']) === false || isset($token['parenthesis_opener']) === false) {
+    /**
+     * Called to process normal member vars.
+     *
+     * @param PHP_CodeSniffer_File $phpcsFile The PHP_CodeSniffer file where this
+     *                                        token was found.
+     * @param int                  $stackPtr  The position where the token was found.
+     *
+     * @return void
+     */
+    protected function processVariable(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        $varName = $this->normalizeVarName($token['content']);
+        $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
+
+//echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
+//echo "Prev:\n" . print_r($tokens[$stackPtr - 1], true);
+
+        // TODO: determine if variable is being assigned or read.
+
+        // Possible assignment methods:
+        //   Assignment via =
+        //   Assignment via list (...) =
+        //   Assignment via foreach (... as ...) { }
+        //   Is a mandatory function parameter
+        //   Is an optional function parameter with non-null value
+        //   Pass-by-reference to known pass-by-reference function
+
+
+        // Is the next non-whitespace an asignment?
+        $assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr);
+        if ($assignPtr !== false) {
+            // Plain ol' assignment. Simpl(ish).
+
+//echo "Next:\n" . print_r($tokens[$assignPtr], true);
+
+            $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
+            $this->markVariableAssignment($varName, $writtenPtr, $currScope);
             return;
         }
 
-        // the next token
-        $next = ++$token['scope_opener'];
-        // the last token (function closing curly braces)
-        $end  = --$token['scope_closer'];
-        
-	// check it this variable is getting a value assigned
-	$globals = array();
-        $global_vars = array();
-        $vars = array();
-        $global_line = 0;
+        // OK, are we within a list (...) construct?
+        if (isset($token['nested_parenthesis'])) {
+//echo "Has brackets.\n";
+            $openPtrs = array_keys($token['nested_parenthesis']);
+            $openPtr = $openPtrs[count($openPtrs) - 1];
+//echo "Open bracket:\n" . print_r($tokens[$openPtr], true);
+            $prevPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
+//echo "Prev to bracket:\n" . print_r($tokens[$prevPtr], true);
+            if (($prevPtr !== false) && ($tokens[$prevPtr]['code'] === T_LIST)) {
+                // OK, we're a list (...) construct... are we being assigned to?
+//echo "Is list.\n";
 
-        $reads = array();
-        $read_vars = array();
-        $writes = array();
-        $write_vars = array();
-        $others = array();        
+                $closePtr = $tokens[$openPtr]['parenthesis_closer'];
+                $assignPtr = $this->isNextThingAnAssign($phpcsFile, $closePtr);
+                if ($assignPtr !== false) {
+                    // Yes, we're being assigned.
 
-        // define ignored tokens, write and read tokens, ignored variables, comparison operators
-        $ignored_tokens = array("T_COMMENT", "T_CLOSE_TAG", "T_OPEN_TAG", "T_ML_COMMENT", "T_COMMENT", "T_WHITESPACE");
-        $write_tokens = array("T_EQUAL", "T_LIST", "T_OBJECT_OPERATOR", "T_OPEN_SQUARE_BRACKET", "T_CLOSE_SQUARE_BRACKET", "T_SEMICOLON", "T_DOUBLE_ARROW", "T_LIST");
-        $read_tokens  = array(
-                              "T_COMMA", "T_DOUBLE_ARROW", "T_AS", "T_BOOLEAN_AND", "T_BOOLEAN_OR", "T_IS_EQUAL", "T_IS_GREATER_OR_EQUAL", "T_IS_IDENTICAL", "T_IS_NOT_EQUAL",
-                              "T_IS_NOT_IDENTICAL", "T_IS_NOT_IDENTICAL", "T_EQUAL");
+//echo "Next after brackets:\n" . print_r($tokens[$assignPtr], true);
 
-        $ignored_vars = array("\$GLOBALS", "\$_SERVER", "\$_GET", "\$_POST", "\$_FILES", "\$_COOKIE", "\$_SESSION", "\$_REQUEST", "\$_ENV", "\$this");
-
-        $comparisons = array("T_BOOLEAN_AND", "T_BOOLEAN_OR", "T_IS_EQUAL", "T_IS_GREATER_OR_EQUAL", "T_IS_IDENTICAL", "T_IS_NOT_EQUAL", "T_IS_NOT_IDENTICAL", "T_IS_NOT_IDENTICAL", "T_EQUAL");
-
-        foreach ($phpcsFile->getMethodParameters($stackPtr) as $param) {
-            // TODO: skip optional function args that have a null default
-            $write_vars[] = $param['name'] ."|". $tokens[$stackPtr]['line'];
-            $writes[] = $param['name'];
-        }
-
-        // scan through code
-        for (; $next <= $end; ++$next) {
-            // current token
-            $token = $tokens[$next];
-            // current token code
-            $code  = $token['code'];
-            
-	    // skip ignored tokens tokens
-            if (in_array($token['type'], $ignored_tokens)) {
-                continue;
-            }
-
-            // line with globals defined
-            if ($token['type'] == "T_GLOBAL") {
-                $global_line = $token['line'];
-            } 
-
-            // global variables on that line
-            if ($token['type'] == "T_VARIABLE" && $token['line'] == $global_line) {
-                $global_vars[] = $token['content'] ."|". $token['line'];
-                $globals[] = $token['content'];
-            }
-            // all other variables in function 
-            if ($token['type'] == "T_VARIABLE" && $token['line'] != $global_line) {
-                $vars[] = $token['content'];
-            }
-        
-            // check function variable context
-            if ($token['type'] == "T_VARIABLE" && $token['line'] != $global_line) {
-    
-                // reading from a variable
-                if (in_array($tokens[$next-2]['type'], $read_tokens) || in_array($tokens[$next-1]['type'], $read_tokens)) {
-                    $read_vars[] = $token['content'] ."|". $next;
-                    $reads[] = $token['content'];
-                } 
-                
-                // writing to a variable
-                if (in_array($tokens[$next+1]['type'], $write_tokens) || in_array($tokens[$next+2]['type'], $write_tokens)) {
-                    $write_vars[] = $token['content'] ."|". $token['line'];
-                    $writes[] = $token['content'];
+                    $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
+                    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+                    return;
                 }
-
-                // whitespace problems, check next token
-                if ($tokens[$next-1]['type'] == "T_DOUBLE_ARROW" || $tokens[$next-2]['type'] == "T_DOUBLE_ARROW" || $tokens[$next-3]['type'] == "T_DOUBLE_ARROW") {
-                                        $others[] = $token['content'];
-                }
-                // variable as as function parameter
-                if ($tokens[$next-1]['content'] == "(" && $tokens[$next+1]['content'] == ")") {
-                                        $others[] = $token['content'];                    
-                }
-
-                // &$var
-                if ($tokens[$next-1]['content'] == "&" && $tokens[$next+1]['content'] == "," && $tokens[$next+2]['type'] == "T_CONSTANT_ENCAPSED_STRING") {
-                    $others[] = $token['content'];
-                }
-
-                // returned variable
-                if ($tokens[$next-1]['type'] == "T_RETURN" || $tokens[$next-2]['type'] == "T_RETURN") {
-                    $others[] = $token['content'];
-                }
-
-                // multiple variables as parameters _somefunc($a, $b)
-                if (($tokens[$next-1]['content'] == "," && $tokens[$next-2]['type'] == "T_VARIABLE") || (($tokens[$next+1]['content'] == "," && $tokens[$next+2]['type'] == "T_VARIABLE"))) {
-                    $others[] = $token['content'];
-                }
-                
-                // variable concatenated between two strings
-                if ($tokens[$next-1]['content'] == "." && $tokens[$next+1]['content'] == ".") {
-                    $others[] = $token['content'];
-                }
-            
-                // object var
-                if ($tokens[$next+1]['content'] == "->") {
-                    $others[] = $token['content'];
-                }
-                
-                // comparing value to a variable
-                if (in_array($tokens[$next+2]['type'], $comparisons)) {
-                    $others[] = $token['content'];
-                }
-
-                                if ($tokens[$next-1]['content'] == "(" && $tokens[$next-3]['type'] == "T_FOREACH") {
-                    $others[] = $token['content'];
-                }
-
-                //@mkdir(dirname($image['orig']), 0777, true);
-                                if ($tokens[$next-1]['content'] == "(" && $tokens[$next+1]['content'] == "[") {
-                    $others[] = $token['content'];
-                }
-
-                //rename($_FILES['image_file']['tmp_name'][$k], $image['orig']);
-                if (($tokens[$next-1]['content'] == "," || $tokens[$next-2]['content'] == ",") && $tokens[$next+1]['content'] == "[") {
-                       $others[] = $token['content'];
-                }
-                
-                //$news['published'] = 1;
-                if ($tokens[$next+1]['content'] == "[" && $tokens[$next+2]['type'] == "T_CONSTANT_ENCAPSED_STRING" && ($tokens[$next+3]['content'] == "]" || $tokens[$next+2]['content'] == "=")) {
-                       $others[] = $token['content'];
-                }
-
-            } // end if
-
-        } // end for
-
-        // output warnings for undefined variables
-        foreach ($read_vars as $read) {
-            $read = explode("|", $read);
-            if(!in_array($read[0], array_unique($writes)) && !in_array($read[0], $globals) && !in_array($read[0], $ignored_vars) && !in_array($read[0], $others) /*&& !in_array($read[0], $params)*/) {
-                 $phpcsFile->addWarning("Variable " . $read[0] ." is undefined.", $read[1]);
             }
         }
-	
-    } //end process()
+
+//echo "Looks like a read.\n";
+
+        // OK, we don't appear to be a write to the var, assume we're a read.
+        if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
+            // We haven't been defined by this point.
+//echo "Uninitialized.\n";
+            $phpcsFile->addWarning("Variable {$varName} is undefined.", $stackPtr);
+        }
+    }
+
+    /**
+     * Called to process variables found in duoble quoted strings.
+     *
+     * Note that there may be more than one variable in the string, which will
+     * result only in one call for the string.
+     *
+     * @param PHP_CodeSniffer_File $phpcsFile The PHP_CodeSniffer file where this
+     *                                        token was found.
+     * @param int                  $stackPtr  The position where the double quoted
+     *                                        string was found.
+     *
+     * @return void
+     */
+    protected function processVariableInString(
+        PHP_CodeSniffer_File
+        $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        if ($token['code'] === T_FUNCTION) {
+            // Bug in AbstractVariableSniff sends T_FUNCTIONs to this callback.
+            // TODO: fix and submit upstream patch
+            return;
+        }
+
+        $pattern = '|[^\\\]\${?([a-zA-Z0-9_]+)}?|';
+        if (!preg_match_all($pattern, $token['content'], $matches)) {
+            // TODO: probably should raise an error
+            return;
+        }
+
+        $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
+        foreach ($matches[1] as $varName) {
+            $varName = $this->normalizeVarName($varName);
+//echo "Found variable {$varName} in string on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
+            if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
+//echo "Uninitialized.\n";
+                $phpcsFile->addWarning("Variable {$varName} is undefined.", $stackPtr);
+            }
+        }
+    }
 
 }//end class
 
