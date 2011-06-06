@@ -37,7 +37,8 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         if (is_null($currScope)) {
             $currScope = 'file';
         }
-        return $this->currentFile . ':' . $currScope;
+        return ($this->currentFile ? $this->currentFile->getFilename() : 'unknown file') .
+            ':' . $currScope;
     }
 
     function markVariableAssignment($varName, $stackPtr, $currScope) {
@@ -52,6 +53,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
     }
 
     function isVariableInitialized($varName, $stackPtr, $currScope) {
+//return true;
         $scopeKey = $this->scopeKey($currScope);
         if (isset($this->_scopes[$scopeKey]) &&
             isset($this->_scopes[$scopeKey][$varName]) &&
@@ -91,7 +93,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
     ) {
         $tokens = $phpcsFile->getTokens();
 
-        // Is the next non-whitespace an asignment?
+        // Is the next non-whitespace an assignment?
         $nextPtr = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true, null, true);
         if ($nextPtr !== false) {
             if ($tokens[$nextPtr]['code'] === T_EQUAL) {
@@ -166,6 +168,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         // Possible assignment methods:
         //   Assignment via =
         //   Assignment via list (...) =
+        //   Declares as a global
         //   Assignment via foreach (... as ...) { }
         //   Is a mandatory function parameter
         //   Is an optional function parameter with non-null value
@@ -210,13 +213,42 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
             }
         }
 
+        // Are we a global declaration?
+        // Search backwards for first token that isn't whitespace, comma or variable.
+        $globalPtr = $phpcsFile->findPrevious(
+            array(T_WHITESPACE, T_VARIABLE, T_COMMA),
+            $stackPtr - 1, null, true, null, true);
+        if (($globalPtr !== false) && ($tokens[$globalPtr]['code'] === T_GLOBAL)) {
+            // It's a global declaration.
+//echo "In a global declaration.\n";
+            $this->markVariableAssignment($varName, $stackPtr, $currScope);
+            return;
+        }
+
+        // Are we a foreach loopvar?
+        if (isset($token['nested_parenthesis'])) {
+            $openPtrs = array_keys($token['nested_parenthesis']);
+            $openPtr = $openPtrs[count($openPtrs) - 1];
+
+            // Is there an 'as' token between us and the opening bracket?
+            $asPtr = $phpcsFile->findPrevious(T_AS, $stackPtr - 1, $openPtr);
+            if ($asPtr !== false) {
+                $this->markVariableAssignment($varName, $stackPtr, $currScope);
+                return;
+            }
+        }
+
+        // TODO: are we a function parameter?
+        // TODO:   are we optional?
+        // TODO:     are we default null?
+
 //echo "Looks like a read.\n";
 
         // OK, we don't appear to be a write to the var, assume we're a read.
         if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
             // We haven't been defined by this point.
 //echo "Uninitialized.\n";
-            $phpcsFile->addWarning("Variable {$varName} is undefined.", $stackPtr);
+            $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
         }
     }
 
@@ -259,7 +291,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
 //echo "Found variable {$varName} in string on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
             if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
 //echo "Uninitialized.\n";
-                $phpcsFile->addWarning("Variable {$varName} is undefined.", $stackPtr);
+                $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
             }
         }
     }

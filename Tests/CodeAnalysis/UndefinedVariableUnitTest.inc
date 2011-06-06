@@ -1,7 +1,6 @@
 <?php
 
 function v() {
-    (list ($var) = 12);
 }
 
 function function_without_param() {
@@ -58,4 +57,27 @@ function function_with_default_undefined_param($junk, $param = null) {
     echo "xxx $param xxx";
     echo "xxx {$param} xxx";
     return $param;
+}
+
+function function_with_global_var() {
+    global $var, $var2;
+
+    echo $var;
+    echo $var3;
+    return $var2;
+}
+
+function function_with_foreach() {
+    foreach ($array as $element1) {
+        echo $element1;
+    }
+    foreach ($array as &$element2) {
+        echo $element2;
+    }
+    foreach ($array as $key1 => $value1) {
+        echo "$key1 => $value1\n";
+    }
+    foreach ($array as $key2 => &$value2) {
+        echo "$key2 => $value2\n";
+    }
 }
