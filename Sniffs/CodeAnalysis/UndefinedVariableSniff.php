@@ -173,6 +173,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         //   Is a mandatory function parameter
         //   Is an optional function parameter with non-null value
         //   Pass-by-reference to known pass-by-reference function
+        //   TODO: we need to care about/ignore "use" in closures?
 
 
         // Is the next non-whitespace an asignment?
@@ -238,10 +239,28 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
             }
         }
 
-        // TODO: are we a function parameter?
-        // TODO:   are we optional?
-        // TODO:     are we default null?
+        // Are we a function parameter?
+        // It would be nice to get the list of function parameters from watching for
+        // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
+        // we need to do that as private or final, so we have to do it this hackish way.
+        if (isset($token['nested_parenthesis'])) {
+            $openPtrs = array_keys($token['nested_parenthesis']);
+            $openPtr = $openPtrs[count($openPtrs) - 1];
+//echo "Prev to bracket:\n" . print_r($tokens[$openPtr - 1], true);
 
+            // Function names are T_STRING, so we look backwards from the opening bracket
+            // for the first thing that isn't a function name or whitespace and check if
+            // it's a function keyword.
+            $functionPtr = $phpcsFile->findPrevious(array(T_STRING, T_WHITESPACE),
+                $openPtr - 1, null, true, null, true);
+//echo "functionPtr:\n" . print_r($tokens[$functionPtr], true);
+            if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
+                // TODO:   are we optional?
+                // TODO:     are we default null?
+                $this->markVariableAssignment($varName, $stackPtr, $currScope);
+                return;
+            }
+        }
 //echo "Looks like a read.\n";
 
         // OK, we don't appear to be a write to the var, assume we're a read.
