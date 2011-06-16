@@ -76,8 +76,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
 
 //echo "Looking for scope for {$token['content']}.\n";
         foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
-            // TODO: T_CLOSURE?
-            if ($scopeCode === T_FUNCTION) {
+            if (($scopeCode === T_FUNCTION) || ($scopeCode === T_CLOSURE)) {
 //echo "Found scope {$tokens[$scopePtr]['content']}.\n";
                 return $scopePtr;
             }
@@ -160,25 +159,26 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         $varName = $this->normalizeVarName($token['content']);
         $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
 
-//if (($varName == 'param') || ($varName == 'junk')) {
+//if ($varName == 'this') {
 //echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
 //}
 //echo "Prev:\n" . print_r($tokens[$stackPtr - 1], true);
 
-        // TODO: determine if variable is being assigned or read.
+        // Determine if variable is being assigned or read.
 
         // Possible assignment methods:
+        //   Is a mandatory function/closure parameter
+        //   TODO: Is an optional function/closure parameter with non-null value
+        //   Is closure use declaration of a variable defined within containing scope
+        //   $this within a class.
         //   Assignment via =
         //   Assignment via list (...) =
         //   Declares as a global
         //   Assignment via foreach (... as ...) { }
-        //   Is a mandatory function parameter
-        //   Is an optional function parameter with non-null value
-        //   Pass-by-reference to known pass-by-reference function
-        //   TODO: we need to care about/ignore "use" in closures?
+        //   TODO: Pass-by-reference to known pass-by-reference function
 
 
-        // Are we a function parameter?
+        // Are we a function or closure parameter?
         // It would be nice to get the list of function parameters from watching for
         // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
         // we need to do that as private or final, so we have to do it this hackish way.
@@ -193,11 +193,40 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
             $functionPtr = $phpcsFile->findPrevious(array(T_STRING, T_WHITESPACE),
                 $openPtr - 1, null, true, null, true);
 //echo "functionPtr: $functionPtr\n";// . print_r($tokens[$functionPtr], true);
-            if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
+            if (($functionPtr !== false) &&
+                (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
+                 ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
                 // TODO:   are we optional?
                 // TODO:     are we default null?
                 $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
                 return;
+            }
+
+            // Is it a use keyword?  Use is both a read and a define, fun!
+            if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_USE)) {
+                if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
+                    // We haven't been defined by this point.
+//echo "Uninitialized.\n";
+                    $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
+                    return;
+                }
+                // $functionPtr is at the use, we need the function keyword for start of scope.
+                $functionPtr = $phpcsFile->findPrevious(T_CLOSURE,
+                    $functionPtr - 1, $currScope + 1, false, null, true);
+                if ($functionPtr !== false) {
+                    $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
+                }
+                return;
+            }
+        }
+
+        // Are we $this within a class?
+        if (($varName == 'this') && (!empty($token['conditions']))) {
+            foreach ($token['conditions'] as $scopePtr => $scopeCode) {
+// TODO: $this within a closure is invalid
+                if ($scopeCode == T_CLASS) {
+                    return;
+                }
             }
         }
 

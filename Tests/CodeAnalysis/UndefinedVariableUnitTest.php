@@ -89,6 +89,39 @@ class Generic_Tests_CodeAnalysis_UndefinedVariableUnitTest extends AbstractSniff
                 77  => 1,  //  $array
                 //  function_with_defined_foreach()
                 //    no warnings.
+                //  ClassWithoutMembers->method_without_param()
+                100 => 1,  //  $var
+                101 => 1,  //  $var
+                102 => 1,  //  $var
+                103 => 2,  //  $var $var2
+                104 => 2,  //  $var $var2
+                105 => 1,  //  $var
+                106 => 1,  //  $var
+                107 => 1,  //  $var
+                108 => 1,  //  $var
+                113 => 1,  //  $var2
+                114 => 1,  //  $var2
+                //  ClassWithoutMembers->method_with_param()
+                //    no warnings.
+                //  ClassWithoutMembers->method_with_member_var()
+// TODO:                136 => 1,  //  $this->member_var
+                //  ClassWithMembers->method_with_member_var()
+// TODO:                145 => 1,  //  $this->no_such_member_var
+                //  function_with_this_outside_class()
+                150 => 1,  //  $this
+                //  function_with_closure()
+                158 => 1,  //  $outer_param
+                160 => 1,  //  $outer_var
+                161 => 1,  //  $outer_var2
+                164 => 1,  //  $outer_var3
+                167 => 1,  //  $inner_param
+                169 => 1,  //  $outer_var2
+                170 => 1,  //  $outer_var3
+                171 => 1,  //  $inner_var
+                176 => 1,  //  $outer_var3
+                177 => 1,  //  $inner_param
+                178 => 1,  //  $inner_var
+                179 => 1,  //  $inner_var2
                );
 
     }//end getWarningList()
