@@ -57,13 +57,38 @@ class Generic_Tests_CodeAnalysis_UndefinedVariableUnitTest extends AbstractSniff
      */
     public function getWarningList()
     {
+        //  This is a maintainence nightmare.
         return array(
-                4 => 1,
-                5 => 1,
-                6 => 1,
-                37 => 1,
-                38 => 1,
-                39 => 1,
+                //  function_without_param()
+                4   => 1,  //  $var
+                5   => 1,  //  $var
+                6   => 1,  //  $var
+                7   => 2,  //  $var $var2
+                8   => 2,  //  $var $var2
+                9   => 1,  //  $var
+                10  => 1,  //  $var
+                11  => 1,  //  $var
+                12  => 1,  //  $var
+                17  => 1,  //  $var2
+                18  => 1,  //  $var2
+                //  function_with_param()
+                //    no warnings.
+                //  function_with_default_defined_param()
+                //    no warnings.
+                //  function_with_default_undefined_param()
+                //    unimplemented, skip for now
+//                49  => 1,  //  $param
+//                50  => 1,  //  $param
+//                60  => 1,  //  $param
+                //  function_with_global_var()
+                63  => 1,  //  $var3
+                //  function_with_undefined_foreach()
+                68  => 1,  //  $array
+                71  => 1,  //  $array
+                74  => 1,  //  $array
+                77  => 1,  //  $array
+                //  function_with_defined_foreach()
+                //    no warnings.
                );
 
     }//end getWarningList()

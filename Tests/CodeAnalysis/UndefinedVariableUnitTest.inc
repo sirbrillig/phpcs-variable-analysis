@@ -1,8 +1,5 @@
 <?php
 
-function v() {
-}
-
 function function_without_param() {
     echo $var;
     echo "xxx $var xxx";
@@ -67,7 +64,7 @@ function function_with_global_var() {
     return $var2;
 }
 
-function function_with_foreach() {
+function function_with_undefined_foreach() {
     foreach ($array as $element1) {
         echo $element1;
     }
@@ -81,3 +78,20 @@ function function_with_foreach() {
         echo "$key2 => $value2\n";
     }
 }
+
+function function_with_foreach() {
+    $array = array();
+    foreach ($array as $element1) {
+        echo $element1;
+    }
+    foreach ($array as &$element2) {
+        echo $element2;
+    }
+    foreach ($array as $key1 => $value1) {
+        echo "$key1 => $value1\n";
+    }
+    foreach ($array as $key2 => &$value2) {
+        echo "$key2 => $value2\n";
+    }
+}
+
