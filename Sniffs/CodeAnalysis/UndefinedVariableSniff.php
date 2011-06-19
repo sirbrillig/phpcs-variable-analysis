@@ -174,7 +174,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         //   Assignment via =
         //   Assignment via list (...) =
         //   Declares as a global
-        //   TODO: declares as a static
+        //   Declares as a static
         //   Assignment via foreach (... as ...) { }
         //   TODO: Pass-by-reference to known pass-by-reference function
 
@@ -278,6 +278,34 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         if (($globalPtr !== false) && ($tokens[$globalPtr]['code'] === T_GLOBAL)) {
             // It's a global declaration.
 //echo "In a global declaration.\n";
+            $this->markVariableAssignment($varName, $stackPtr, $currScope);
+            return;
+        }
+
+        // Are we a static declaration?
+        // Static declarations are a bit more complicated than globals, since they
+        // can contain assignments. The assignment is compile-time however so can
+        // only be constant values, which makes life manageable.
+        // Valid values are:
+        //   number T_MINUS T_LNUMBER T_DNUMBER
+        //   string T_CONSTANT_ENCAPSED_STRING
+        //   define T_STRING
+        //   class constant T_STRING, T_DOUBLE_COLON, T_STRING
+        // Search backwards for first token that isn't whitespace, comma, variable,
+        // equals, or on the list of assignable constant values above.
+        $staticPtr = $phpcsFile->findPrevious(
+            array(T_WHITESPACE, T_VARIABLE, T_COMMA, T_EQUAL,
+                  T_MINUS, T_LNUMBER, T_DNUMBER,
+                  T_CONSTANT_ENCAPSED_STRING,
+                  T_STRING,
+                  T_DOUBLE_COLON),
+            $stackPtr - 1, null, true, null, true);
+//if ($varName == 'static2') {
+//echo "Failing token:\n" . print_r($tokens[$staticPtr], true);
+//}
+        if (($staticPtr !== false) && ($tokens[$staticPtr]['code'] === T_STATIC)) {
+            // It's a static declaration.
+//echo "In a static declaration.\n";
             $this->markVariableAssignment($varName, $stackPtr, $currScope);
             return;
         }

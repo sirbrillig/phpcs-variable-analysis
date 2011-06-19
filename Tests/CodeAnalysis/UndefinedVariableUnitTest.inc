@@ -161,7 +161,7 @@ function function_with_closure($outer_param) {
             echo $outer_var2;
             echo $inner_var;
         }, array());
-    array_map(function () use ($outer_var, $outer_var3, $outer_param) {
+    array_map(function () use ($outer_var, $outer_var3, &$outer_param) {
             $inner_var2 = 2;
             echo $outer_param;
             echo $inner_param;
@@ -185,9 +185,19 @@ function &function_with_return_by_reference_and_param($param) {
 }
 
 function function_with_static_var() {
-    static $static1, $static2 = 12, $static3;
+    static $static1, $static_num = 12, $static_neg_num = -1.5, $static_string = 'abc', $static_string2 = "def", $static_define = MYDEFINE, $static_constant = MyClass::CONSTANT, $static2;
     echo $static1;
+    echo $static_num;
     echo $static2;
-    echo $static3;
     echo $var;
+}
+
+function function_with_pass_by_reference_param(&$param) {
+    echo $param;
+}
+
+function function_with_pass_by_reference_calls() {
+    echo $matches;
+    preg_match('/(abc)/', 'defabcghi', $matches);
+    echo $matches;
 }
