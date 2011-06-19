@@ -122,6 +122,13 @@ class Generic_Tests_CodeAnalysis_UndefinedVariableUnitTest extends AbstractSniff
                 177 => 1,  //  $inner_param
                 178 => 1,  //  $inner_var
                 179 => 1,  //  $inner_var2
+                //  function_with_return_by_reference_and_param()
+                //    no warnings.
+                //  function_with_static_var()
+                188 => 1,  //  TODO: should not warn when implemented
+                189 => 1,  //  TODO: should not warn when implemented
+                191 => 1,  //  TODO: should not warn when implemented
+                192 => 1,  //  $var
                );
 
     }//end getWarningList()

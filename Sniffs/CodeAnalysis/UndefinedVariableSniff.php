@@ -174,6 +174,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         //   Assignment via =
         //   Assignment via list (...) =
         //   Declares as a global
+        //   TODO: declares as a static
         //   Assignment via foreach (... as ...) { }
         //   TODO: Pass-by-reference to known pass-by-reference function
 
@@ -187,10 +188,11 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
             $openPtr = $openPtrs[count($openPtrs) - 1];
 //echo "Prev to bracket: " . ($openPtr - 1 ) . "\n";// . print_r($tokens[$openPtr - 1], true);
 
-            // Function names are T_STRING, so we look backwards from the opening bracket
-            // for the first thing that isn't a function name or whitespace and check if
+            // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
+            // so we look backwards from the opening bracket for the first thing that
+            // isn't a function name, reference sigil or whitespace and check if
             // it's a function keyword.
-            $functionPtr = $phpcsFile->findPrevious(array(T_STRING, T_WHITESPACE),
+            $functionPtr = $phpcsFile->findPrevious(array(T_STRING, T_WHITESPACE, T_BITWISE_AND),
                 $openPtr - 1, null, true, null, true);
 //echo "functionPtr: $functionPtr\n";// . print_r($tokens[$functionPtr], true);
             if (($functionPtr !== false) &&

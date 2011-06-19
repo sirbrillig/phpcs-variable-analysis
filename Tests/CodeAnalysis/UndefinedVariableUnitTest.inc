@@ -178,3 +178,16 @@ function function_with_closure($outer_param) {
     echo $inner_var;
     echo $inner_var2;
 }
+
+function &function_with_return_by_reference_and_param($param) {
+    echo $param;
+    return $param;
+}
+
+function function_with_static_var() {
+    static $static1, $static2 = 12, $static3;
+    echo $static1;
+    echo $static2;
+    echo $static3;
+    echo $var;
+}
