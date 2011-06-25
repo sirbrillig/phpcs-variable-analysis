@@ -28,6 +28,13 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
 {
     private $_scopes = array();
 
+    //  Array of known pass-by-reference functions and the argument(s) which are passed
+    //  by reference, the arguments are numbered starting from 1.
+    static $pass_by_ref_functions = array(
+        'array_shift' => array(1),
+        'preg_match'  => array(3),
+        );
+
     function normalizeVarName($varName) {
         $varName = preg_replace('/[{}$]/', '', $varName);
         return $varName;
@@ -122,6 +129,78 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         return $execPtr;
     }
 
+    function findContainingBrackets(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+
+        if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
+            $openPtrs = array_keys($tokens[$stackPtr]['nested_parenthesis']);
+            return end($openPtrs);
+        }
+        return false;
+    }
+
+
+    function findFunctionCall(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+
+        if ($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) {
+            // First non-whitespace thing and see if it's a T_STRING function name
+            $functionPtr = $phpcsFile->findPrevious(T_WHITESPACE,
+                $openPtr - 1, null, true, null, true);
+            if ($tokens[$functionPtr]['code'] === T_STRING) {
+                return $functionPtr;
+            }
+        }
+        return false;
+    }
+
+    function findFunctionCallArguments(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+
+        if ($tokens[$stackPtr]['code'] !== T_STRING) {
+            // Assume $stackPtr is something within the brackets, find our function call
+            if (($stackPtr = $this->findFunctionCall($phpcsFile, $stackPtr)) === false) {
+                return false;
+            }
+        }
+
+        // $stackPtr is the function name, find our brackets after it
+        $openPtr = $phpcsFile->findNext(T_WHITESPACE,
+            $stackPtr + 1, null, true, null, true);
+        if (($openPtr === false) || ($tokens[$openPtr]['code'] !== T_OPEN_PARENTHESIS)) {
+            return false;
+        }
+
+        if (!isset($tokens[$openPtr]['parenthesis_closer'])) {
+            return false;
+        }
+        $closePtr = $tokens[$openPtr]['parenthesis_closer'];
+
+        $argPtrs = array();
+        $lastPtr = $openPtr;
+        $lastArgComma = $openPtr;
+        while (($nextPtr = $phpcsFile->findNext(T_COMMA, $lastPtr + 1, $closePtr)) !== false) {
+            if ($this->findContainingBrackets($phpcsFile, $nextPtr) == $openPtr) {
+                // Comma is at our level of brackets, it's an argument delimiter.
+                array_push($argPtrs, range($lastArgComma + 1, $nextPtr - 1));
+                $lastArgComma = $nextPtr;
+            }
+            $lastPtr = $nextPtr;
+        }
+        array_push($argPtrs, range($lastArgComma + 1, $closePtr - 1));
+
+        return $argPtrs;
+    }
+
     /**
      * Called to process class member vars.
      *
@@ -160,7 +239,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
 
 //if ($varName == 'this') {
-//echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
+//echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n";// . print_r($token, true);
 //}
 //echo "Prev:\n" . print_r($tokens[$stackPtr - 1], true);
 
@@ -176,16 +255,14 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         //   Declares as a global
         //   Declares as a static
         //   Assignment via foreach (... as ...) { }
-        //   TODO: Pass-by-reference to known pass-by-reference function
+        //   Pass-by-reference to known pass-by-reference function
 
 
         // Are we a function or closure parameter?
         // It would be nice to get the list of function parameters from watching for
         // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
         // we need to do that as private or final, so we have to do it this hackish way.
-        if (isset($token['nested_parenthesis'])) {
-            $openPtrs = array_keys($token['nested_parenthesis']);
-            $openPtr = $openPtrs[count($openPtrs) - 1];
+        if ($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) {
 //echo "Prev to bracket: " . ($openPtr - 1 ) . "\n";// . print_r($tokens[$openPtr - 1], true);
 
             // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
@@ -245,10 +322,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         }
 
         // OK, are we within a list (...) construct?
-        if (isset($token['nested_parenthesis'])) {
-//echo "Has brackets.\n";
-            $openPtrs = array_keys($token['nested_parenthesis']);
-            $openPtr = $openPtrs[count($openPtrs) - 1];
+        if ($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) {
 //echo "Open bracket:\n" . print_r($tokens[$openPtr], true);
             $prevPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
 //echo "Prev to bracket:\n" . print_r($tokens[$prevPtr], true);
@@ -311,15 +385,55 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         }
 
         // Are we a foreach loopvar?
-        if (isset($token['nested_parenthesis'])) {
-            $openPtrs = array_keys($token['nested_parenthesis']);
-            $openPtr = $openPtrs[count($openPtrs) - 1];
-
+        if ($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) {
             // Is there an 'as' token between us and the opening bracket?
             $asPtr = $phpcsFile->findPrevious(T_AS, $stackPtr - 1, $openPtr);
             if ($asPtr !== false) {
                 $this->markVariableAssignment($varName, $stackPtr, $currScope);
                 return;
+            }
+        }
+
+        // Are we pass-by-reference to known pass-by-reference function?
+        if (($functionPtr = $this->findFunctionCall($phpcsFile, $stackPtr)) !== false) {
+            // Is our function a known pass-by-reference function?
+            $functionName = $tokens[$functionPtr]['content'];
+//echo "  Is a function call to {$functionName}\n";
+            if (isset(self::$pass_by_ref_functions[$functionName])) {
+                $refArgs = self::$pass_by_ref_functions[$functionName];
+//echo "  Is a pass-by-ref function\n";
+            
+                if ($argPtrs = $this->findFunctionCallArguments($phpcsFile, $stackPtr)) {
+//echo "  Arg pointers found\n";
+                    // We're within a function call arguments list, find which arg we are.
+                    $argPos = false;
+                    foreach ($argPtrs as $idx => $ptrs) {
+                        if (in_array($stackPtr, $ptrs)) {
+                            $argPos = $idx + 1;
+                            break;
+                        }
+                    }
+//echo "  We have arg position $argPos\n";
+                    if (($argPos !== false) && in_array($argPos, $refArgs)) {
+                        // Our argument position matches that of a pass-by-ref argument,
+                        // check that we're the only part of the argument expression.
+                        $onlyMe = true;
+                        foreach ($argPtrs[$argPos - 1] as $ptr) {
+                            if ($ptr === $stackPtr) {
+                                continue;
+                            }
+                            if ($tokens[$ptr]['code'] !== T_WHITESPACE) {
+                                $onlyMe = false;
+                                break;
+                            }
+                        }
+                        if ($onlyMe) {
+                            // Just us, we can mark it as a write.
+                            $this->markVariableAssignment($varName, $stackPtr, $currScope);
+                            return;
+                        }
+                    }
+                }
             }
         }
 

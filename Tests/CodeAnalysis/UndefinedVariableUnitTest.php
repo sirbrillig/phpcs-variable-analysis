@@ -130,8 +130,12 @@ class Generic_Tests_CodeAnalysis_UndefinedVariableUnitTest extends AbstractSniff
                 //    no warnings.
                 //  function_with_pass_by_reference_calls()
                 200 => 1,  //  $matches
-                201 => 1,  //  TODO: should not warn when implemented
-                202 => 1,  //  TODO: should not warn when implemented
+                201 => 1,  //  $needle
+                202 => 1,  //  $haystack
+                204 => 1,  //  $needle
+                205 => 1,  //  $haystack
+                207 => 1,  //  $needle
+                208 => 1,  //  $haystack
                );
 
     }//end getWarningList()
