@@ -201,6 +201,282 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         return $argPtrs;
     }
 
+    protected function checkForFunctionPrototype(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Are we a function or closure parameter?
+        // It would be nice to get the list of function parameters from watching for
+        // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
+        // we need to do that as private or final, so we have to do it this hackish way.
+        if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
+            return false;
+        }
+
+//echo "Prev to bracket: " . ($openPtr - 1 ) . "\n";// . print_r($tokens[$openPtr - 1], true);
+
+        // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
+        // so we look backwards from the opening bracket for the first thing that
+        // isn't a function name, reference sigil or whitespace and check if
+        // it's a function keyword.
+        $functionPtr = $phpcsFile->findPrevious(array(T_STRING, T_WHITESPACE, T_BITWISE_AND),
+            $openPtr - 1, null, true, null, true);
+//echo "functionPtr: $functionPtr\n";// . print_r($tokens[$functionPtr], true);
+        if (($functionPtr !== false) &&
+            (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
+             ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
+            // TODO:   are we optional?
+            // TODO:     are we default null?
+            $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
+            return true;
+        }
+
+        // Is it a use keyword?  Use is both a read and a define, fun!
+        if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_USE)) {
+            if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
+                // We haven't been defined by this point.
+//echo "Uninitialized.\n";
+                $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
+                return true;
+            }
+            // $functionPtr is at the use, we need the function keyword for start of scope.
+            $functionPtr = $phpcsFile->findPrevious(T_CLOSURE,
+                $functionPtr - 1, $currScope + 1, false, null, true);
+            if ($functionPtr !== false) {
+                $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    protected function checkForThisWithinClass(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Are we $this within a class?
+        if (($varName == 'this') && (!empty($token['conditions']))) {
+            foreach ($token['conditions'] as $scopePtr => $scopeCode) {
+// TODO: $this within a closure is invalid
+                if ($scopeCode === T_CLASS) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    protected function checkForAssignment(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Is the next non-whitespace an assignment?
+        if (($assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr)) === false) {
+            return false;
+        }
+
+        // Plain ol' assignment. Simpl(ish).
+//echo "Next:\n" . print_r($tokens[$assignPtr], true);
+        $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
+        $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+        return true;
+    }
+
+    protected function checkForListAssignment(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // OK, are we within a list (...) construct?
+        if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
+            return false;
+        }
+
+//echo "Open bracket:\n" . print_r($tokens[$openPtr], true);
+        $prevPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
+//echo "Prev to bracket:\n" . print_r($tokens[$prevPtr], true);
+        if (($prevPtr === false) || ($tokens[$prevPtr]['code'] !== T_LIST)) {
+            return false;
+        }
+
+        // OK, we're a list (...) construct... are we being assigned to?
+//echo "Is list.\n";
+        $closePtr = $tokens[$openPtr]['parenthesis_closer'];
+        if (($assignPtr = $this->isNextThingAnAssign($phpcsFile, $closePtr)) === false) {
+            return false;
+        }
+
+        // Yes, we're being assigned.
+//echo "Next after brackets:\n" . print_r($tokens[$assignPtr], true);
+        $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
+        $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+        return true;
+    }
+
+    protected function checkForGlobalDeclaration(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Are we a global declaration?
+        // Search backwards for first token that isn't whitespace, comma or variable.
+        $globalPtr = $phpcsFile->findPrevious(
+            array(T_WHITESPACE, T_VARIABLE, T_COMMA),
+            $stackPtr - 1, null, true, null, true);
+        if (($globalPtr === false) || ($tokens[$globalPtr]['code'] !== T_GLOBAL)) {
+            return false;
+        }
+
+        // It's a global declaration.
+//echo "In a global declaration.\n";
+        $this->markVariableAssignment($varName, $stackPtr, $currScope);
+        return true;
+    }
+
+    protected function checkForStaticDeclaration(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Are we a static declaration?
+        // Static declarations are a bit more complicated than globals, since they
+        // can contain assignments. The assignment is compile-time however so can
+        // only be constant values, which makes life manageable.
+        // Valid values are:
+        //   number T_MINUS T_LNUMBER T_DNUMBER
+        //   string T_CONSTANT_ENCAPSED_STRING
+        //   define T_STRING
+        //   class constant T_STRING, T_DOUBLE_COLON, T_STRING
+        // Search backwards for first token that isn't whitespace, comma, variable,
+        // equals, or on the list of assignable constant values above.
+        $staticPtr = $phpcsFile->findPrevious(
+            array(T_WHITESPACE, T_VARIABLE, T_COMMA, T_EQUAL,
+                  T_MINUS, T_LNUMBER, T_DNUMBER,
+                  T_CONSTANT_ENCAPSED_STRING,
+                  T_STRING,
+                  T_DOUBLE_COLON),
+            $stackPtr - 1, null, true, null, true);
+//if ($varName == 'static2') {
+//echo "Failing token:\n" . print_r($tokens[$staticPtr], true);
+//}
+        if (($staticPtr === false) || ($tokens[$staticPtr]['code'] !== T_STATIC)) {
+            return false;
+        }
+
+        // It's a static declaration.
+//echo "In a static declaration.\n";
+        $this->markVariableAssignment($varName, $stackPtr, $currScope);
+        return true;
+    }
+
+    protected function checkForForeachLoopVar(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Are we a foreach loopvar?
+        if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
+            return false;
+        }
+
+        // Is there an 'as' token between us and the opening bracket?
+        if (($asPtr = $phpcsFile->findPrevious(T_AS, $stackPtr - 1, $openPtr)) === false) {
+            return false;
+        }
+
+        $this->markVariableAssignment($varName, $stackPtr, $currScope);
+        return true;
+    }
+
+    protected function checkForPassByReferenceFunctionCall(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Are we pass-by-reference to known pass-by-reference function?
+        if (($functionPtr = $this->findFunctionCall($phpcsFile, $stackPtr)) === false) {
+            return false;
+        }
+
+        // Is our function a known pass-by-reference function?
+        $functionName = $tokens[$functionPtr]['content'];
+//echo "  Is a function call to {$functionName}\n";
+        if (!isset(self::$pass_by_ref_functions[$functionName])) {
+            return false;
+        }
+
+        $refArgs = self::$pass_by_ref_functions[$functionName];
+//echo "  Is a pass-by-ref function\n";
+            
+        if (($argPtrs = $this->findFunctionCallArguments($phpcsFile, $stackPtr)) === false) {
+            return false;
+        }
+
+//echo "  Arg pointers found\n";
+        // We're within a function call arguments list, find which arg we are.
+        $argPos = false;
+        foreach ($argPtrs as $idx => $ptrs) {
+            if (in_array($stackPtr, $ptrs)) {
+                $argPos = $idx + 1;
+                break;
+            }
+        }
+//echo "  We have arg position $argPos\n";
+        if (($argPos === false) || !in_array($argPos, $refArgs)) {
+            return false;
+        }
+
+        // Our argument position matches that of a pass-by-ref argument,
+        // check that we're the only part of the argument expression.
+        foreach ($argPtrs[$argPos - 1] as $ptr) {
+            if ($ptr === $stackPtr) {
+                continue;
+            }
+            if ($tokens[$ptr]['code'] !== T_WHITESPACE) {
+                return false;
+            }
+        }
+
+        // Just us, we can mark it as a write.
+        $this->markVariableAssignment($varName, $stackPtr, $currScope);
+        return true;
+    }
+
     /**
      * Called to process class member vars.
      *
@@ -257,184 +533,44 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         //   Assignment via foreach (... as ...) { }
         //   Pass-by-reference to known pass-by-reference function
 
-
         // Are we a function or closure parameter?
-        // It would be nice to get the list of function parameters from watching for
-        // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
-        // we need to do that as private or final, so we have to do it this hackish way.
-        if ($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) {
-//echo "Prev to bracket: " . ($openPtr - 1 ) . "\n";// . print_r($tokens[$openPtr - 1], true);
-
-            // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
-            // so we look backwards from the opening bracket for the first thing that
-            // isn't a function name, reference sigil or whitespace and check if
-            // it's a function keyword.
-            $functionPtr = $phpcsFile->findPrevious(array(T_STRING, T_WHITESPACE, T_BITWISE_AND),
-                $openPtr - 1, null, true, null, true);
-//echo "functionPtr: $functionPtr\n";// . print_r($tokens[$functionPtr], true);
-            if (($functionPtr !== false) &&
-                (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
-                 ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
-                // TODO:   are we optional?
-                // TODO:     are we default null?
-                $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
-                return;
-            }
-
-            // Is it a use keyword?  Use is both a read and a define, fun!
-            if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_USE)) {
-                if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
-                    // We haven't been defined by this point.
-//echo "Uninitialized.\n";
-                    $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
-                    return;
-                }
-                // $functionPtr is at the use, we need the function keyword for start of scope.
-                $functionPtr = $phpcsFile->findPrevious(T_CLOSURE,
-                    $functionPtr - 1, $currScope + 1, false, null, true);
-                if ($functionPtr !== false) {
-                    $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
-                }
-                return;
-            }
-        }
-
-        // Are we $this within a class?
-        if (($varName == 'this') && (!empty($token['conditions']))) {
-            foreach ($token['conditions'] as $scopePtr => $scopeCode) {
-// TODO: $this within a closure is invalid
-                if ($scopeCode == T_CLASS) {
-                    return;
-                }
-            }
-        }
-
-        // Is the next non-whitespace an asignment?
-        $assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr);
-        if ($assignPtr !== false) {
-            // Plain ol' assignment. Simpl(ish).
-
-//echo "Next:\n" . print_r($tokens[$assignPtr], true);
-
-            $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
-            $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+        if ($this->checkForFunctionPrototype($phpcsFile, $stackPtr, $varName, $currScope)) {
             return;
         }
 
-        // OK, are we within a list (...) construct?
-        if ($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) {
-//echo "Open bracket:\n" . print_r($tokens[$openPtr], true);
-            $prevPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
-//echo "Prev to bracket:\n" . print_r($tokens[$prevPtr], true);
-            if (($prevPtr !== false) && ($tokens[$prevPtr]['code'] === T_LIST)) {
-                // OK, we're a list (...) construct... are we being assigned to?
-//echo "Is list.\n";
+        // Are we $this within a class?
+        if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
+            return;
+        }
 
-                $closePtr = $tokens[$openPtr]['parenthesis_closer'];
-                $assignPtr = $this->isNextThingAnAssign($phpcsFile, $closePtr);
-                if ($assignPtr !== false) {
-                    // Yes, we're being assigned.
+        // Is the next non-whitespace an assignment?
+        if ($this->checkForAssignment($phpcsFile, $stackPtr, $varName, $currScope)) {
+            return;
+        }
 
-//echo "Next after brackets:\n" . print_r($tokens[$assignPtr], true);
-
-                    $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
-                    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
-                    return;
-                }
-            }
+        // OK, are we within a list (...) = construct?
+        if ($this->checkForListAssignment($phpcsFile, $stackPtr, $varName, $currScope)) {
+            return;
         }
 
         // Are we a global declaration?
-        // Search backwards for first token that isn't whitespace, comma or variable.
-        $globalPtr = $phpcsFile->findPrevious(
-            array(T_WHITESPACE, T_VARIABLE, T_COMMA),
-            $stackPtr - 1, null, true, null, true);
-        if (($globalPtr !== false) && ($tokens[$globalPtr]['code'] === T_GLOBAL)) {
-            // It's a global declaration.
-//echo "In a global declaration.\n";
-            $this->markVariableAssignment($varName, $stackPtr, $currScope);
+        if ($this->checkForGlobalDeclaration($phpcsFile, $stackPtr, $varName, $currScope)) {
             return;
         }
 
         // Are we a static declaration?
-        // Static declarations are a bit more complicated than globals, since they
-        // can contain assignments. The assignment is compile-time however so can
-        // only be constant values, which makes life manageable.
-        // Valid values are:
-        //   number T_MINUS T_LNUMBER T_DNUMBER
-        //   string T_CONSTANT_ENCAPSED_STRING
-        //   define T_STRING
-        //   class constant T_STRING, T_DOUBLE_COLON, T_STRING
-        // Search backwards for first token that isn't whitespace, comma, variable,
-        // equals, or on the list of assignable constant values above.
-        $staticPtr = $phpcsFile->findPrevious(
-            array(T_WHITESPACE, T_VARIABLE, T_COMMA, T_EQUAL,
-                  T_MINUS, T_LNUMBER, T_DNUMBER,
-                  T_CONSTANT_ENCAPSED_STRING,
-                  T_STRING,
-                  T_DOUBLE_COLON),
-            $stackPtr - 1, null, true, null, true);
-//if ($varName == 'static2') {
-//echo "Failing token:\n" . print_r($tokens[$staticPtr], true);
-//}
-        if (($staticPtr !== false) && ($tokens[$staticPtr]['code'] === T_STATIC)) {
-            // It's a static declaration.
-//echo "In a static declaration.\n";
-            $this->markVariableAssignment($varName, $stackPtr, $currScope);
+        if ($this->checkForStaticDeclaration($phpcsFile, $stackPtr, $varName, $currScope)) {
             return;
         }
 
         // Are we a foreach loopvar?
-        if ($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) {
-            // Is there an 'as' token between us and the opening bracket?
-            $asPtr = $phpcsFile->findPrevious(T_AS, $stackPtr - 1, $openPtr);
-            if ($asPtr !== false) {
-                $this->markVariableAssignment($varName, $stackPtr, $currScope);
-                return;
-            }
+        if ($this->checkForForeachLoopVar($phpcsFile, $stackPtr, $varName, $currScope)) {
+            return;
         }
 
         // Are we pass-by-reference to known pass-by-reference function?
-        if (($functionPtr = $this->findFunctionCall($phpcsFile, $stackPtr)) !== false) {
-            // Is our function a known pass-by-reference function?
-            $functionName = $tokens[$functionPtr]['content'];
-//echo "  Is a function call to {$functionName}\n";
-            if (isset(self::$pass_by_ref_functions[$functionName])) {
-                $refArgs = self::$pass_by_ref_functions[$functionName];
-//echo "  Is a pass-by-ref function\n";
-            
-                if ($argPtrs = $this->findFunctionCallArguments($phpcsFile, $stackPtr)) {
-//echo "  Arg pointers found\n";
-                    // We're within a function call arguments list, find which arg we are.
-                    $argPos = false;
-                    foreach ($argPtrs as $idx => $ptrs) {
-                        if (in_array($stackPtr, $ptrs)) {
-                            $argPos = $idx + 1;
-                            break;
-                        }
-                    }
-//echo "  We have arg position $argPos\n";
-                    if (($argPos !== false) && in_array($argPos, $refArgs)) {
-                        // Our argument position matches that of a pass-by-ref argument,
-                        // check that we're the only part of the argument expression.
-                        $onlyMe = true;
-                        foreach ($argPtrs[$argPos - 1] as $ptr) {
-                            if ($ptr === $stackPtr) {
-                                continue;
-                            }
-                            if ($tokens[$ptr]['code'] !== T_WHITESPACE) {
-                                $onlyMe = false;
-                                break;
-                            }
-                        }
-                        if ($onlyMe) {
-                            // Just us, we can mark it as a write.
-                            $this->markVariableAssignment($varName, $stackPtr, $currScope);
-                            return;
-                        }
-                    }
-                }
-            }
+        if ($this->checkForPassByReferenceFunctionCall($phpcsFile, $stackPtr, $varName, $currScope)) {
+            return;
         }
 
 //echo "Looks like a read.\n";
