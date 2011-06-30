@@ -35,6 +35,10 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         'preg_match'  => array(3),
         );
 
+    //  Allows an install to extend the list of known pass-by-reference functions
+    //  by defining generic.codeanalysis.undefinedvariable
+    public $site_pass_by_ref_functions = array();
+
     function normalizeVarName($varName) {
         $varName = preg_replace('/[{}$]/', '', $varName);
         return $varName;
@@ -251,6 +255,38 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
                 $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
                 return true;
             }
+        }
+        return false;
+    }
+    
+    protected function checkForCatchBlock(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Are we a catch block parameter?
+        if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
+            return false;
+        }
+
+//echo "Prev to bracket: " . ($openPtr - 1 ) . "\n";// . print_r($tokens[$openPtr - 1], true);
+
+        // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
+        // so we look backwards from the opening bracket for the first thing that
+        // isn't a function name, reference sigil or whitespace and check if
+        // it's a function keyword.
+        $catchPtr = $phpcsFile->findPrevious(T_WHITESPACE,
+            $openPtr - 1, null, true, null, true);
+//echo "catchPtr: $catchPtr\n";// . print_r($tokens[$catchPtr], true);
+        if (($catchPtr !== false) &&
+            ($tokens[$catchPtr]['code'] === T_CATCH)) {
+// TODO: ick, scope should only be within the catch block
+            $this->markVariableAssignment($varName, $stackPtr, $currScope);
+            return true;
         }
         return false;
     }
@@ -525,6 +561,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         //   Is a mandatory function/closure parameter
         //   TODO: Is an optional function/closure parameter with non-null value
         //   Is closure use declaration of a variable defined within containing scope
+        //   TODO: catch (...) block start
         //   $this within a class.
         //   Assignment via =
         //   Assignment via list (...) =
@@ -535,6 +572,11 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
 
         // Are we a function or closure parameter?
         if ($this->checkForFunctionPrototype($phpcsFile, $stackPtr, $varName, $currScope)) {
+            return;
+        }
+
+        // Are we a catch parameter?
+        if ($this->checkForCatchBlock($phpcsFile, $stackPtr, $varName, $currScope)) {
             return;
         }
 

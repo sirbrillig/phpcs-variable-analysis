@@ -136,6 +136,10 @@ class Generic_Tests_CodeAnalysis_UndefinedVariableUnitTest extends AbstractSniff
                 205 => 1,  //  $haystack
                 207 => 1,  //  $needle
                 208 => 1,  //  $haystack
+                //  function_with_try_catch()
+                212 => 1,  //  $e
+                216 => 1,  //  $e
+// TODO:               222 => 1,  //  $e
                );
 
     }//end getWarningList()
