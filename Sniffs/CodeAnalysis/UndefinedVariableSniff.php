@@ -284,7 +284,7 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
 //echo "catchPtr: $catchPtr\n";// . print_r($tokens[$catchPtr], true);
         if (($catchPtr !== false) &&
             ($tokens[$catchPtr]['code'] === T_CATCH)) {
-// TODO: ick, scope should only be within the catch block
+            // Scope of the exception var is actually the function, not just the catch block.
             $this->markVariableAssignment($varName, $stackPtr, $currScope);
             return true;
         }
