@@ -139,6 +139,8 @@ class Generic_Tests_CodeAnalysis_UndefinedVariableUnitTest extends AbstractSniff
                 //  function_with_try_catch()
                 212 => 1,  //  $e
                 216 => 1,  //  $e
+                //  ClassWithThisInsideClosure->method_with_this_inside_closure()
+                230 => 1,  //  $this
                );
 
     }//end getWarningList()

@@ -301,14 +301,21 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         $token  = $tokens[$stackPtr];
 
         // Are we $this within a class?
-        if (($varName == 'this') && (!empty($token['conditions']))) {
-            foreach ($token['conditions'] as $scopePtr => $scopeCode) {
-// TODO: $this within a closure is invalid
-                if ($scopeCode === T_CLASS) {
-                    return true;
-                }
+        if (($varName != 'this') || empty($token['conditions'])) {
+            return false;
+        }
+
+        foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
+            //  $this within a closure is invalid
+            //  Note: have to fetch code from $tokens, T_CLOSURE isn't set for conditions codes.
+            if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
+                return false;
+            }
+            if ($scopeCode === T_CLASS) {
+                return true;
             }
         }
+
         return false;
     }
 
@@ -561,8 +568,8 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         //   Is a mandatory function/closure parameter
         //   TODO: Is an optional function/closure parameter with non-null value
         //   Is closure use declaration of a variable defined within containing scope
-        //   TODO: catch (...) block start
-        //   $this within a class.
+        //   catch (...) block start
+        //   $this within a class (but not within a closure).
         //   Assignment via =
         //   Assignment via list (...) =
         //   Declares as a global

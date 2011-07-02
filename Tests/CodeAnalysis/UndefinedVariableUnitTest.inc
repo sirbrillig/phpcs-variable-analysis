@@ -222,3 +222,13 @@ function function_with_try_catch() {
     echo $e;
     echo $var;
 }
+
+class ClassWithThisInsideClosure {
+    function method_with_this_inside_closure() {
+        echo $this;
+        array_map(function ($inner_param) {
+                echo $this;
+            }, array());
+        echo $this;
+    }
+}
