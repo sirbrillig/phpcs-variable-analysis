@@ -119,18 +119,33 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
     ) {
         $tokens = $phpcsFile->getTokens();
 
-        // Write should be recorded at the next statement to ensure we treat
-        // the assign as happening after the RHS execution.
-        // eg: $var = $var + 1; -> RHS could still be undef.
-        $execPtr = $phpcsFile->findNext(T_SEMICOLON, $stackPtr + 1, null, false, null, true);
-        if ($execPtr === false) {
-            // TODO: panic
-            $execPtr = $stackPtr;
+        //  Write should be recorded at the next statement to ensure we treat
+        //  the assign as happening after the RHS execution.
+        //  eg: $var = $var + 1; -> RHS could still be undef.
+        //  However, if we're within a bracketed expression, we take place at
+        //  the closing bracket, if that's first.
+        //  eg: echo (($var = 12) && ($var == 12));
+        $semicolonPtr = $phpcsFile->findNext(T_SEMICOLON, $stackPtr + 1, null, false, null, true);
+        $closePtr = false;
+        if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) !== false) {
+            if (isset($tokens[$openPtr]['parenthesis_closer'])) {
+                $closePtr = $tokens[$openPtr]['parenthesis_closer'];
+            }
         }
 
-        // TODO: Handle: echo (($var = 12) && ($var == 12));
+        if ($semicolonPtr === false) {
+            if ($closePtr === false) {
+                // TODO: panic
+                return $stackPtr;
+            }
+            return $closePtr;
+        }
 
-        return $execPtr;
+        if ($closePtr < $semicolonPtr) {
+            return $closePtr;
+        }
+
+        return $semicolonPtr;
     }
 
     function findContainingBrackets(
