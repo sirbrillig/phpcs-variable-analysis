@@ -694,6 +694,10 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
         foreach ($matches[1] as $varName) {
             $varName = $this->normalizeVarName($varName);
+            // Are we $this within a class?
+            if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
+                continue;
+            }
 //echo "Found variable {$varName} in string on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
             if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
 //echo "Uninitialized.\n";

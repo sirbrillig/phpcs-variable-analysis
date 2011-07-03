@@ -79,7 +79,7 @@ function function_with_undefined_foreach() {
     }
 }
 
-function function_with_foreach() {
+function function_with_defined_foreach() {
     $array = array();
     foreach ($array as $element1) {
         echo $element1;
@@ -226,10 +226,13 @@ function function_with_try_catch() {
 class ClassWithThisInsideClosure {
     function method_with_this_inside_closure() {
         echo $this;
+        echo "$this";
         array_map(function ($inner_param) {
                 echo $this;
+                echo "$this";
             }, array());
         echo $this;
+        echo "$this";
     }
 }
 
