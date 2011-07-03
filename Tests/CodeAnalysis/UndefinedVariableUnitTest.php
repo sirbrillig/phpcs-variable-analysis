@@ -76,9 +76,9 @@ class Generic_Tests_CodeAnalysis_UndefinedVariableUnitTest extends AbstractSniff
                 //  function_with_default_defined_param()
                 //    no warnings.
                 //  function_with_default_undefined_param()
-                49  => 1,  //  $param
-                50  => 1,  //  $param
-                51  => 1,  //  $param
+//                49  => 1,  //  $param
+//                50  => 1,  //  $param
+//                51  => 1,  //  $param
                 //  function_with_global_var()
                 63  => 1,  //  $var3
                 //  function_with_undefined_foreach()

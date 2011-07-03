@@ -234,19 +234,19 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         if (($functionPtr !== false) &&
             (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
              ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
-            //  We're a function paramater, are we optional?
-            if (($assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr)) !== false) {
-                //  Are we default null?
-                $nullPtr = $phpcsFile->findNext(T_WHITESPACE, $assignPtr + 1, null,
-                    true, null, true);
-                if ($tokens[$nullPtr]['code'] === T_NULL) {
-                    //  We're optional with a null default, it's unsafe to assume
-                    //  that the variable is defined.
-                    //  Actually tricky since this will produce false-positives
-                    //  behind is_null/isset/etc checks.
-                    return false;
-                }
-            }
+//            //  We're a function paramater, are we optional?
+//            if (($assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr)) !== false) {
+//                //  Are we default null?
+//                $nullPtr = $phpcsFile->findNext(T_WHITESPACE, $assignPtr + 1, null,
+//                    true, null, true);
+//                if ($tokens[$nullPtr]['code'] === T_NULL) {
+//                    //  We're optional with a null default, it's unsafe to assume
+//                    //  that the variable is defined.
+//                    //  Actually tricky since this will produce false-positives
+//                    //  behind is_null/isset/etc checks.
+//                    return false;
+//                }
+//            }
             $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
             return true;
         }
