@@ -24,20 +24,91 @@
  * @copyright 2011 Sam Graham <php-codesniffer-plugins BLAHBLAH illusori.co.uk>
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer_Standards_AbstractVariableSniff
+class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniffer_Sniff
 {
+    /**
+     * The current phpcsFile being checked.
+     *
+     * @var phpcsFile
+     */
+    protected $currentFile = '';
+
+    /**
+     * A list of scopes encountered so far and the variables within them.
+     */
     private $_scopes = array();
 
-    //  Array of known pass-by-reference functions and the argument(s) which are passed
-    //  by reference, the arguments are numbered starting from 1.
-    static $pass_by_ref_functions = array(
+    /**
+     *  Array of known pass-by-reference functions and the argument(s) which are passed
+     *  by reference, the arguments are numbered starting from 1.
+     */
+    private $_pass_by_ref_functions = array(
         'array_shift' => array(1),
         'preg_match'  => array(3),
         );
 
-    //  Allows an install to extend the list of known pass-by-reference functions
-    //  by defining generic.codeanalysis.undefinedvariable
-    public $site_pass_by_ref_functions = array();
+    /**
+     *  Allows an install to extend the list of known pass-by-reference functions
+     *  by defining generic.codeanalysis.variableanalysis.site_pass_by_ref_functions.
+     */
+    public $site_pass_by_ref_functions = null;
+
+    /**
+     * Returns an array of tokens this test wants to listen for.
+     * 
+     * @return array
+     */
+    public function register() {    
+        //  Magic to modfy $_pass_by_ref_functions with any site-specific settings.
+        if (!empty($this->site_pass_by_ref_functions)) {
+echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
+            foreach (preg_split('/\s+/', $this->site_pass_by_ref_functions) as $line) {
+                list ($function, $args) = explode(':', $line);
+                $this->$_pass_by_ref_functions[$function] = explode(',', $args);
+            }
+        }
+        return array(
+//            T_CLASS,
+//            T_INTERFACE,
+//            T_FUNCTION,
+            T_VARIABLE,
+            T_DOUBLE_QUOTED_STRING,
+            T_CLOSE_CURLY_BRACKET,
+            );
+    }//end register()
+
+    /**
+     * Processes this test, when one of its tokens is encountered.
+     *
+     * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
+     * @param int                  $stackPtr  The position of the current token
+     *                                        in the stack passed in $tokens.
+     * 
+     * @return void
+     */
+    public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+//if ($token['content'] == '$param') {
+//echo "Found token on line {$token['line']}.\n" . print_r($token, true);
+//}
+
+        if ($this->currentFile !== $phpcsFile) {
+            $this->currentFile = $phpcsFile;
+        }
+
+        if ($token['code'] === T_VARIABLE) {
+            return $this->processVariable($phpcsFile, $stackPtr);
+        }
+        if ($token['code'] === T_DOUBLE_QUOTED_STRING) {
+            return $this->processVariableInString($phpcsFile, $stackPtr);
+        }
+        if (($token['code'] === T_CLOSE_CURLY_BRACKET) &&
+            isset($token['scope_condition'])) {
+            return $this->processScopeClose($phpcsFile, $token['scope_condition']);
+        }
+    }
 
     function normalizeVarName($varName) {
         $varName = preg_replace('/[{}$]/', '', $varName);
@@ -74,6 +145,30 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         return false;
     }
 
+    function findFunctionPrototype(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
+            return false;
+        }
+        // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
+        // so we look backwards from the opening bracket for the first thing that
+        // isn't a function name, reference sigil or whitespace and check if
+        // it's a function keyword.
+        $functionPtr = $phpcsFile->findPrevious(array(T_STRING, T_WHITESPACE, T_BITWISE_AND),
+            $openPtr - 1, null, true, null, true);
+//echo "functionPtr: $functionPtr\n";// . print_r($tokens[$functionPtr], true);
+        if (($functionPtr !== false) &&
+            ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
+            return $functionPtr;
+        }
+        return false;
+    }
+
     function findVariableScope(
         PHP_CodeSniffer_File $phpcsFile,
         $stackPtr
@@ -81,20 +176,18 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         $tokens = $phpcsFile->getTokens();
         $token  = $tokens[$stackPtr];
 
-        if (empty($token['conditions'])) {
-            return null;
-        }
-
+        if (!empty($token['conditions'])) {
 //echo "Looking for scope for {$token['content']}.\n";
-        foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
-            if (($scopeCode === T_FUNCTION) || ($scopeCode === T_CLOSURE)) {
+            foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
+                if (($scopeCode === T_FUNCTION) || ($scopeCode === T_CLOSURE)) {
 //echo "Found scope {$tokens[$scopePtr]['content']}.\n";
-                return $scopePtr;
-            }
+                    return $scopePtr;
+                }
 //echo "Skipping scope {$tokens[$scopePtr]['content']}.\n";
+            }
         }
 
-        return null;
+        return $this->findFunctionPrototype($phpcsFile, $stackPtr);
     }
 
     function isNextThingAnAssign(
@@ -505,11 +598,11 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         // Is our function a known pass-by-reference function?
         $functionName = $tokens[$functionPtr]['content'];
 //echo "  Is a function call to {$functionName}\n";
-        if (!isset(self::$pass_by_ref_functions[$functionName])) {
+        if (!isset($this->_pass_by_ref_functions[$functionName])) {
             return false;
         }
 
-        $refArgs = self::$pass_by_ref_functions[$functionName];
+        $refArgs = $this->_pass_by_ref_functions[$functionName];
 //echo "  Is a pass-by-ref function\n";
             
         if (($argPtrs = $this->findFunctionCallArguments($phpcsFile, $stackPtr)) === false) {
@@ -581,9 +674,12 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         $token  = $tokens[$stackPtr];
 
         $varName = $this->normalizeVarName($token['content']);
-        $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
+        if (($currScope = $this->findVariableScope($phpcsFile, $stackPtr)) === false) {
+            return;
+        }
+        
 
-//if ($varName == 'this') {
+//if ($varName == 'param') {
 //echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n";// . print_r($token, true);
 //}
 //echo "Prev:\n" . print_r($tokens[$stackPtr - 1], true);
@@ -679,15 +775,8 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         $tokens = $phpcsFile->getTokens();
         $token  = $tokens[$stackPtr];
 
-        if ($token['code'] === T_FUNCTION) {
-            // Bug in AbstractVariableSniff sends T_FUNCTIONs to this callback.
-            // TODO: fix and submit upstream patch
-            return;
-        }
-
         $pattern = '|[^\\\]\${?([a-zA-Z0-9_]+)}?|';
         if (!preg_match_all($pattern, $token['content'], $matches)) {
-            // TODO: probably should raise an error
             return;
         }
 
@@ -706,6 +795,27 @@ class Generic_Sniffs_CodeAnalysis_UndefinedVariableSniff extends PHP_CodeSniffer
         }
     }
 
+  /**
+     * Called to process the end of a scope.
+     *
+     * Note that although triggered by the closing curly brace of the scope, $stackPtr is
+     * the scope conditional, not the closing curly brace.
+     *
+     * @param PHP_CodeSniffer_File $phpcsFile The PHP_CodeSniffer file where this
+     *                                        token was found.
+     * @param int                  $stackPtr  The position of the scope conditional.
+     *
+     * @return void
+     */
+    protected function processScopeClose(
+        PHP_CodeSniffer_File
+        $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+    }
 }//end class
 
 ?>
