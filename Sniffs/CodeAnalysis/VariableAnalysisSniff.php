@@ -13,6 +13,49 @@
  */
 
 /**
+ * Holds details of a scope.
+ *
+ * @category  PHP
+ * @package   PHP_CodeSniffer
+ * @author    Sam Graham <php-codesniffer-plugins BLAHBLAH illusori.co.uk>
+ * @copyright 2011 Sam Graham <php-codesniffer-plugins BLAHBLAH illusori.co.uk>
+ * @link      http://pear.php.net/package/PHP_CodeSniffer
+ */
+class ScopeInfo {
+    public $owner;
+    public $opener;
+    public $closer;
+    public $variables = array();
+
+    function __construct($currScope) {
+        $owner = $currScope;
+// TODO: extract opener/closer
+    }
+}
+
+/**
+ * Holds details of a variable within a scope.
+ *
+ * @category  PHP
+ * @package   PHP_CodeSniffer
+ * @author    Sam Graham <php-codesniffer-plugins BLAHBLAH illusori.co.uk>
+ * @copyright 2011 Sam Graham <php-codesniffer-plugins BLAHBLAH illusori.co.uk>
+ * @link      http://pear.php.net/package/PHP_CodeSniffer
+ */
+class VariableInfo {
+    public $name;
+    public $scopeType;
+    public $typeHint;
+    public $firstDeclared;
+    public $firstInitialized;
+    public $firstRead;
+
+    function __construct($varName) {
+        $name = $varName;
+    }
+}
+
+/**
  * Checks the for undefined function variables.
  *
  * This sniff checks that all function variables
@@ -42,6 +85,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
      *  Array of known pass-by-reference functions and the argument(s) which are passed
      *  by reference, the arguments are numbered starting from 1.
      */
+// TODO: complete list
     private $_pass_by_ref_functions = array(
         'array_shift' => array(1),
         'preg_match'  => array(3),
@@ -60,6 +104,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
      */
     public function register() {    
         //  Magic to modfy $_pass_by_ref_functions with any site-specific settings.
+// TODO: test
         if (!empty($this->site_pass_by_ref_functions)) {
 echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
             foreach (preg_split('/\s+/', $this->site_pass_by_ref_functions) as $line) {
@@ -123,26 +168,58 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
             ':' . $currScope;
     }
 
-    function markVariableAssignment($varName, $stackPtr, $currScope) {
+    //  Warning: this is an autovivifying get
+    function getScopeInfo($currScope, $autoCreate = true) {
         $scopeKey = $this->scopeKey($currScope);
-        if (isset($this->_scopes[$scopeKey]) &&
-            isset($this->_scopes[$scopeKey][$varName]) &&
-            ($this->_scopes[$scopeKey][$varName] <= $stackPtr)) {
+        if (!isset($this->_scopes[$scopeKey])) {
+            if (!$autoCreate) {
+                return null;
+            }
+            $this->_scopes[$scopeKey] = new ScopeInfo($currScope);
+        }
+        return $this->_scopes[$scopeKey];
+    }
+
+    function getVariableInfo($varName, $currScope, $autoCreate = true) {
+        $scopeInfo = $this->getScopeInfo($currScope, $autoCreate);
+        if (!isset($scopeInfo->variables[$varName])) {
+            if (!$autoCreate) {
+                return null;
+            }
+            $scopeInfo->variables[$varName] = new VariableInfo($varName);
+        }
+        return $scopeInfo->variables[$varName];
+    }
+
+    function markVariableAssignment($varName, $stackPtr, $currScope) {
+        $varInfo = $this->getVariableInfo($varName, $currScope);
+        if (isset($varInfo->firstInitialized) && ($varInfo->firstInitialized <= $stackPtr)) {
             return;
         }
 //echo "Marking write to var {$varName} in {$scopeKey} at {$stackPtr}.\n";
-        $this->_scopes[$scopeKey][$varName] = $stackPtr;
+        $varInfo->firstInitialized = $stackPtr;
     }
 
     function isVariableInitialized($varName, $stackPtr, $currScope) {
 //return true;
-        $scopeKey = $this->scopeKey($currScope);
-        if (isset($this->_scopes[$scopeKey]) &&
-            isset($this->_scopes[$scopeKey][$varName]) &&
-            ($this->_scopes[$scopeKey][$varName] <= $stackPtr)) {
+        $varInfo = $this->getVariableInfo($varName, $currScope);
+        if (isset($varInfo->firstInitialized) && $varInfo->firstInitialized <= $stackPtr) {
             return true;
         }
         return false;
+    }
+
+    function isVariableUndefined($varName, $stackPtr, $currScope) {
+//return true;
+        $varInfo = $this->getVariableInfo($varName, $currScope, false);
+        if (isset($varInfo->firstDeclared) && $varInfo->firstDeclared <= $stackPtr) {
+// TODO: do we want to check scopeType here?
+            return false;
+        }
+        if (isset($varInfo->firstInitialized) && $varInfo->firstInitialized <= $stackPtr) {
+            return false;
+        }
+        return true;
     }
 
     function findFunctionPrototype(
@@ -361,7 +438,7 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
 
         // Is it a use keyword?  Use is both a read and a define, fun!
         if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_USE)) {
-            if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
+            if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
                 // We haven't been defined by this point.
 //echo "Uninitialized.\n";
                 $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
@@ -747,7 +824,7 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
 //echo "Looks like a read.\n";
 
         // OK, we don't appear to be a write to the var, assume we're a read.
-        if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
+        if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
             // We haven't been defined by this point.
 //echo "Uninitialized.\n";
             $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
@@ -788,7 +865,7 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
                 continue;
             }
 //echo "Found variable {$varName} in string on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
-            if ($this->isVariableInitialized($varName, $stackPtr, $currScope) === false) {
+            if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
 //echo "Uninitialized.\n";
                 $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
             }
