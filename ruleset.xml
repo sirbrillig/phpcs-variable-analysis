@@ -3,7 +3,9 @@
  <description>Run ./install.sh and add the following rules to your standrd's ruleset.xml.</description>
 
  <!-- Rules provided by PHP_Codesniffer-Plugins -->
- <rule ref="Generic.CodeAnalysis.UnusedVariable"/>
- <rule ref="Generic.CodeAnalysis.UnusedGlobalVariable"/>
- <rule ref="Generic.CodeAnalysis.UndefinedVariable"/>
+ <rule ref="Generic.CodeAnalysis.VariableAnalysis"/>
+ <!-- You can also refer to these subrules:
+      Generic.CodeAnalysis.VariableAnalysis.UndefinedVariable
+      Generic.CodeAnalysis.VariableAnalysis.UnusedVariable
+   -->
 </ruleset>

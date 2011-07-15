@@ -1,23 +1,9 @@
 PHP_CodeSniffer Plugins
 
-Undefined variable sniff: 
- *
- * This sniff checks that all function variables
- * are defined in the function body.
- *
-
-Unused global variable sniff:
- *
- * This sniff checks that all global variables are used in the function body.
- * Will also diplay a warning if globals are defined within a conditional
- * statement or loops.
- *
-
-Unused variable sniff:
- *
- * This sniff checks that all function variables
- * are used  in the function body.
- *
+Variable Analysis Sniff: 
+ * Performs static analysis of variable use.
+ * Warns on use of undefined variables.
+ * Warns if variables are set or declared but never used within that scope.
 
 INSTALLATION
 

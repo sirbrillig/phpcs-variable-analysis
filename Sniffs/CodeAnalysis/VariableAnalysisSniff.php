@@ -471,7 +471,9 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
             if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
                 // We haven't been defined by this point.
 //echo "Uninitialized.\n";
-                $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
+                $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr,
+                    'UndefinedVariable',
+                    array("\${$varName}"));
                 return true;
             }
             // $functionPtr is at the use, we need the function keyword for start of scope.
@@ -869,7 +871,9 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
         if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
             // We haven't been defined by this point.
 //echo "Uninitialized.\n";
-            $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
+            $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr,
+                'UndefinedVariable',
+                array("\${$varName}"));
         }
     }
 
@@ -910,7 +914,9 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
             $this->markVariableRead($varName, $stackPtr, $currScope);
             if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
 //echo "Uninitialized.\n";
-                $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
+                $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr,
+                    'UndefinedVariable',
+                    array("\${$varName}"));
             }
         }
     }
@@ -947,16 +953,24 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
             }
             if (isset($varInfo->firstDeclared)) {
                 $phpcsFile->addWarning(
-                    "Unused " . VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType] .
-                        " \${$varInfo->name}.",
-                    $varInfo->firstDeclared
+                    "Unused %s %s.",
+                    $varInfo->firstDeclared,
+                    'UnusedVariable',
+                    array(
+                        VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
+                        "\${$varInfo->name}",
+                        )
                     );
             }
             if (isset($varInfo->firstInitialized)) {
                 $phpcsFile->addWarning(
-                    "Unused " . VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType] .
-                        " \${$varInfo->name}.",
-                    $varInfo->firstInitialized
+                    "Unused %s %s.",
+                    $varInfo->firstInitialized,
+                    'UnusedVariable',
+                    array(
+                        VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
+                        "\${$varInfo->name}",
+                        )
                     );
             }
         }
