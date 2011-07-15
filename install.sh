@@ -3,7 +3,7 @@
 showhelp() {
 echo "install.sh [-h] [-p <PEAR dir>] [-d <PHP_Codesniffer dir>]
 
-Install the PHP_Codesniffer-Plugins sniffs into your PEAR install of PHP_Codesniffer.
+Install the PHP_Codesniffer-VariableAnalysis sniffs into your PEAR install of PHP_Codesniffer.
 
     -h        Show this help and exit.
     -t        Also install test scripts (only use if you're using svn checkout of PHP_Codesniffer).

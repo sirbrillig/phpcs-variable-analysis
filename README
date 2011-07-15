@@ -1,4 +1,4 @@
-PHP_CodeSniffer Plugins
+PHP_CodeSniffer VariableAnalysis
 
 Variable Analysis Sniff: 
  * Performs static analysis of variable use.
