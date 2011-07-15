@@ -28,7 +28,7 @@ class ScopeInfo {
     public $variables = array();
 
     function __construct($currScope) {
-        $owner = $currScope;
+        $this->owner = $currScope;
 // TODO: extract opener/closer
     }
 }
@@ -44,6 +44,9 @@ class ScopeInfo {
  */
 class VariableInfo {
     public $name;
+    /**
+     * What scope the variable has: local, param, static, global, bound
+     */
     public $scopeType;
     public $typeHint;
     public $firstDeclared;
@@ -51,7 +54,7 @@ class VariableInfo {
     public $firstRead;
 
     function __construct($varName) {
-        $name = $varName;
+        $this->name = $varName;
     }
 }
 
@@ -193,11 +196,37 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
 
     function markVariableAssignment($varName, $stackPtr, $currScope) {
         $varInfo = $this->getVariableInfo($varName, $currScope);
+        if (!isset($varInfo->scopeType)) {
+            $varInfo->scopeType = 'local';
+        }
         if (isset($varInfo->firstInitialized) && ($varInfo->firstInitialized <= $stackPtr)) {
             return;
         }
 //echo "Marking write to var {$varName} in {$scopeKey} at {$stackPtr}.\n";
         $varInfo->firstInitialized = $stackPtr;
+    }
+
+    function markVariableDeclaration($varName, $scopeType, $typeHint, $stackPtr, $currScope) {
+        $varInfo = $this->getVariableInfo($varName, $currScope);
+        if (isset($varInfo->scopeType)) {
+            // TODO: issue redeclaration/reuse warning?
+        } else {
+            $varInfo->scopeType = $scopeType;
+        }
+        if (isset($varInfo->firstDeclared) && ($varInfo->firstDeclared <= $stackPtr)) {
+            return;
+        }
+//echo "Marking declaration of var {$varName} in {$scopeKey} at {$stackPtr}.\n";
+        $varInfo->firstDeclared = $stackPtr;
+    }
+
+    function markVariableRead($varName, $stackPtr, $currScope) {
+        $varInfo = $this->getVariableInfo($varName, $currScope);
+        if (isset($varInfo->firstRead) && ($varInfo->firstRead <= $stackPtr)) {
+            return;
+        }
+//echo "Marking read of var {$varName} in {$scopeKey} at {$stackPtr}.\n";
+        $varInfo->firstRead = $stackPtr;
     }
 
     function isVariableInitialized($varName, $stackPtr, $currScope) {
@@ -419,25 +448,18 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
         if (($functionPtr !== false) &&
             (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
              ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
-//            //  We're a function paramater, are we optional?
-//            if (($assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr)) !== false) {
-//                //  Are we default null?
-//                $nullPtr = $phpcsFile->findNext(T_WHITESPACE, $assignPtr + 1, null,
-//                    true, null, true);
-//                if ($tokens[$nullPtr]['code'] === T_NULL) {
-//                    //  We're optional with a null default, it's unsafe to assume
-//                    //  that the variable is defined.
-//                    //  Actually tricky since this will produce false-positives
-//                    //  behind is_null/isset/etc checks.
-//                    return false;
-//                }
-//            }
-            $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
+            // TODO: typeHint
+            $this->markVariableDeclaration($varName, 'param', null, $stackPtr, $functionPtr);
+            //  Are we optional with a default?
+            if (($assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr)) !== false) {
+                $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
+            }
             return true;
         }
 
         // Is it a use keyword?  Use is both a read and a define, fun!
         if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_USE)) {
+            $this->markVariableRead($varName, $stackPtr, $currScope);
             if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
                 // We haven't been defined by this point.
 //echo "Uninitialized.\n";
@@ -448,6 +470,8 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
             $functionPtr = $phpcsFile->findPrevious(T_CLOSURE,
                 $functionPtr - 1, $currScope + 1, false, null, true);
             if ($functionPtr !== false) {
+                // TODO: typeHints in use?
+                $this->markVariableDeclaration($varName, 'bound', null, $stackPtr, $functionPtr);
                 $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
                 return true;
             }
@@ -481,6 +505,8 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
         if (($catchPtr !== false) &&
             ($tokens[$catchPtr]['code'] === T_CATCH)) {
             // Scope of the exception var is actually the function, not just the catch block.
+            // TODO: typeHint
+            $this->markVariableDeclaration($varName, 'local', null, $stackPtr, $currScope);
             $this->markVariableAssignment($varName, $stackPtr, $currScope);
             return true;
         }
@@ -531,7 +557,9 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
 
         // Plain ol' assignment. Simpl(ish).
 //echo "Next:\n" . print_r($tokens[$assignPtr], true);
-        $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
+        if (($writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr)) === false) {
+            $writtenPtr = $stackPtr;  // I dunno
+        }
         $this->markVariableAssignment($varName, $writtenPtr, $currScope);
         return true;
     }
@@ -591,7 +619,7 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
 
         // It's a global declaration.
 //echo "In a global declaration.\n";
-        $this->markVariableAssignment($varName, $stackPtr, $currScope);
+        $this->markVariableDeclaration($varName, 'global', null, $stackPtr, $currScope);
         return true;
     }
 
@@ -631,7 +659,10 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
 
         // It's a static declaration.
 //echo "In a static declaration.\n";
-        $this->markVariableAssignment($varName, $stackPtr, $currScope);
+        $this->markVariableDeclaration($varName, 'static', null, $stackPtr, $currScope);
+        if ($this->isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
+            $this->markVariableAssignment($varName, $stackPtr, $currScope);
+        }
         return true;
     }
 
@@ -713,6 +744,8 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
 
         // Just us, we can mark it as a write.
         $this->markVariableAssignment($varName, $stackPtr, $currScope);
+        // It's a read as well for purposes of used-variables.
+        $this->markVariableRead($varName, $stackPtr, $currScope);
         return true;
     }
 
@@ -822,6 +855,7 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
         }
 
 //echo "Looks like a read.\n";
+        $this->markVariableRead($varName, $stackPtr, $currScope);
 
         // OK, we don't appear to be a write to the var, assume we're a read.
         if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
@@ -832,7 +866,7 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
     }
 
     /**
-     * Called to process variables found in duoble quoted strings.
+     * Called to process variables found in double quoted strings.
      *
      * Note that there may be more than one variable in the string, which will
      * result only in one call for the string.
@@ -892,6 +926,12 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
         $tokens = $phpcsFile->getTokens();
         $token  = $tokens[$stackPtr];
 
+        $scopeInfo = $this->getScopeInfo($stackPtr, false);
+        if (is_null($scopeInfo)) {
+//            echo "Empty scope.\n";
+            return;
+        }
+//        echo "Scope closed:\n" . var_dump($scopeInfo, true);
     }
 }//end class
 
