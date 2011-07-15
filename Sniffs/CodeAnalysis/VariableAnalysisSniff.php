@@ -53,6 +53,14 @@ class VariableInfo {
     public $firstInitialized;
     public $firstRead;
 
+    static $scopeTypeDescriptions = array(
+        'local'  => 'variable',
+        'param'  => 'function parameter',
+        'static' => 'static variable',
+        'global' => 'global variable',
+        'bound'  => 'bound variable',
+        );
+
     function __construct($varName) {
         $this->name = $varName;
     }
@@ -899,6 +907,7 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
                 continue;
             }
 //echo "Found variable {$varName} in string on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
+            $this->markVariableRead($varName, $stackPtr, $currScope);
             if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
 //echo "Uninitialized.\n";
                 $phpcsFile->addWarning("Variable \${$varName} is undefined.", $stackPtr);
@@ -906,7 +915,7 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
         }
     }
 
-  /**
+    /**
      * Called to process the end of a scope.
      *
      * Note that although triggered by the closing curly brace of the scope, $stackPtr is
@@ -932,6 +941,25 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
             return;
         }
 //        echo "Scope closed:\n" . var_dump($scopeInfo, true);
+        foreach ($scopeInfo->variables as $varInfo) {
+            if (isset($varInfo->firstRead)) {
+                continue;
+            }
+            if (isset($varInfo->firstDeclared)) {
+                $phpcsFile->addWarning(
+                    "Unused " . VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType] .
+                        " \${$varInfo->name}.",
+                    $varInfo->firstDeclared
+                    );
+            }
+            if (isset($varInfo->firstInitialized)) {
+                $phpcsFile->addWarning(
+                    "Unused " . VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType] .
+                        " \${$varInfo->name}.",
+                    $varInfo->firstInitialized
+                    );
+            }
+        }
     }
 }//end class
 

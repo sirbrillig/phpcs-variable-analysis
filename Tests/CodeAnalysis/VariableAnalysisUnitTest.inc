@@ -34,7 +34,7 @@ function function_with_param($param) {
     return $param;
 }
 
-function function_with_default_defined_param($junk, $param = 12) {
+function function_with_default_defined_param($unused, $param = 12) {
     echo $param;
     echo "xxx $param xxx";
     echo "xxx {$param} xxx";
@@ -45,7 +45,7 @@ function function_with_default_defined_param($junk, $param = 12) {
     return $param;
 }
 
-function function_with_default_undefined_param($junk, $param = null) {
+function function_with_default_null_param($unused, $param = null) {
     echo $param;
     echo "xxx $param xxx";
     echo "xxx {$param} xxx";
@@ -57,7 +57,7 @@ function function_with_default_undefined_param($junk, $param = null) {
 }
 
 function function_with_global_var() {
-    global $var, $var2;
+    global $var, $var2, $unused;
 
     echo $var;
     echo $var3;
@@ -68,14 +68,26 @@ function function_with_undefined_foreach() {
     foreach ($array as $element1) {
         echo $element1;
     }
+    echo $element1;
     foreach ($array as &$element2) {
         echo $element2;
     }
+    echo $element2;
     foreach ($array as $key1 => $value1) {
         echo "$key1 => $value1\n";
     }
+    echo "$key1 => $value1\n";
     foreach ($array as $key2 => &$value2) {
         echo "$key2 => $value2\n";
+    }
+    echo "$key2 => $value2\n";
+    foreach ($array as $element3) {
+    }
+    foreach ($array as &$element4) {
+    }
+    foreach ($array as $key3 => $value3) {
+    }
+    foreach ($array as $key4 => &$value4) {
     }
 }
 
@@ -84,14 +96,26 @@ function function_with_defined_foreach() {
     foreach ($array as $element1) {
         echo $element1;
     }
+    echo $element1;
     foreach ($array as &$element2) {
         echo $element2;
     }
+    echo $element2;
     foreach ($array as $key1 => $value1) {
         echo "$key1 => $value1\n";
     }
+    echo "$key1 => $value1\n";
     foreach ($array as $key2 => &$value2) {
         echo "$key2 => $value2\n";
+    }
+    echo "$key2 => $value2\n";
+    foreach ($array as $element3) {
+    }
+    foreach ($array as &$element4) {
+    }
+    foreach ($array as $key3 => $value3) {
+    }
+    foreach ($array as $key4 => &$value4) {
     }
 }
 

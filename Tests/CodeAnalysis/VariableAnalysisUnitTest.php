@@ -77,27 +77,33 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 //    no warnings.
                 ($base += 23) => 0,
                 //  function_with_default_defined_param() line 37 (+11)
-                //    no warnings.
                 ($base += 11) => 0,
-                //  function_with_default_undefined_param() line 48 (+11)
+                ($base + 0)   => 1,  //  $unused
+                //  function_with_default_null_param() line 48 (+11)
                 ($base += 11) => 0,
-//                ($base + 1)   => 1,  //  $param
-//                ($base + 2)   => 1,  //  $param
-//                ($base + 3)   => 1,  //  $param
+                ($base + 0)   => 1,  //  $unused
                 //  function_with_global_var() line 59 (+11)
                 ($base += 11) => 0,
+                ($base + 1)   => 1,  //  $unused
                 ($base + 4)   => 1,  //  $var3
                 //  function_with_undefined_foreach() line 67 (+8)
                 ($base += 8)  => 0,
                 ($base + 1)   => 1,  //  $array
-                ($base + 4)   => 1,  //  $array
-                ($base + 7)   => 1,  //  $array
-                ($base + 10)  => 1,  //  $array
-                //  function_with_defined_foreach() line 82 (+15)
-                //    no warnings.
-                ($base += 15) => 0,
-                //  ClassWithoutMembers->method_without_param() line 99 (+17)
-                ($base += 17) => 0,
+                ($base + 5)   => 1,  //  $array
+                ($base + 9)   => 1,  //  $array
+                ($base + 13)  => 1,  //  $array
+                ($base + 17)  => 1, // 2,  //  $array, $element3
+                ($base + 19)  => 1, // 2,  //  $array, $element4
+                ($base + 21)  => 1, // 3,  //  $array, $key3, $value4
+                ($base + 23)  => 1, // 3,  //  $array, $key4, $value4
+                //  function_with_defined_foreach() line 94 (+27)
+                ($base += 27) => 0,
+                ($base + 18)  => 1,  //  $element3
+                ($base + 20)  => 1,  //  $element4
+                ($base + 22)  => 1, // 2,  //  $key3, $value4
+                ($base + 24)  => 1, // 2,  //  $key4, $value4
+                //  ClassWithoutMembers->method_without_param() line 123 (+29)
+                ($base += 29) => 0,
                 ($base + 1)   => 1,  //  $var
                 ($base + 2)   => 1,  //  $var
                 ($base + 3)   => 1,  //  $var
@@ -140,6 +146,8 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 ($base += 29) => 0,
                 //  function_with_static_var() line 187 (+5)
                 ($base += 5)  => 0,
+                ($base + 1)   => 1, // 5,  //  $static_neg_num, $static_string, $static_string2,
+                                     //  $static_define, $static_constant
                 ($base + 5)   => 1,  //  $var
                 //  function_with_pass_by_reference_param() line 195 (+8)
                 //    no warnings.
@@ -159,6 +167,7 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 ($base + 5)   => 1,  //  $e
                 //  ClassWithThisInsideClosure->method_with_this_inside_closure() line 227 (+16)
                 ($base += 16) => 0,
+                ($base + 3)   => 1,  //  $inner_param
                 ($base + 4)   => 1,  //  $this
                 ($base + 5)   => 1,  //  $this
                 //  function_with_inline_assigns() line 239 (+12)
