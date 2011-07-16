@@ -7,5 +7,6 @@
  <!-- You can also refer to these subrules:
       Generic.CodeAnalysis.VariableAnalysis.UndefinedVariable
       Generic.CodeAnalysis.VariableAnalysis.UnusedVariable
+      Generic.CodeAnalysis.VariableAnalysis.VariableRedeclaration
    -->
 </ruleset>

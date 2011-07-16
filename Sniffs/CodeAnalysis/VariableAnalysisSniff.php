@@ -85,7 +85,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
      *
      * @var phpcsFile
      */
-    protected $currentFile = '';
+    protected $currentFile = null;
 
     /**
      * A list of scopes encountered so far and the variables within them.
@@ -217,10 +217,22 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
     function markVariableDeclaration($varName, $scopeType, $typeHint, $stackPtr, $currScope) {
         $varInfo = $this->getVariableInfo($varName, $currScope);
         if (isset($varInfo->scopeType)) {
-            // TODO: issue redeclaration/reuse warning?
-        } else {
-            $varInfo->scopeType = $scopeType;
+            //  Issue redeclaration/reuse warning
+            //  Note: we check off scopeType not firstDeclared, this is so that
+            //    we catch declarations that come after implicit declarations like
+            //    use of a variable as a local.
+            $this->currentFile->addWarning(
+                "Redeclaration of %s %s as %s.",
+                $stackPtr,
+                'VariableRedeclaration',
+                array(
+                    VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
+                    "\${$varName}",
+                    VariableInfo::$scopeTypeDescriptions[$scopeType],
+                    )
+                );
         }
+        $varInfo->scopeType = $scopeType;
         if (isset($varInfo->firstDeclared) && ($varInfo->firstDeclared <= $stackPtr)) {
             return;
         }

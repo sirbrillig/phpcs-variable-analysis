@@ -270,3 +270,33 @@ function function_with_inline_assigns() {
     }
     echo $var2;
 }
+
+function function_with_global_redeclarations($param) {
+    global $global;
+    static $static;
+    $bound = 12;
+    $local = function () use ($bound) {
+            global $bound;
+            echo $bound;
+        };
+    echo "$param $global $static $bound $local\n"; // Stop unused var warnings.
+    global $param;
+    global $static;
+    global $bound;
+    global $local;
+}
+
+function function_with_static_redeclarations($param) {
+    global $global;
+    static $static, $static;
+    $bound = 12;
+    $local = function () use ($bound) {
+            static$bound;
+            echo $bound;
+        };
+    echo "$param $global $static $bound $local\n"; // Stop unused var warnings.
+    static $param;
+    static $static;
+    static $bound;
+    static $local;
+}
