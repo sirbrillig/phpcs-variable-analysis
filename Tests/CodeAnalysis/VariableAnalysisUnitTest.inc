@@ -279,11 +279,15 @@ function function_with_global_redeclarations($param) {
             global $bound;
             echo $bound;
         };
-    echo "$param $global $static $bound $local\n"; // Stop unused var warnings.
+    try {
+    } catch (Exception $e) {
+    }
+    echo "$param $global $static $bound $local $e\n"; // Stop unused var warnings.
     global $param;
     global $static;
     global $bound;
     global $local;
+    global $e;
 }
 
 function function_with_static_redeclarations($param) {
@@ -294,9 +298,24 @@ function function_with_static_redeclarations($param) {
             static$bound;
             echo $bound;
         };
-    echo "$param $global $static $bound $local\n"; // Stop unused var warnings.
+    try {
+    } catch (Exception $e) {
+    }
+    echo "$param $global $static $bound $local $e\n"; // Stop unused var warnings.
     static $param;
     static $static;
     static $bound;
     static $local;
+    static $e;
+}
+
+function function_with_catch_redeclarations() {
+    try {
+    } catch (Exception $e) {
+        echo $e;
+    }
+    try {
+    } catch (Exception $e) {
+        echo $e;
+    }
 }

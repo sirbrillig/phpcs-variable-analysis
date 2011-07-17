@@ -177,18 +177,23 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 //  function_with_global_redeclarations() line 274 (+11)
                 ($base += 11) => 0,
                 ($base + 5)   => 1,  //  $bound
-                ($base + 9)   => 1,  //  $param
-                ($base + 10)  => 1,  //  $static
-                ($base + 11)  => 1,  //  $bound
-                ($base + 12)  => 1,  //  $local
-                //  function_with_static_redeclarations() line 289 (+15)
-                ($base += 15) => 0,
+                ($base + 12)  => 1,  //  $param
+                ($base + 13)  => 1,  //  $static
+                ($base + 14)  => 1,  //  $bound
+                ($base + 15)  => 1,  //  $local
+                ($base + 16)  => 1,  //  $e
+                //  function_with_static_redeclarations() line 293 (+19)
+                ($base += 19) => 0,
                 ($base + 2)   => 1,  //  $static
                 ($base + 5)   => 1,  //  $bound
-                ($base + 9)   => 1,  //  $param
-                ($base + 10)  => 1,  //  $static
-                ($base + 11)  => 1,  //  $bound
-                ($base + 12)  => 1,  //  $local
+                ($base + 12)  => 1,  //  $param
+                ($base + 13)  => 1,  //  $static
+                ($base + 14)  => 1,  //  $bound
+                ($base + 15)  => 1,  //  $local
+                ($base + 16)  => 1,  //  $e
+                //  function_with_catch_redeclarations() line 312 (+19)
+                //    no warnings.
+                ($base += 19) => 0,
                );
 
     }//end getWarningList()

@@ -214,23 +214,26 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
         $varInfo->firstInitialized = $stackPtr;
     }
 
-    function markVariableDeclaration($varName, $scopeType, $typeHint, $stackPtr, $currScope) {
+    function markVariableDeclaration($varName, $scopeType, $typeHint, $stackPtr, $currScope, $permitMatchingRedeclaration = false) {
         $varInfo = $this->getVariableInfo($varName, $currScope);
         if (isset($varInfo->scopeType)) {
-            //  Issue redeclaration/reuse warning
-            //  Note: we check off scopeType not firstDeclared, this is so that
-            //    we catch declarations that come after implicit declarations like
-            //    use of a variable as a local.
-            $this->currentFile->addWarning(
-                "Redeclaration of %s %s as %s.",
-                $stackPtr,
-                'VariableRedeclaration',
-                array(
-                    VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
-                    "\${$varName}",
-                    VariableInfo::$scopeTypeDescriptions[$scopeType],
-                    )
-                );
+            if (($permitMatchingRedeclaration === false) ||
+                ($varInfo->scopeType !== $scopeType)) {
+                //  Issue redeclaration/reuse warning
+                //  Note: we check off scopeType not firstDeclared, this is so that
+                //    we catch declarations that come after implicit declarations like
+                //    use of a variable as a local.
+                $this->currentFile->addWarning(
+                    "Redeclaration of %s %s as %s.",
+                    $stackPtr,
+                    'VariableRedeclaration',
+                    array(
+                        VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
+                        "\${$varName}",
+                        VariableInfo::$scopeTypeDescriptions[$scopeType],
+                        )
+                    );
+            }
         }
         $varInfo->scopeType = $scopeType;
         if (isset($varInfo->firstDeclared) && ($varInfo->firstDeclared <= $stackPtr)) {
@@ -528,7 +531,7 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
             ($tokens[$catchPtr]['code'] === T_CATCH)) {
             // Scope of the exception var is actually the function, not just the catch block.
             // TODO: typeHint
-            $this->markVariableDeclaration($varName, 'local', null, $stackPtr, $currScope);
+            $this->markVariableDeclaration($varName, 'local', null, $stackPtr, $currScope, true);
             $this->markVariableAssignment($varName, $stackPtr, $currScope);
             return true;
         }
