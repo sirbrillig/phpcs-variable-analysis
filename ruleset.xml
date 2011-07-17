@@ -1,12 +1,27 @@
 <?xml version="1.0"?>
 <ruleset name="PHP_Codesniffer Plugins Generic">
- <description>Run ./install.sh and add the following rules to your standrd's ruleset.xml.</description>
+ <description>Run ./install.sh and choose from the following rules to your standrd's ruleset.xml.</description>
 
- <!-- Rules provided by PHP_Codesniffer-Plugins -->
+ <!-- If you want everything, with the defaults, just include this line -->
  <rule ref="Generic.CodeAnalysis.VariableAnalysis"/>
  <!-- You can also refer to these subrules:
       Generic.CodeAnalysis.VariableAnalysis.UndefinedVariable
       Generic.CodeAnalysis.VariableAnalysis.UnusedVariable
       Generic.CodeAnalysis.VariableAnalysis.VariableRedeclaration
    -->
+
+ <!-- Copy the following line if you want to include your own list of pass-by-reference
+      functions defined in your codebase.
+      Format is "function:argnum" or "function:argnum1,argnum2" etc.
+      Whitespace delimits function definitions.
+   -->
+ <rule ref="Generic.CodeAnalysis.VariableAnalysis">
+  <properties>
+   <property name="sitePassByRefFunctions" value="
+    my_pass_by_ref_function:1
+    my_pass_by_ref_function2:2,3
+    "/>
+  </properties>
+ </rule>
+
 </ruleset>

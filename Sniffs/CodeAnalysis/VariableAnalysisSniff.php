@@ -97,16 +97,16 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
      *  by reference, the arguments are numbered starting from 1.
      */
 // TODO: complete list
-    private $_pass_by_ref_functions = array(
+    private $_passByRefFunctions = array(
         'array_shift' => array(1),
         'preg_match'  => array(3),
         );
 
     /**
      *  Allows an install to extend the list of known pass-by-reference functions
-     *  by defining generic.codeanalysis.variableanalysis.site_pass_by_ref_functions.
+     *  by defining generic.codeanalysis.variableanalysis.sitePassByRefFunctions.
      */
-    public $site_pass_by_ref_functions = null;
+    public $sitePassByRefFunctions = null;
 
     /**
      * Returns an array of tokens this test wants to listen for.
@@ -114,14 +114,14 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
      * @return array
      */
     public function register() {    
-        //  Magic to modfy $_pass_by_ref_functions with any site-specific settings.
-// TODO: test
-        if (!empty($this->site_pass_by_ref_functions)) {
-echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
-            foreach (preg_split('/\s+/', $this->site_pass_by_ref_functions) as $line) {
+        //  Magic to modfy $_passByRefFunctions with any site-specific settings.
+        if (!empty($this->sitePassByRefFunctions)) {
+//echo "Site pass by ref:" . var_dump($this->sitePassByRefFunctions, true);
+            foreach (preg_split('/\s+/', trim($this->sitePassByRefFunctions)) as $line) {
                 list ($function, $args) = explode(':', $line);
-                $this->$_pass_by_ref_functions[$function] = explode(',', $args);
+                $this->_passByRefFunctions[$function] = explode(',', $args);
             }
+//echo "Updated pass by ref:" . var_dump($this->_passByRefFunctions, true);
         }
         return array(
 //            T_CLASS,
@@ -731,11 +731,11 @@ echo "Site pass by ref:" . var_dump($this->site_pass_by_ref_functions, true);
         // Is our function a known pass-by-reference function?
         $functionName = $tokens[$functionPtr]['content'];
 //echo "  Is a function call to {$functionName}\n";
-        if (!isset($this->_pass_by_ref_functions[$functionName])) {
+        if (!isset($this->_passByRefFunctions[$functionName])) {
             return false;
         }
 
-        $refArgs = $this->_pass_by_ref_functions[$functionName];
+        $refArgs = $this->_passByRefFunctions[$functionName];
 //echo "  Is a pass-by-ref function\n";
             
         if (($argPtrs = $this->findFunctionCallArguments($phpcsFile, $stackPtr)) === false) {
