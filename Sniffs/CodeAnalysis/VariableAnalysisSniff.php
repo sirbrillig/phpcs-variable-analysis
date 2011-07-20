@@ -566,6 +566,56 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         return false;
     }
 
+    protected function checkForStaticMember(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Are we a static member?
+        $doubleColonPtr = $stackPtr - 1;
+        if ($tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
+            return false;
+        }
+        $classNamePtr   = $stackPtr - 2;
+        if (($tokens[$classNamePtr]['code'] !== T_STRING) &&
+            ($tokens[$classNamePtr]['code'] !== T_SELF)) {
+            return false;
+        }
+
+//echo "found className " . $tokens[$classNamePtr]['content'] . "\n";
+
+        // Are we refering to self:: outside a class?
+        // TODO: not sure this is our business or should be some other sniff.
+        if ($tokens[$classNamePtr]['code'] === T_SELF) {
+//echo "found self, like totally trippin'\n";
+            if (!empty($token['conditions'])) {
+                foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
+                    //  self within a closure is invalid
+                    //  Note: have to fetch code from $tokens, T_CLOSURE isn't set for conditions codes.
+                    if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
+                        $phpcsFile->addError("Use of self::%s inside closure.", $stackPtr,
+                            'SelfOutsideClass',
+                            array("\${$varName}"));
+                        return true;
+                    }
+                    if ($scopeCode === T_CLASS) {
+                        return true;
+                    }
+                }
+            }
+            $phpcsFile->addError("Use of self::%s outside class definition.", $stackPtr,
+                'SelfOutsideClass',
+                array("\${$varName}"));
+            return true;
+        }
+
+        return true;
+    }
+
     protected function checkForAssignment(
         PHP_CodeSniffer_File $phpcsFile,
         $stackPtr,
@@ -827,6 +877,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         //   Is closure use declaration of a variable defined within containing scope
         //   catch (...) block start
         //   $this within a class (but not within a closure).
+        //   $var part of class::$var static member
         //   Assignment via =
         //   Assignment via list (...) =
         //   Declares as a global
@@ -846,6 +897,11 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
 
         // Are we $this within a class?
         if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
+            return;
+        }
+
+        // $var part of class::$var static member
+        if ($this->checkForStaticMember($phpcsFile, $stackPtr, $varName, $currScope)) {
             return;
         }
 

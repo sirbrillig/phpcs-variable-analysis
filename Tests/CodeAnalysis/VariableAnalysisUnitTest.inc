@@ -158,20 +158,30 @@ class ClassWithoutMembers {
 
     function method_with_member_var() {
         echo $this->member_var;
+        echo self::$static_member_var;
     }
 }
 
 class ClassWithMembers {
     public $member_var;
+    static $static_member_var;
 
     function method_with_member_var() {
         echo $this->member_var;
         echo $this->no_such_member_var;
+        echo self::$static_member_var;
+        echo self::$no_such_static_member_var;
+        echo SomeOtherClass::$external_static_member_var;
     }
 }
 
 function function_with_this_outside_class() {
     return $this->whatever();
+}
+
+function function_with_static_members_outside_class() {
+    echo SomeOtherClass::$external_static_member_var;
+    return self::$whatever;
 }
 
 function function_with_closure($outer_param) {
@@ -257,6 +267,18 @@ class ClassWithThisInsideClosure {
             }, array());
         echo $this;
         echo "$this";
+    }
+}
+
+class ClassWithSelfInsideClosure {
+    static $static_member;
+
+    function method_with_self_inside_closure() {
+        echo self::$static_member;
+        array_map(function () {
+                echo self::$static_member;
+            }, array());
+        echo self::$static_member;
     }
 }
 

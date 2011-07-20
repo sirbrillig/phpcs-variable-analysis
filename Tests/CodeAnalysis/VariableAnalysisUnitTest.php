@@ -31,6 +31,180 @@
 class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffUnitTest
 {
 
+    private function _getWarningAndErrorList() {
+        //  This is a maintainence nightmare.
+        //    Value of a line is either:
+        //    - an int: the number of warnings.
+        //    - an array: the number of warnings and number of errors.
+        //    This is chosen because we mostly warn and because maintaining _two_
+        //    separate lists of line numbers would drive me insane.
+        //
+        //  All the fiddling with $base is to make each line number relative
+        //  to the line number of the function the line is in, which in turn
+        //  is relative to the line number of the previous function.
+        //
+        //  This makes adding new tests only moderately painful rather than
+        //  a total clusterfuck of alterations.
+        //
+        //  Comments with an unexplained number at the start before the name
+        //  of several variables are probably a reminder that there's multiple
+        //  errors on that line, but I had to pretend only one error because
+        //  AbstractSniffUnitTest doesn't reliably count all the errors. :(
+        //  This unfortunately means some of our test cases could fail and
+        //  we'd never notice.
+        //  TODO: track down that bug, fix and submit upstream.
+        $base = 0;
+        return array(
+                //  function_without_param() line (+3)
+                ($base += 3)  => 0,
+                ($base + 1)   => 1,  //  $var
+                ($base + 2)   => 1,  //  $var
+                ($base + 3)   => 1,  //  $var
+                ($base + 4)   => 2,  //  $var $var2
+                ($base + 5)   => 2,  //  $var $var2
+                ($base + 6)   => 1,  //  $var
+                ($base + 7)   => 1,  //  $var
+                ($base + 8)   => 1,  //  $var
+                ($base + 9)   => 1,  //  $var
+                ($base + 14)  => 1,  //  $var2
+                ($base + 15)  => 1,  //  $var2
+                //  function_with_param() line (+23)
+                //    no warnings.
+                ($base += 23) => 0,
+                //  function_with_default_defined_param() line (+11)
+                ($base += 11) => 0,
+                ($base + 0)   => 1,  //  $unused
+                //  function_with_default_null_param() line (+11)
+                ($base += 11) => 0,
+                ($base + 0)   => 1,  //  $unused
+                //  function_with_global_var() line (+11)
+                ($base += 11) => 0,
+                ($base + 1)   => 1,  //  $unused
+                ($base + 4)   => 1,  //  $var3
+                //  function_with_undefined_foreach() line (+8)
+                ($base += 8)  => 0,
+                ($base + 1)   => 1,  //  $array
+                ($base + 5)   => 1,  //  $array
+                ($base + 9)   => 1,  //  $array
+                ($base + 13)  => 1,  //  $array
+                ($base + 17)  => 1, // 2,  //  $array, $element3
+                ($base + 19)  => 1, // 2,  //  $array, $element4
+                ($base + 21)  => 1, // 3,  //  $array, $key3, $value4
+                ($base + 23)  => 1, // 3,  //  $array, $key4, $value4
+                //  function_with_defined_foreach() line (+27)
+                ($base += 27) => 0,
+                ($base + 18)  => 1,  //  $element3
+                ($base + 20)  => 1,  //  $element4
+                ($base + 22)  => 1, // 2,  //  $key3, $value4
+                ($base + 24)  => 1, // 2,  //  $key4, $value4
+                //  ClassWithoutMembers->method_without_param() line (+29)
+                ($base += 29) => 0,
+                ($base + 1)   => 1,  //  $var
+                ($base + 2)   => 1,  //  $var
+                ($base + 3)   => 1,  //  $var
+                ($base + 4)   => 2,  //  $var $var2
+                ($base + 5)   => 2,  //  $var $var2
+                ($base + 6)   => 1,  //  $var
+                ($base + 7)   => 1,  //  $var
+                ($base + 8)   => 1,  //  $var
+                ($base + 9)   => 1,  //  $var
+                ($base + 14)  => 1,  //  $var2
+                ($base + 15)  => 1,  //  $var2
+                //  ClassWithoutMembers->method_with_param() line (+24)
+                //    no warnings.
+                ($base += 24) => 0,
+                //  ClassWithoutMembers->method_with_member_var() line (+12)
+                //    no warnings.
+                //    We can't/don't inspect the class inheritence so we can't
+                //    determine that these are undeclared:
+                //      $this->member_var
+                //      self::$static_member_var
+                ($base += 12) => 0,
+                //  ClassWithMembers->method_with_member_var() line (+10)
+                //    no warnings.
+                //    We can't/don't inspect the class inheritence so we can't
+                //    determine that these are undeclared:
+                //      $this->no_such_member_var
+                //      self::$no_such_static_member_var
+                ($base += 10)  => 0,
+                //  function_with_this_outside_class() line (+9)
+                ($base += 9)  => 0,
+                ($base + 1)   => 1,  //  $this
+                //  function_with_static_members_outside_class() line (+4)
+                ($base += 4)  => 0,
+                ($base + 2)   => array(0, 1),  //  self::$whatever
+                //  function_with_closure() line (+5)
+                ($base += 5)  => 0,
+                ($base + 5)   => 1,  //  $outer_param
+                ($base + 7)   => 1,  //  $outer_var
+                ($base + 8)   => 1,  //  $outer_var2
+                ($base + 11)  => 1,  //  $outer_var3
+                ($base + 14)  => 1,  //  $inner_param
+                ($base + 16)  => 1,  //  $outer_var2
+                ($base + 17)  => 1,  //  $outer_var3
+                ($base + 18)  => 1,  //  $inner_var
+                ($base + 23)  => 1,  //  $outer_var3
+                ($base + 24)  => 1,  //  $inner_param
+                ($base + 25)  => 1,  //  $inner_var
+                ($base + 26)  => 1,  //  $inner_var2
+                //  function_with_return_by_reference_and_param() line (+29)
+                //    no warnings.
+                ($base += 29) => 0,
+                //  function_with_static_var() line (+5)
+                ($base += 5)  => 0,
+                ($base + 1)   => 1, // 5,  //  $static_neg_num, $static_string, $static_string2,
+                                     //  $static_define, $static_constant
+                ($base + 5)   => 1,  //  $var
+                //  function_with_pass_by_reference_param() line (+8)
+                //    no warnings.
+                ($base += 8)  => 0,
+                //  function_with_pass_by_reference_calls() line (+4)
+                ($base += 4)  => 0,
+                ($base + 1)   => 1,  //  $matches
+                ($base + 2)   => 1,  //  $needle
+                ($base + 3)   => 1,  //  $haystack
+                ($base + 5)   => 1,  //  $needle
+                ($base + 6)   => 1,  //  $haystack
+                ($base + 8)   => 1,  //  $needle
+                ($base + 9)   => 1,  //  $haystack
+                //  function_with_try_catch() line (+12)
+                ($base += 12) => 0,
+                ($base + 1)   => 1,  //  $e
+                ($base + 5)   => 1,  //  $e
+                //  ClassWithThisInsideClosure->method_with_this_inside_closure() line (+16)
+                ($base += 16) => 0,
+                ($base + 3)   => 1,  //  $inner_param
+                ($base + 4)   => 1,  //  $this
+                ($base + 5)   => 1,  //  $this
+                //  ClassWithSelfInsideClosure->method_with_self_inside_closure() line (+15)
+                ($base += 15) => 0,
+                ($base + 3)   => array(0, 1),  //  $self::$static_member
+                //  function_with_inline_assigns() line (+9)
+                ($base += 9) => 0,
+                ($base + 1)   => 1,  //  $var
+                ($base + 4)   => 1,  //  $var2
+                //  function_with_global_redeclarations() line (+11)
+                ($base += 11) => 0,
+                ($base + 5)   => 1,  //  $bound
+                ($base + 12)  => 1,  //  $param
+                ($base + 13)  => 1,  //  $static
+                ($base + 14)  => 1,  //  $bound
+                ($base + 15)  => 1,  //  $local
+                ($base + 16)  => 1,  //  $e
+                //  function_with_static_redeclarations() line (+19)
+                ($base += 19) => 0,
+                ($base + 2)   => 1,  //  $static
+                ($base + 5)   => 1,  //  $bound
+                ($base + 12)  => 1,  //  $param
+                ($base + 13)  => 1,  //  $static
+                ($base + 14)  => 1,  //  $bound
+                ($base + 15)  => 1,  //  $local
+                ($base + 16)  => 1,  //  $e
+                //  function_with_catch_redeclarations() line (+19)
+                //    no warnings.
+                ($base += 19) => 0,
+               );
+    }//end _getWarningAndErrorList()
 
     /**
      * Returns the lines where errors should occur.
@@ -42,8 +216,17 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
      */
     public function getErrorList()
     {
-        return array();
-
+        $errorList = array();
+        foreach ($this->_getWarningAndErrorList() as $line => $incidents) {
+            $errors = null;
+            if (is_array($incidents)) {
+                list ($warnings, $errors) = $incidents;
+            }
+            if (!empty($errors)) {
+                $errorList[$line] = $errors;
+            }
+        }
+        return $errorList;
     }//end getErrorList()
 
 
@@ -57,146 +240,20 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
      */
     public function getWarningList()
     {
-        //  This is a maintainence nightmare.
-        $base = 0;
-        return array(
-                //  function_without_param() line 3 (+3)
-                ($base += 3)  => 0,
-                ($base + 1)   => 1,  //  $var
-                ($base + 2)   => 1,  //  $var
-                ($base + 3)   => 1,  //  $var
-                ($base + 4)   => 2,  //  $var $var2
-                ($base + 5)   => 2,  //  $var $var2
-                ($base + 6)   => 1,  //  $var
-                ($base + 7)   => 1,  //  $var
-                ($base + 8)   => 1,  //  $var
-                ($base + 9)   => 1,  //  $var
-                ($base + 14)  => 1,  //  $var2
-                ($base + 15)  => 1,  //  $var2
-                //  function_with_param() line 26 (+23)
-                //    no warnings.
-                ($base += 23) => 0,
-                //  function_with_default_defined_param() line 37 (+11)
-                ($base += 11) => 0,
-                ($base + 0)   => 1,  //  $unused
-                //  function_with_default_null_param() line 48 (+11)
-                ($base += 11) => 0,
-                ($base + 0)   => 1,  //  $unused
-                //  function_with_global_var() line 59 (+11)
-                ($base += 11) => 0,
-                ($base + 1)   => 1,  //  $unused
-                ($base + 4)   => 1,  //  $var3
-                //  function_with_undefined_foreach() line 67 (+8)
-                ($base += 8)  => 0,
-                ($base + 1)   => 1,  //  $array
-                ($base + 5)   => 1,  //  $array
-                ($base + 9)   => 1,  //  $array
-                ($base + 13)  => 1,  //  $array
-                ($base + 17)  => 1, // 2,  //  $array, $element3
-                ($base + 19)  => 1, // 2,  //  $array, $element4
-                ($base + 21)  => 1, // 3,  //  $array, $key3, $value4
-                ($base + 23)  => 1, // 3,  //  $array, $key4, $value4
-                //  function_with_defined_foreach() line 94 (+27)
-                ($base += 27) => 0,
-                ($base + 18)  => 1,  //  $element3
-                ($base + 20)  => 1,  //  $element4
-                ($base + 22)  => 1, // 2,  //  $key3, $value4
-                ($base + 24)  => 1, // 2,  //  $key4, $value4
-                //  ClassWithoutMembers->method_without_param() line 123 (+29)
-                ($base += 29) => 0,
-                ($base + 1)   => 1,  //  $var
-                ($base + 2)   => 1,  //  $var
-                ($base + 3)   => 1,  //  $var
-                ($base + 4)   => 2,  //  $var $var2
-                ($base + 5)   => 2,  //  $var $var2
-                ($base + 6)   => 1,  //  $var
-                ($base + 7)   => 1,  //  $var
-                ($base + 8)   => 1,  //  $var
-                ($base + 9)   => 1,  //  $var
-                ($base + 14)  => 1,  //  $var2
-                ($base + 15)  => 1,  //  $var2
-                //  ClassWithoutMembers->method_with_param() line 123 (+24)
-                //    no warnings.
-                ($base += 24) => 0,
-                //  ClassWithoutMembers->method_with_member_var() line 135 (+12)
-                ($base += 12) => 0,
-// TODO:                136 => 1,  //  $this->member_var
-                //  ClassWithMembers->method_with_member_var() line 143 (+8)
-                ($base += 8)  => 0,
-// TODO:                145 => 1,  //  $this->no_such_member_var
-                //  function_with_this_outside_class() line 149 (+6)
-                ($base += 6)  => 0,
-                ($base + 1)   => 1,  //  $this
-                //  function_with_closure() line 153 (+4)
-                ($base += 4)  => 0,
-                ($base + 5)   => 1,  //  $outer_param
-                ($base + 7)   => 1,  //  $outer_var
-                ($base + 8)   => 1,  //  $outer_var2
-                ($base + 11)  => 1,  //  $outer_var3
-                ($base + 14)  => 1,  //  $inner_param
-                ($base + 16)  => 1,  //  $outer_var2
-                ($base + 17)  => 1,  //  $outer_var3
-                ($base + 18)  => 1,  //  $inner_var
-                ($base + 23)  => 1,  //  $outer_var3
-                ($base + 24)  => 1,  //  $inner_param
-                ($base + 25)  => 1,  //  $inner_var
-                ($base + 26)  => 1,  //  $inner_var2
-                //  function_with_return_by_reference_and_param() line 182 (+29)
-                //    no warnings.
-                ($base += 29) => 0,
-                //  function_with_static_var() line 187 (+5)
-                ($base += 5)  => 0,
-                ($base + 1)   => 1, // 5,  //  $static_neg_num, $static_string, $static_string2,
-                                     //  $static_define, $static_constant
-                ($base + 5)   => 1,  //  $var
-                //  function_with_pass_by_reference_param() line 195 (+8)
-                //    no warnings.
-                ($base += 8)  => 0,
-                //  function_with_pass_by_reference_calls() line 199 (+4)
-                ($base += 4)  => 0,
-                ($base + 1)   => 1,  //  $matches
-                ($base + 2)   => 1,  //  $needle
-                ($base + 3)   => 1,  //  $haystack
-                ($base + 5)   => 1,  //  $needle
-                ($base + 6)   => 1,  //  $haystack
-                ($base + 8)   => 1,  //  $needle
-                ($base + 9)   => 1,  //  $haystack
-                //  function_with_try_catch() line 211 (+12)
-                ($base += 12) => 0,
-                ($base + 1)   => 1,  //  $e
-                ($base + 5)   => 1,  //  $e
-                //  ClassWithThisInsideClosure->method_with_this_inside_closure() line 227 (+16)
-                ($base += 16) => 0,
-                ($base + 3)   => 1,  //  $inner_param
-                ($base + 4)   => 1,  //  $this
-                ($base + 5)   => 1,  //  $this
-                //  function_with_inline_assigns() line 263 (+12)
-                ($base += 12) => 0,
-                ($base + 1)   => 1,  //  $var
-                ($base + 4)   => 1,  //  $var2
-                //  function_with_global_redeclarations() line 274 (+11)
-                ($base += 11) => 0,
-                ($base + 5)   => 1,  //  $bound
-                ($base + 12)  => 1,  //  $param
-                ($base + 13)  => 1,  //  $static
-                ($base + 14)  => 1,  //  $bound
-                ($base + 15)  => 1,  //  $local
-                ($base + 16)  => 1,  //  $e
-                //  function_with_static_redeclarations() line 293 (+19)
-                ($base += 19) => 0,
-                ($base + 2)   => 1,  //  $static
-                ($base + 5)   => 1,  //  $bound
-                ($base + 12)  => 1,  //  $param
-                ($base + 13)  => 1,  //  $static
-                ($base + 14)  => 1,  //  $bound
-                ($base + 15)  => 1,  //  $local
-                ($base + 16)  => 1,  //  $e
-                //  function_with_catch_redeclarations() line 312 (+19)
-                //    no warnings.
-                ($base += 19) => 0,
-               );
-
-    }//end getWarningList()
+        $warningList = array();
+        foreach ($this->_getWarningAndErrorList() as $line => $incidents) {
+            $warnings = null;
+            if (is_array($incidents)) {
+                list ($warnings, $errors) = $incidents;
+            } else {
+                $warnings = $incidents;
+            }
+            if (!empty($warnings)) {
+                $warningList[$line] = $warnings;
+            }
+        }
+        return $warningList;
+  }//end getWarningList()
 
 
 }//end class

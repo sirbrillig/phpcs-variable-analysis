@@ -4,10 +4,11 @@
 
  <!-- If you want everything, with the defaults, just include this line -->
  <rule ref="Generic.CodeAnalysis.VariableAnalysis"/>
- <!-- You can also refer to these subrules:
+ <!-- You can also refer to these policy codes to customize them:
       Generic.CodeAnalysis.VariableAnalysis.UndefinedVariable
       Generic.CodeAnalysis.VariableAnalysis.UnusedVariable
       Generic.CodeAnalysis.VariableAnalysis.VariableRedeclaration
+      Generic.CodeAnalysis.VariableAnalysis.SelfOutsideClass
    -->
 
  <!-- Copy the following line if you want to include your own list of pass-by-reference
