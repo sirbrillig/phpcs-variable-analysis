@@ -566,6 +566,33 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         return false;
     }
 
+    protected function checkForSuperGlobal(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Are we a superglobal varaible?
+        if (in_array($varName, array(
+            'GLOBALS',
+            '_SERVER',
+            '_GET',
+            '_POST',
+            '_FILES',
+            '_COOKIE',
+            '_SESSION',
+            '_REQUEST',
+            '_ENV',
+            ))) {
+            return true;
+        }
+
+        return false;
+    }
+
     protected function checkForStaticMember(
         PHP_CodeSniffer_File $phpcsFile,
         $stackPtr,
@@ -716,6 +743,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         //   string T_CONSTANT_ENCAPSED_STRING
         //   define T_STRING
         //   class constant T_STRING, T_DOUBLE_COLON, T_STRING
+// TODO: assignment can be via heredoc, just to confuse matters
         // Search backwards for first token that isn't whitespace, comma, variable,
         // equals, or on the list of assignable constant values above.
         $staticPtr = $phpcsFile->findPrevious(
@@ -877,6 +905,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         //   Is closure use declaration of a variable defined within containing scope
         //   catch (...) block start
         //   $this within a class (but not within a closure).
+        //   $GLOBALS, $_REQUEST, etc superglobals.
         //   $var part of class::$var static member
         //   Assignment via =
         //   Assignment via list (...) =
@@ -897,6 +926,11 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
 
         // Are we $this within a class?
         if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
+            return;
+        }
+
+        // Are we a $GLOBALS, $_REQUEST, etc superglobal?
+        if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName, $currScope)) {
             return;
         }
 

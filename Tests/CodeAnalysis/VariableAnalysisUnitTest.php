@@ -203,6 +203,9 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 //  function_with_catch_redeclarations() line (+19)
                 //    no warnings.
                 ($base += 19) => 0,
+                //  function_with_superglobals() line (+11)
+                //    no warnings.
+                ($base += 11) => 0,
                );
     }//end _getWarningAndErrorList()
 
