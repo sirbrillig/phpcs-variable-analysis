@@ -24,3 +24,10 @@ CUSTOMIZATION
 
 There's a variety of options to customize the behaviour of VariableAnalysis, take
 a look at the included ruleset.xml for commented examples of a configuration.
+
+KNOWN ISSUES & BUGS
+-------------------
+
+ * File scope isn't currently analysed.
+ * Pass-by-reference functions list is barely started, let alone complete.
+ * Heredoc/nowdoc in static variable assign-while-declaring may confuse things.
