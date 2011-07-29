@@ -29,7 +29,7 @@ class ScopeInfo {
 
     function __construct($currScope) {
         $this->owner = $currScope;
-// TODO: extract opener/closer
+        // TODO: extract opener/closer
     }
 }
 
@@ -97,10 +97,11 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
      *  Array of known pass-by-reference functions and the argument(s) which are passed
      *  by reference, the arguments are numbered starting from 1.
      */
-// TODO: complete list
+    // TODO: complete list
     private $_passByRefFunctions = array(
-        'array_shift' => array(1),
-        'preg_match'  => array(3),
+        'array_shift'    => array(1),
+        'preg_match'     => array(3),
+        'preg_match_all' => array(3),
         );
 
     /**
@@ -158,9 +159,9 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         $tokens = $phpcsFile->getTokens();
         $token  = $tokens[$stackPtr];
 
-//if ($token['content'] == '$param') {
-//echo "Found token on line {$token['line']}.\n" . print_r($token, true);
-//}
+        //if ($token['content'] == '$param') {
+        //echo "Found token on line {$token['line']}.\n" . print_r($token, true);
+        //}
 
         if ($this->currentFile !== $phpcsFile) {
             $this->currentFile = $phpcsFile;
@@ -184,7 +185,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
     }
 
     function scopeKey($currScope) {
-        if (is_null($currScope)) {
+        if ($currScope === false) {
             $currScope = 'file';
         }
         return ($this->currentFile ? $this->currentFile->getFilename() : 'unknown file') .
@@ -226,7 +227,6 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         if (isset($varInfo->firstInitialized) && ($varInfo->firstInitialized <= $stackPtr)) {
             return;
         }
-//echo "Marking write to var {$varName} in {$scopeKey} at {$stackPtr}.\n";
         $varInfo->firstInitialized = $stackPtr;
     }
 
@@ -252,10 +252,12 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             }
         }
         $varInfo->scopeType = $scopeType;
+        if (isset($typeHint)) {
+            $varInfo->typeHint = $typeHint;
+        }
         if (isset($varInfo->firstDeclared) && ($varInfo->firstDeclared <= $stackPtr)) {
             return;
         }
-//echo "Marking declaration of var {$varName} in {$scopeKey} at {$stackPtr}.\n";
         $varInfo->firstDeclared = $stackPtr;
     }
 
@@ -264,12 +266,10 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         if (isset($varInfo->firstRead) && ($varInfo->firstRead <= $stackPtr)) {
             return;
         }
-//echo "Marking read of var {$varName} in {$scopeKey} at {$stackPtr}.\n";
         $varInfo->firstRead = $stackPtr;
     }
 
     function isVariableInitialized($varName, $stackPtr, $currScope) {
-//return true;
         $varInfo = $this->getVariableInfo($varName, $currScope);
         if (isset($varInfo->firstInitialized) && $varInfo->firstInitialized <= $stackPtr) {
             return true;
@@ -278,10 +278,9 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
     }
 
     function isVariableUndefined($varName, $stackPtr, $currScope) {
-//return true;
         $varInfo = $this->getVariableInfo($varName, $currScope, false);
         if (isset($varInfo->firstDeclared) && $varInfo->firstDeclared <= $stackPtr) {
-// TODO: do we want to check scopeType here?
+            // TODO: do we want to check scopeType here?
             return false;
         }
         if (isset($varInfo->firstInitialized) && $varInfo->firstInitialized <= $stackPtr) {
@@ -306,7 +305,6 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         // it's a function keyword.
         $functionPtr = $phpcsFile->findPrevious(array(T_STRING, T_WHITESPACE, T_BITWISE_AND),
             $openPtr - 1, null, true, null, true);
-//echo "functionPtr: $functionPtr\n";// . print_r($tokens[$functionPtr], true);
         if (($functionPtr !== false) &&
             ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
             return $functionPtr;
@@ -322,13 +320,10 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         $token  = $tokens[$stackPtr];
 
         if (!empty($token['conditions'])) {
-//echo "Looking for scope for {$token['content']}.\n";
             foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
                 if (($scopeCode === T_FUNCTION) || ($scopeCode === T_CLOSURE)) {
-//echo "Found scope {$tokens[$scopePtr]['content']}.\n";
                     return $scopePtr;
                 }
-//echo "Skipping scope {$tokens[$scopePtr]['content']}.\n";
             }
         }
 
@@ -475,22 +470,19 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             return false;
         }
 
-//echo "Prev to bracket: " . ($openPtr - 1 ) . "\n";// . print_r($tokens[$openPtr - 1], true);
-
         // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
         // so we look backwards from the opening bracket for the first thing that
         // isn't a function name, reference sigil or whitespace and check if
         // it's a function keyword.
         $functionPtr = $phpcsFile->findPrevious(array(T_STRING, T_WHITESPACE, T_BITWISE_AND),
             $openPtr - 1, null, true, null, true);
-//echo "functionPtr: $functionPtr\n";// . print_r($tokens[$functionPtr], true);
         if (($functionPtr !== false) &&
             (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
              ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
             // TODO: typeHint
             $this->markVariableDeclaration($varName, 'param', null, $stackPtr, $functionPtr);
             //  Are we optional with a default?
-            if (($assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr)) !== false) {
+            if ($this->isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
                 $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
             }
             return true;
@@ -501,7 +493,6 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             $this->markVariableRead($varName, $stackPtr, $currScope);
             if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
                 // We haven't been defined by this point.
-//echo "Uninitialized.\n";
                 $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr,
                     'UndefinedVariable',
                     array("\${$varName}"));
@@ -534,15 +525,12 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             return false;
         }
 
-//echo "Prev to bracket: " . ($openPtr - 1 ) . "\n";// . print_r($tokens[$openPtr - 1], true);
-
         // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
         // so we look backwards from the opening bracket for the first thing that
         // isn't a function name, reference sigil or whitespace and check if
         // it's a function keyword.
         $catchPtr = $phpcsFile->findPrevious(T_WHITESPACE,
             $openPtr - 1, null, true, null, true);
-//echo "catchPtr: $catchPtr\n";// . print_r($tokens[$catchPtr], true);
         if (($catchPtr !== false) &&
             ($tokens[$catchPtr]['code'] === T_CATCH)) {
             // Scope of the exception var is actually the function, not just the catch block.
@@ -633,12 +621,9 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             return false;
         }
 
-//echo "found className " . $tokens[$classNamePtr]['content'] . "\n";
-
         // Are we refering to self:: outside a class?
         // TODO: not sure this is our business or should be some other sniff.
         if ($tokens[$classNamePtr]['code'] === T_SELF) {
-//echo "found self, like totally trippin'\n";
             if (!empty($token['conditions'])) {
                 foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
                     //  self within a closure is invalid
@@ -678,7 +663,6 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         }
 
         // Plain ol' assignment. Simpl(ish).
-//echo "Next:\n" . print_r($tokens[$assignPtr], true);
         if (($writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr)) === false) {
             $writtenPtr = $stackPtr;  // I dunno
         }
@@ -700,22 +684,18 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             return false;
         }
 
-//echo "Open bracket:\n" . print_r($tokens[$openPtr], true);
         $prevPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
-//echo "Prev to bracket:\n" . print_r($tokens[$prevPtr], true);
         if (($prevPtr === false) || ($tokens[$prevPtr]['code'] !== T_LIST)) {
             return false;
         }
 
         // OK, we're a list (...) construct... are we being assigned to?
-//echo "Is list.\n";
         $closePtr = $tokens[$openPtr]['parenthesis_closer'];
         if (($assignPtr = $this->isNextThingAnAssign($phpcsFile, $closePtr)) === false) {
             return false;
         }
 
         // Yes, we're being assigned.
-//echo "Next after brackets:\n" . print_r($tokens[$assignPtr], true);
         $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
         $this->markVariableAssignment($varName, $writtenPtr, $currScope);
         return true;
@@ -740,7 +720,6 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         }
 
         // It's a global declaration.
-//echo "In a global declaration.\n";
         $this->markVariableDeclaration($varName, 'global', null, $stackPtr, $currScope);
         return true;
     }
@@ -763,7 +742,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         //   string T_CONSTANT_ENCAPSED_STRING
         //   define T_STRING
         //   class constant T_STRING, T_DOUBLE_COLON, T_STRING
-// TODO: assignment can be via heredoc, just to confuse matters
+        // TODO: assignment can be via heredoc, just to confuse matters
         // Search backwards for first token that isn't whitespace, comma, variable,
         // equals, or on the list of assignable constant values above.
         $staticPtr = $phpcsFile->findPrevious(
@@ -773,15 +752,14 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
                   T_STRING,
                   T_DOUBLE_COLON),
             $stackPtr - 1, null, true, null, true);
-//if ($varName == 'static2') {
-//echo "Failing token:\n" . print_r($tokens[$staticPtr], true);
-//}
+        //if ($varName == 'static2') {
+        //echo "Failing token:\n" . print_r($tokens[$staticPtr], true);
+        //}
         if (($staticPtr === false) || ($tokens[$staticPtr]['code'] !== T_STATIC)) {
             return false;
         }
 
         // It's a static declaration.
-//echo "In a static declaration.\n";
         $this->markVariableDeclaration($varName, 'static', null, $stackPtr, $currScope);
         if ($this->isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
             $this->markVariableAssignment($varName, $stackPtr, $currScope);
@@ -804,7 +782,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         }
 
         // Is there an 'as' token between us and the opening bracket?
-        if (($asPtr = $phpcsFile->findPrevious(T_AS, $stackPtr - 1, $openPtr)) === false) {
+        if ($phpcsFile->findPrevious(T_AS, $stackPtr - 1, $openPtr) === false) {
             return false;
         }
 
@@ -828,19 +806,16 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
 
         // Is our function a known pass-by-reference function?
         $functionName = $tokens[$functionPtr]['content'];
-//echo "  Is a function call to {$functionName}\n";
         if (!isset($this->_passByRefFunctions[$functionName])) {
             return false;
         }
 
         $refArgs = $this->_passByRefFunctions[$functionName];
-//echo "  Is a pass-by-ref function\n";
             
         if (($argPtrs = $this->findFunctionCallArguments($phpcsFile, $stackPtr)) === false) {
             return false;
         }
 
-//echo "  Arg pointers found\n";
         // We're within a function call arguments list, find which arg we are.
         $argPos = false;
         foreach ($argPtrs as $idx => $ptrs) {
@@ -849,7 +824,6 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
                 break;
             }
         }
-//echo "  We have arg position $argPos\n";
         if (($argPos === false) || !in_array($argPos, $refArgs)) {
             return false;
         }
@@ -912,10 +886,10 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         }
         
 
-//if ($varName == 'param') {
-//echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n";// . print_r($token, true);
-//}
-//echo "Prev:\n" . print_r($tokens[$stackPtr - 1], true);
+        //if ($varName == 'param') {
+        //echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n";// . print_r($token, true);
+        //}
+        //echo "Prev:\n" . print_r($tokens[$stackPtr - 1], true);
 
         // Determine if variable is being assigned or read.
 
@@ -989,13 +963,11 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             return;
         }
 
-//echo "Looks like a read.\n";
         $this->markVariableRead($varName, $stackPtr, $currScope);
 
         // OK, we don't appear to be a write to the var, assume we're a read.
         if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
             // We haven't been defined by this point.
-//echo "Uninitialized.\n";
             $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr,
                 'UndefinedVariable',
                 array("\${$varName}"));
@@ -1035,10 +1007,8 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
                 continue;
             }
-//echo "Found variable {$varName} in string on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
             $this->markVariableRead($varName, $stackPtr, $currScope);
             if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
-//echo "Uninitialized.\n";
                 $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr,
                     'UndefinedVariable',
                     array("\${$varName}"));
