@@ -52,6 +52,7 @@ class VariableInfo {
     public $firstDeclared;
     public $firstInitialized;
     public $firstRead;
+    public $ignoreUnused = false;
 
     static $scopeTypeDescriptions = array(
         'local'  => 'variable',
@@ -115,6 +116,12 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
     public $allowUnusedCaughtExceptions = false;
 
     /**
+     *  A list of names of placeholder variables that you want to ignore from
+     *  unused variable warnings, ie things like $junk.
+     */
+    public $validUnusedVariableNames = null;
+
+    /**
      * Returns an array of tokens this test wants to listen for.
      * 
      * @return array
@@ -122,17 +129,16 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
     public function register() {    
         //  Magic to modfy $_passByRefFunctions with any site-specific settings.
         if (!empty($this->sitePassByRefFunctions)) {
-//echo "Site pass by ref:" . var_dump($this->sitePassByRefFunctions, true);
             foreach (preg_split('/\s+/', trim($this->sitePassByRefFunctions)) as $line) {
                 list ($function, $args) = explode(':', $line);
                 $this->_passByRefFunctions[$function] = explode(',', $args);
             }
-//echo "Updated pass by ref:" . var_dump($this->_passByRefFunctions, true);
+        }
+        if (!empty($this->validUnusedVariableNames)) {
+            $this->validUnusedVariableNames =
+                preg_split('/\s+/', trim($this->validUnusedVariableNames));
         }
         return array(
-//            T_CLASS,
-//            T_INTERFACE,
-//            T_FUNCTION,
             T_VARIABLE,
             T_DOUBLE_QUOTED_STRING,
             T_CLOSE_CURLY_BRACKET,
@@ -204,6 +210,10 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
                 return null;
             }
             $scopeInfo->variables[$varName] = new VariableInfo($varName);
+            if ($this->validUnusedVariableNames &&
+                in_array($varName, $this->validUnusedVariableNames)) {
+                $scopeInfo->variables[$varName]->ignoreUnused = true;
+            }
         }
         return $scopeInfo->variables[$varName];
     }
@@ -540,8 +550,8 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             $this->markVariableDeclaration($varName, 'local', null, $stackPtr, $currScope, true);
             $this->markVariableAssignment($varName, $stackPtr, $currScope);
             if ($this->allowUnusedCaughtExceptions) {
-                // Hmm, bit of a hack...
-                $this->markVariableRead($varName, $stackPtr, $currScope);
+                $varInfo = $this->getVariableInfo($varName, $currScope);
+                $varInfo->ignoreUnused = true;
             }
             return true;
         }
@@ -1053,17 +1063,12 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         $phpcsFile,
         $stackPtr
     ) {
-        $tokens = $phpcsFile->getTokens();
-        $token  = $tokens[$stackPtr];
-
         $scopeInfo = $this->getScopeInfo($stackPtr, false);
         if (is_null($scopeInfo)) {
-//            echo "Empty scope.\n";
             return;
         }
-//        echo "Scope closed:\n" . var_dump($scopeInfo, true);
         foreach ($scopeInfo->variables as $varInfo) {
-            if (isset($varInfo->firstRead)) {
+            if ($varInfo->ignoreUnused || isset($varInfo->firstRead)) {
                 continue;
             }
             if (isset($varInfo->firstDeclared)) {

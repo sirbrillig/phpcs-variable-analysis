@@ -36,6 +36,16 @@
         }
    -->
    <property name="allowUnusedCaughtExceptions" value="1"/>
+   <!--
+      Include the following property if you want to have a whitelist of variable names
+      that are commonly used for placeholder "junk" values that ignored and that you
+      don't want to provoke an unused variable warning for.
+      Format is "variableName" without a leading $ with whitespace delimiting names.
+   -->
+   <property name="validUnusedVariableNames" value="
+    junk
+    dummy
+    "/>
   </properties>
  </rule>
 
