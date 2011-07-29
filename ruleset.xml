@@ -4,24 +4,38 @@
 
  <!-- If you want everything, with the defaults, just include this line -->
  <rule ref="Generic.CodeAnalysis.VariableAnalysis"/>
- <!-- You can also refer to these policy codes to customize them:
+ <!--
+    You can also refer to these policy codes to customize them:
       Generic.CodeAnalysis.VariableAnalysis.UndefinedVariable
       Generic.CodeAnalysis.VariableAnalysis.UnusedVariable
       Generic.CodeAnalysis.VariableAnalysis.VariableRedeclaration
       Generic.CodeAnalysis.VariableAnalysis.SelfOutsideClass
-   -->
+ -->
 
- <!-- Copy the following line if you want to include your own list of pass-by-reference
+ <!-- Include this block to customize VariableAnalysis behaviour -->
+ <rule ref="Generic.CodeAnalysis.VariableAnalysis">
+  <properties>
+   <!--
+      Include the following property if you want to include your own list of pass-by-reference
       functions defined in your codebase.
       Format is "function:argnum" or "function:argnum1,argnum2" etc.
       Whitespace delimits function definitions.
    -->
- <rule ref="Generic.CodeAnalysis.VariableAnalysis">
-  <properties>
    <property name="sitePassByRefFunctions" value="
     my_pass_by_ref_function:1
     my_pass_by_ref_function2:2,3
     "/>
+   <!--
+      Include the following property if you want to prevent exception variables declared
+      in a catch block from causing an unused variable warning, this supports the common
+      (but not always wanted) pattern of:
+        try {
+            // stuff here
+        } catch (Exception $e) {
+            // Do something without ever using $e
+        }
+   -->
+   <property name="allowUnusedCaughtExceptions" value="1"/>
   </properties>
  </rule>
 

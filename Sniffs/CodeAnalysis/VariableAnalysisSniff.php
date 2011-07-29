@@ -109,6 +109,12 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
     public $sitePassByRefFunctions = null;
 
     /**
+     *  Allows exceptions in a catch block to be unused without provoking unused-var warning.
+     *  Set generic.codeanalysis.variableanalysis.allowUnusedCaughtExceptions to a true value.
+     */
+    public $allowUnusedCaughtExceptions = false;
+
+    /**
      * Returns an array of tokens this test wants to listen for.
      * 
      * @return array
@@ -533,6 +539,10 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             // TODO: typeHint
             $this->markVariableDeclaration($varName, 'local', null, $stackPtr, $currScope, true);
             $this->markVariableAssignment($varName, $stackPtr, $currScope);
+            if ($this->allowUnusedCaughtExceptions) {
+                // Hmm, bit of a hack...
+                $this->markVariableRead($varName, $stackPtr, $currScope);
+            }
             return true;
         }
         return false;
