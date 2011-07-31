@@ -29,5 +29,4 @@ KNOWN ISSUES & BUGS
 -------------------
 
  * File scope isn't currently analysed.
- * Pass-by-reference functions list is barely started, let alone complete.
  * Heredoc/nowdoc in static variable assign-while-declaring may confuse things.
