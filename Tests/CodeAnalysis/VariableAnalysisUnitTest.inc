@@ -240,6 +240,16 @@ function function_with_pass_by_reference_calls() {
     echo $matches;
     echo $needle;
     echo $haystack;
+    $stmt = 'whatever';
+    $var1 = 'one';
+    $var2 = 'two';
+    echo $var1;
+    echo $var2;
+    echo $var3;
+    maxdb_stmt_bind_result($stmt, $var1, $var2, $var3);
+    echo $var1;
+    echo $var2;
+    echo $var3;
 }
 
 function function_with_try_catch() {

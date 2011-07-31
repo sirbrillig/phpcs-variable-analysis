@@ -167,8 +167,9 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 ($base + 6)   => 1,  //  $haystack
                 ($base + 8)   => 1,  //  $needle
                 ($base + 9)   => 1,  //  $haystack
-                //  function_with_try_catch() line (+12)
-                ($base += 12) => 0,
+                ($base + 15)  => 1,  //  $var3
+                //  function_with_try_catch() line (+22)
+                ($base += 22) => 0,
                 ($base + 1)   => 1,  //  $e
                 ($base + 5)   => 1,  //  $e
                 //  ClassWithThisInsideClosure->method_with_this_inside_closure() line (+16)
