@@ -154,10 +154,10 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 ($base += 5)  => 0,
                 ($base + 1)   => 1, // 5,  //  $static_neg_num, $static_string, $static_string2,
                                      //  $static_define, $static_constant
-                ($base + 5)   => 1,  //  $var
-                //  function_with_pass_by_reference_param() line (+8)
+                ($base + 13)   => 1,  //  $var
+                //  function_with_pass_by_reference_param() line (+20)
                 //    no warnings.
-                ($base += 8)  => 0,
+                ($base += 20)  => 0,
                 //  function_with_pass_by_reference_calls() line (+4)
                 ($base += 4)  => 0,
                 ($base + 1)   => 1,  //  $matches

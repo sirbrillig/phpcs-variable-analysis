@@ -960,24 +960,27 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         // can contain assignments. The assignment is compile-time however so can
         // only be constant values, which makes life manageable.
         // Valid values are:
-        //   number T_MINUS T_LNUMBER T_DNUMBER
-        //   string T_CONSTANT_ENCAPSED_STRING
-        //   define T_STRING
-        //   class constant T_STRING, T_DOUBLE_COLON, T_STRING
-        // TODO: assignment can be via heredoc, just to confuse matters
+        //   number         T_MINUS T_LNUMBER T_DNUMBER
+        //   string         T_CONSTANT_ENCAPSED_STRING
+        //   heredoc        T_START_HEREDOC T_HEREDOC T_END_HEREDOC
+        //   define         T_STRING
+        //   class constant T_STRING T_DOUBLE_COLON T_STRING
         // Search backwards for first token that isn't whitespace, comma, variable,
         // equals, or on the list of assignable constant values above.
         $staticPtr = $phpcsFile->findPrevious(
-            array(T_WHITESPACE, T_VARIABLE, T_COMMA, T_EQUAL,
-                  T_MINUS, T_LNUMBER, T_DNUMBER,
-                  T_CONSTANT_ENCAPSED_STRING,
-                  T_STRING,
-                  T_DOUBLE_COLON),
+            array(
+                T_WHITESPACE, T_VARIABLE, T_COMMA, T_EQUAL,
+                T_MINUS, T_LNUMBER, T_DNUMBER,
+                T_CONSTANT_ENCAPSED_STRING,
+                T_STRING,
+                T_DOUBLE_COLON,
+                T_START_HEREDOC, T_HEREDOC, T_END_HEREDOC,
+                ),
             $stackPtr - 1, null, true, null, true);
-        //if ($varName == 'static2') {
-        //echo "Failing token:\n" . print_r($tokens[$staticPtr], true);
-        //}
         if (($staticPtr === false) || ($tokens[$staticPtr]['code'] !== T_STATIC)) {
+            //if ($varName == 'static4') {
+            //    echo "Failing token:\n" . print_r($tokens[$staticPtr], true);
+            //}
             return false;
         }
 

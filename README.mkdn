@@ -29,4 +29,3 @@ KNOWN ISSUES & BUGS
 -------------------
 
  * File scope isn't currently analysed.
- * Heredoc/nowdoc in static variable assign-while-declaring may confuse things.

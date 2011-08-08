@@ -220,10 +220,22 @@ function &function_with_return_by_reference_and_param($param) {
 
 function function_with_static_var() {
     static $static1, $static_num = 12, $static_neg_num = -1.5, $static_string = 'abc', $static_string2 = "def", $static_define = MYDEFINE, $static_constant = MyClass::CONSTANT, $static2;
+    static $static_heredoc = <<<END_OF_HEREDOC
+this is an ugly but valid way to continue after a heredoc
+END_OF_HEREDOC
+        , $static3;
+    static $static_nowdoc = <<<'END_OF_NOWDOC'
+this is an ugly but valid way to continue after a nowdoc
+END_OF_NOWDOC
+        , $static4;
     echo $static1;
     echo $static_num;
     echo $static2;
     echo $var;
+    echo $static_heredoc;
+    echo $static3;
+    echo $static_nowdoc;
+    echo $static4;
 }
 
 function function_with_pass_by_reference_param(&$param) {
