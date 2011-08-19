@@ -1241,6 +1241,9 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
                 continue;
             }
+            if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName, $currScope)) {
+                return;
+            }
             $this->markVariableRead($varName, $stackPtr, $currScope);
             if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
                 $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr,
