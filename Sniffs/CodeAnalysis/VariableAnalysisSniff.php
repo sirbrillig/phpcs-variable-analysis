@@ -346,10 +346,10 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
 
     /**
      * Returns an array of tokens this test wants to listen for.
-     * 
+     *
      * @return array
      */
-    public function register() {    
+    public function register() {
         //  Magic to modfy $_passByRefFunctions with any site-specific settings.
         if (!empty($this->sitePassByRefFunctions)) {
             foreach (preg_split('/\s+/', trim($this->sitePassByRefFunctions)) as $line) {
@@ -364,6 +364,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         return array(
             T_VARIABLE,
             T_DOUBLE_QUOTED_STRING,
+            T_HEREDOC,
             T_CLOSE_CURLY_BRACKET,
             );
     }//end register()
@@ -374,7 +375,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
      * @param PHP_CodeSniffer_File $phpcsFile The file being scanned.
      * @param int                  $stackPtr  The position of the current token
      *                                        in the stack passed in $tokens.
-     * 
+     *
      * @return void
      */
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr) {
@@ -392,7 +393,8 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         if ($token['code'] === T_VARIABLE) {
             return $this->processVariable($phpcsFile, $stackPtr);
         }
-        if ($token['code'] === T_DOUBLE_QUOTED_STRING) {
+        if (($token['code'] === T_DOUBLE_QUOTED_STRING) ||
+            ($token['code'] === T_HEREDOC)) {
             return $this->processVariableInString($phpcsFile, $stackPtr);
         }
         if (($token['code'] === T_CLOSE_CURLY_BRACKET) &&
@@ -541,15 +543,29 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         $tokens = $phpcsFile->getTokens();
         $token  = $tokens[$stackPtr];
 
+        $in_class = false;
         if (!empty($token['conditions'])) {
             foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
                 if (($scopeCode === T_FUNCTION) || ($scopeCode === T_CLOSURE)) {
                     return $scopePtr;
                 }
+                if (($scopeCode === T_CLASS) || ($scopeCode === T_INTERFACE)) {
+                    $in_class = true;
+                }
             }
         }
 
-        return $this->findFunctionPrototype($phpcsFile, $stackPtr);
+        if (($scopePtr = $this->findFunctionPrototype($phpcsFile, $stackPtr)) !== false) {
+            return $scopePtr;
+        }
+
+        if ($in_class) {
+            // Member var of a class, we don't care.
+            return false;
+        }
+
+        // File scope, hmm, lets use first token of file?
+        return 0;
     }
 
     function isNextThingAnAssign(
@@ -1229,7 +1245,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         $tokens = $phpcsFile->getTokens();
         $token  = $tokens[$stackPtr];
 
-        $pattern = '|[^\\\]\${?([a-zA-Z0-9_]+)}?|';
+        $pattern = '|(?<!\\\\)(?:\\\\{2})*\${?([a-zA-Z0-9_]+)}?|';
         if (!preg_match_all($pattern, $token['content'], $matches)) {
             return;
         }
@@ -1242,7 +1258,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
                 continue;
             }
             if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName, $currScope)) {
-                return;
+                continue;
             }
             $this->markVariableRead($varName, $stackPtr, $currScope);
             if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {

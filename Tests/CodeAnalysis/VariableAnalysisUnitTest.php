@@ -59,18 +59,19 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 ($base += 3)  => 0,
                 ($base + 1)   => 1,  //  $var
                 ($base + 2)   => 1,  //  $var
-                ($base + 3)   => 1,  //  $var
-                ($base + 4)   => 2,  //  $var $var2
+                ($base + 3)   => 1,  //  {$var}
+                ($base + 4)   => 1,  //  ${var}
                 ($base + 5)   => 2,  //  $var $var2
-                ($base + 6)   => 1,  //  $var
+                ($base + 6)   => 2,  //  $var $var2
                 ($base + 7)   => 1,  //  $var
                 ($base + 8)   => 1,  //  $var
                 ($base + 9)   => 1,  //  $var
-                ($base + 14)  => 1,  //  $var2
+                ($base + 10)   => 1,  //  $var
                 ($base + 15)  => 1,  //  $var2
-                //  function_with_param() line (+23)
+                ($base + 16)  => 1,  //  $var2
+                //  function_with_param() line (+24)
                 //    no warnings.
-                ($base += 23) => 0,
+                ($base += 24) => 0,
                 //  function_with_default_defined_param() line (+11)
                 ($base += 11) => 0,
                 ($base + 0)   => 1,  //  $unused
@@ -205,8 +206,14 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 //    no warnings.
                 ($base += 19) => 0,
                 //  function_with_superglobals() line (+11)
-                //    no warnings.
                 ($base += 11) => 0,
+                ($base + 11)  => 1,  //  $var
+                //  function_with_heredoc() line (+14)
+                ($base += 14) => 0,
+                ($base + 6)   => 1,  //  $var2
+                ($base + 7)   => 1,  //  {$var2}
+                ($base + 8)   => 1,  //  ${var2}
+                ($base + 10)  => 1,  //  \\$var2
                );
     }//end _getWarningAndErrorList()
 

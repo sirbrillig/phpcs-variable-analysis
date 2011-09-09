@@ -4,6 +4,7 @@ function function_without_param() {
     echo $var;
     echo "xxx $var xxx";
     echo "xxx {$var} xxx";
+    echo "xxx ${var} xxx";
     echo "xxx $var $var2 xxx";
     echo "xxx {$var} {$var2} xxx";
     func($var);
@@ -375,4 +376,19 @@ function function_with_superglobals() {
     echo print_r($_REQUEST, true);
     echo print_r($_ENV, true);
     echo "$GLOBALS['whatever']";
+    echo "$GLOBALS['whatever'] $var";
+}
+
+function function_with_heredoc() {
+    $var = 10;
+    echo <<<END_OF_TEXT
+$var
+{$var}
+${var}
+$var2
+{$var2}
+${var2}
+\$var2
+\\$var2
+END_OF_TEXT;
 }
