@@ -1134,7 +1134,6 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         if (($currScope = $this->findVariableScope($phpcsFile, $stackPtr)) === false) {
             return;
         }
-        
 
         //if ($varName == 'param') {
         //echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n";// . print_r($token, true);

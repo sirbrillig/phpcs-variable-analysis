@@ -8,9 +8,9 @@
  * @package   PHP_CodeSniffer
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @author    Manuel Pichler <mapi@manuel-pichler.de>
- * @copyright 2007-2008 Manuel Pichler. All rights reserved.
+ * @author    Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
+ * @copyright 2011 Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
- * @version   CVS: $Id$
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
@@ -23,7 +23,8 @@
  * @category  PHP
  * @package   PHP_CodeSniffer
  * @author    Manuel Pichler <mapi@manuel-pichler.de>
- * @copyright 2007-2008 Manuel Pichler. All rights reserved.
+ * @author    Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
+ * @copyright 2011 Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
  * @version   Release: @package_version@
  * @link      http://pear.php.net/package/PHP_CodeSniffer
@@ -45,14 +46,6 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
         //
         //  This makes adding new tests only moderately painful rather than
         //  a total clusterfuck of alterations.
-        //
-        //  Comments with an unexplained number at the start before the name
-        //  of several variables are probably a reminder that there's multiple
-        //  errors on that line, but I had to pretend only one error because
-        //  AbstractSniffUnitTest doesn't reliably count all the errors. :(
-        //  This unfortunately means some of our test cases could fail and
-        //  we'd never notice.
-        //  TODO: track down that bug, fix and submit upstream.
         $base = 0;
         return array(
                 //  function_without_param() line (+3)
@@ -66,7 +59,7 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 ($base + 7)   => 1,  //  $var
                 ($base + 8)   => 1,  //  $var
                 ($base + 9)   => 1,  //  $var
-                ($base + 10)   => 1,  //  $var
+                ($base + 10)  => 1,  //  $var
                 ($base + 15)  => 1,  //  $var2
                 ($base + 16)  => 1,  //  $var2
                 //  function_with_param() line (+24)
@@ -88,16 +81,16 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 ($base + 5)   => 1,  //  $array
                 ($base + 9)   => 1,  //  $array
                 ($base + 13)  => 1,  //  $array
-                ($base + 17)  => 1, // 2,  //  $array, $element3
-                ($base + 19)  => 1, // 2,  //  $array, $element4
-                ($base + 21)  => 1, // 3,  //  $array, $key3, $value4
-                ($base + 23)  => 1, // 3,  //  $array, $key4, $value4
+                ($base + 17)  => 2,  //  $array, $element3
+                ($base + 19)  => 2,  //  $array, $element4
+                ($base + 21)  => 3,  //  $array, $key3, $value4
+                ($base + 23)  => 3,  //  $array, $key4, $value4
                 //  function_with_defined_foreach() line (+27)
                 ($base += 27) => 0,
                 ($base + 18)  => 1,  //  $element3
                 ($base + 20)  => 1,  //  $element4
-                ($base + 22)  => 1, // 2,  //  $key3, $value4
-                ($base + 24)  => 1, // 2,  //  $key4, $value4
+                ($base + 22)  => 2,  //  $key3, $value4
+                ($base + 24)  => 2,  //  $key4, $value4
                 //  ClassWithoutMembers->method_without_param() line (+29)
                 ($base += 29) => 0,
                 ($base + 1)   => 1,  //  $var
@@ -153,12 +146,12 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 ($base += 29) => 0,
                 //  function_with_static_var() line (+5)
                 ($base += 5)  => 0,
-                ($base + 1)   => 1, // 5,  //  $static_neg_num, $static_string, $static_string2,
+                ($base + 1)   => 5,  //  $static_neg_num, $static_string, $static_string2,
                                      //  $static_define, $static_constant
-                ($base + 13)   => 1,  //  $var
+                ($base + 13)  => 1,  //  $var
                 //  function_with_pass_by_reference_param() line (+20)
                 //    no warnings.
-                ($base += 20)  => 0,
+                ($base += 20) => 0,
                 //  function_with_pass_by_reference_calls() line (+4)
                 ($base += 4)  => 0,
                 ($base + 1)   => 1,  //  $matches
@@ -182,7 +175,7 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 ($base += 15) => 0,
                 ($base + 3)   => array(0, 1),  //  $self::$static_member
                 //  function_with_inline_assigns() line (+9)
-                ($base += 9) => 0,
+                ($base += 9)  => 0,
                 ($base + 1)   => 1,  //  $var
                 ($base + 4)   => 1,  //  $var2
                 //  function_with_global_redeclarations() line (+11)
