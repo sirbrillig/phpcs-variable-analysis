@@ -513,6 +513,18 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         return true;
     }
 
+    function markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope) {
+        $this->markVariableRead($varName, $stackPtr, $currScope);
+
+        if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
+            // We haven't been defined by this point.
+            $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr,
+                'UndefinedVariable',
+                array("\${$varName}"));
+        }
+        return true;
+    }
+
     function findFunctionPrototype(
         PHP_CodeSniffer_File $phpcsFile,
         $stackPtr
@@ -748,7 +760,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         }
         return false;
     }
-    
+
     protected function checkForCatchBlock(
         PHP_CodeSniffer_File $phpcsFile,
         $stackPtr,
@@ -783,7 +795,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         }
         return false;
     }
-    
+
     protected function checkForThisWithinClass(
         PHP_CodeSniffer_File $phpcsFile,
         $stackPtr,
@@ -1052,7 +1064,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         }
 
         $refArgs = $this->_passByRefFunctions[$functionName];
-            
+
         if (($argPtrs = $this->findFunctionCallArguments($phpcsFile, $stackPtr)) === false) {
             return false;
         }
@@ -1096,6 +1108,28 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         return true;
     }
 
+    protected function checkForSymbolicObjectProperty(
+        PHP_CodeSniffer_File $phpcsFile,
+        $stackPtr,
+        $varName,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        // Are we a symbolic object property/function derefeference?
+        // Search backwards for first token that isn't whitespace, is it a "->" operator?
+        $objectOperatorPtr = $phpcsFile->findPrevious(
+            T_WHITESPACE,
+            $stackPtr - 1, null, true, null, true);
+        if (($objectOperatorPtr === false) || ($tokens[$objectOperatorPtr]['code'] !== T_OBJECT_OPERATOR)) {
+            return false;
+        }
+
+        $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
+        return true;
+    }
+
     /**
      * Called to process class member vars.
      *
@@ -1135,12 +1169,19 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             return;
         }
 
-        //if ($varName == 'param') {
-        //echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n";// . print_r($token, true);
+        //static $dump_token = false;
+        //if ($varName == 'property') {
+        //    $dump_token = true;
         //}
-        //echo "Prev:\n" . print_r($tokens[$stackPtr - 1], true);
+        //if ($dump_token) {
+        //    echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
+        //    echo "Prev:\n" . print_r($tokens[$stackPtr - 1], true);
+        //}
 
         // Determine if variable is being assigned or read.
+
+        // Read methods that preempt assignment:
+        //   Are we a $object->$property type symbolic reference?
 
         // Possible assignment methods:
         //   Is a mandatory function/closure parameter
@@ -1156,6 +1197,11 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         //   Declares as a static
         //   Assignment via foreach (... as ...) { }
         //   Pass-by-reference to known pass-by-reference function
+
+        // Are we a $object->$property type symbolic reference?
+        if ($this->checkForSymbolicObjectProperty($phpcsFile, $stackPtr, $varName, $currScope)) {
+            return;
+        }
 
         // Are we a function or closure parameter?
         if ($this->checkForFunctionPrototype($phpcsFile, $stackPtr, $varName, $currScope)) {
@@ -1212,15 +1258,8 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             return;
         }
 
-        $this->markVariableRead($varName, $stackPtr, $currScope);
-
         // OK, we don't appear to be a write to the var, assume we're a read.
-        if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
-            // We haven't been defined by this point.
-            $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr,
-                'UndefinedVariable',
-                array("\${$varName}"));
-        }
+        $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
     }
 
     /**
@@ -1259,12 +1298,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName, $currScope)) {
                 continue;
             }
-            $this->markVariableRead($varName, $stackPtr, $currScope);
-            if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
-                $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr,
-                    'UndefinedVariable',
-                    array("\${$varName}"));
-            }
+            $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
         }
     }
 

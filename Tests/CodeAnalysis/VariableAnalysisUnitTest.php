@@ -207,6 +207,14 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 ($base + 7)   => 1,  //  {$var2}
                 ($base + 8)   => 1,  //  ${var2}
                 ($base + 10)  => 1,  //  \\$var2
+                //  method_with_symbolic_ref_property() line (+17)
+                ($base += 17) => 0,
+                ($base + 5)   => 1,  //  $undefined_property
+                ($base + 6)   => 1,  //  $undefined_property
+                //  method_with_symbolic_ref_method() line (+8)
+                ($base += 10) => 0,
+                ($base + 5)   => 1,  //  $undefined_method
+                ($base + 6)   => 1,  //  $undefined_method
                );
     }//end _getWarningAndErrorList()
 
