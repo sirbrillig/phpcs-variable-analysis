@@ -991,6 +991,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         //   number         T_MINUS T_LNUMBER T_DNUMBER
         //   string         T_CONSTANT_ENCAPSED_STRING
         //   heredoc        T_START_HEREDOC T_HEREDOC T_END_HEREDOC
+        //   nowdoc         T_START_NOWDOC T_NOWDOC T_END_NOWDOC
         //   define         T_STRING
         //   class constant T_STRING T_DOUBLE_COLON T_STRING
         // Search backwards for first token that isn't whitespace, comma, variable,
@@ -1003,6 +1004,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
                 T_STRING,
                 T_DOUBLE_COLON,
                 T_START_HEREDOC, T_HEREDOC, T_END_HEREDOC,
+                T_START_NOWDOC, T_NOWDOC, T_END_NOWDOC,
                 ),
             $stackPtr - 1, null, true, null, true);
         if (($staticPtr === false) || ($tokens[$staticPtr]['code'] !== T_STATIC)) {
