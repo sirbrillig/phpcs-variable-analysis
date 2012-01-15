@@ -49,6 +49,7 @@ class VariableInfo {
      */
     public $scopeType;
     public $typeHint;
+    public $passByReference = false;
     public $firstDeclared;
     public $firstInitialized;
     public $firstRead;
@@ -731,6 +732,13 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
              ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
             // TODO: typeHint
             $this->markVariableDeclaration($varName, 'param', null, $stackPtr, $functionPtr);
+            // Are we pass-by-reference?
+            $referencePtr = $phpcsFile->findPrevious(T_WHITESPACE,
+                $stackPtr - 1, null, true, null, true);
+            if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
+                $varInfo = $this->getVariableInfo($varName, $functionPtr);
+                $varInfo->passByReference = true;
+            }
             //  Are we optional with a default?
             if ($this->isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
                 $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
@@ -1327,6 +1335,13 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         }
         foreach ($scopeInfo->variables as $varInfo) {
             if ($varInfo->ignoreUnused || isset($varInfo->firstRead)) {
+                continue;
+            }
+            if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {
+                // If we're pass-by-reference then it's a common pattern to
+                // use the variable to return data to the caller, so any
+                // assignment also counts as "variable use" for the purposes
+                // of "unused variable" warnings.
                 continue;
             }
             if (isset($varInfo->firstDeclared)) {
