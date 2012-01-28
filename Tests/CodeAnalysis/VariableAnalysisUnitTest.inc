@@ -375,8 +375,8 @@ function function_with_superglobals() {
     echo print_r($_SESSION, true);
     echo print_r($_REQUEST, true);
     echo print_r($_ENV, true);
-    echo "$GLOBALS['whatever']";
-    echo "$GLOBALS['whatever'] $var";
+    echo "{$GLOBALS['whatever']}";
+    echo "{$GLOBALS['whatever']} $var";
 }
 
 function function_with_heredoc() {
