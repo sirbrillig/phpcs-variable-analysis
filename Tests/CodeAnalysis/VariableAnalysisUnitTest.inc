@@ -428,3 +428,13 @@ class ClassWithLateStaticBinding {
         static::some_method(static::CONSTANT, $param);
     }
 }
+
+function function_with_compact($param1, $param2, $param3) {
+    $var1 = 'value1';
+    $var2 = 'value2';
+    $squish1 = compact('var1');
+    $squish2 = compact('var3');
+    $squish3 = compact('param1');
+    $squish4 = compact('var2', 'param3');
+    echo $squish1, $squish2, $squish3, $squish4;
+}
