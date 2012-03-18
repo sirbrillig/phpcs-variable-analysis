@@ -1004,6 +1004,12 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         // Static declarations are a bit more complicated than globals, since they
         // can contain assignments. The assignment is compile-time however so can
         // only be constant values, which makes life manageable.
+        //
+        // Just to complicate matters further, late static binding constants
+        // take the form static::CONSTANT and are invalid within static variable
+        // assignments, but we don't want to accidentally match their use of the
+        // static keyword.
+        //
         // Valid values are:
         //   number         T_MINUS T_LNUMBER T_DNUMBER
         //   string         T_CONSTANT_ENCAPSED_STRING
@@ -1028,6 +1034,16 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             //if ($varName == 'static4') {
             //    echo "Failing token:\n" . print_r($tokens[$staticPtr], true);
             //}
+            return false;
+        }
+
+        // Is it a late static binding static::?
+        // If so, this isn't the static keyword we're looking for, but since
+        // static:: isn't allowed in a compile-time constant, we also know
+        // we can't be part of a static declaration anyway, so there's no
+        // need to look any further.
+        $lateStaticBindingPtr = $phpcsFile->findNext(T_WHITESPACE, $staticPtr + 1, null, true, null, true);
+        if (($lateStaticBindingPtr !== false) && ($tokens[$lateStaticBindingPtr]['code'] === T_DOUBLE_COLON)) {
             return false;
         }
 

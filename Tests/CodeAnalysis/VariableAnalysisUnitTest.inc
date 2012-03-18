@@ -426,7 +426,7 @@ function function_with_pass_by_ref_assign_only_arg(&$return_value) {
 }
 
 class ClassWithLateStaticBinding {
-    static function method_with_late_static($param) {
+    static function method_with_late_static_binding($param) {
         static::some_method($param);
         static::some_method($var);
         static::some_method(static::CONSTANT, $param);
