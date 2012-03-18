@@ -875,20 +875,29 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         }
         $classNamePtr   = $stackPtr - 2;
         if (($tokens[$classNamePtr]['code'] !== T_STRING) &&
-            ($tokens[$classNamePtr]['code'] !== T_SELF)) {
+            ($tokens[$classNamePtr]['code'] !== T_SELF) &&
+            ($tokens[$classNamePtr]['code'] !== T_STATIC)) {
             return false;
         }
 
         // Are we refering to self:: outside a class?
         // TODO: not sure this is our business or should be some other sniff.
-        if ($tokens[$classNamePtr]['code'] === T_SELF) {
+        if (($tokens[$classNamePtr]['code'] === T_SELF) ||
+            ($tokens[$classNamePtr]['code'] === T_STATIC)) {
+            if ($tokens[$classNamePtr]['code'] === T_SELF) {
+                $err_class = 'SelfOutsideClass';
+                $err_desc  = 'self::';
+            } else {
+                $err_class = 'StaticOutsideClass';
+                $err_desc  = 'static::';
+            }
             if (!empty($token['conditions'])) {
                 foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
                     //  self within a closure is invalid
                     //  Note: have to fetch code from $tokens, T_CLOSURE isn't set for conditions codes.
                     if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
-                        $phpcsFile->addError("Use of self::%s inside closure.", $stackPtr,
-                            'SelfOutsideClass',
+                        $phpcsFile->addError("Use of {$err_desc}%s inside closure.", $stackPtr,
+                            $err_class,
                             array("\${$varName}"));
                         return true;
                     }
@@ -897,8 +906,8 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
                     }
                 }
             }
-            $phpcsFile->addError("Use of self::%s outside class definition.", $stackPtr,
-                'SelfOutsideClass',
+            $phpcsFile->addError("Use of {$err_desc}%s outside class definition.", $stackPtr,
+                $err_class,
                 array("\${$varName}"));
             return true;
         }

@@ -8,7 +8,7 @@ variable use.
  * Warns on use of undefined variables.
  * Warns if variables are set or declared but never used within that scope.
  * Warns if variables are redeclared within same scope.
- * Warns if self::$static_member is used outside class scope.
+ * Warns if $this, self::$static_member, static::$static_member is used outside class scope.
 
 INSTALLATION
 ------------
