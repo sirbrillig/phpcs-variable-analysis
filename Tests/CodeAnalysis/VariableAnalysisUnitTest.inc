@@ -185,6 +185,10 @@ function function_with_static_members_outside_class() {
     return self::$whatever;
 }
 
+function function_with_late_static_binding_outside_class() {
+    echo static::$whatever;
+}
+
 function function_with_closure($outer_param) {
     $outer_var  = 1;
     $outer_var2 = 2;

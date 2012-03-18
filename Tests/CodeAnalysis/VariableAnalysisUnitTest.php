@@ -127,8 +127,11 @@ class Generic_Tests_CodeAnalysis_VariableAnalysisUnitTest extends AbstractSniffU
                 //  function_with_static_members_outside_class() line (+4)
                 ($base += 4)  => 0,
                 ($base + 2)   => array(0, 1),  //  self::$whatever
-                //  function_with_closure() line (+5)
+                //  function_with_late_static_binding_outside_class() line (+5)
                 ($base += 5)  => 0,
+                ($base + 1)   => array(0, 1),  //  static::$whatever
+                //  function_with_closure() line (+4)
+                ($base += 4)  => 0,
                 ($base + 5)   => 1,  //  $outer_param
                 ($base + 7)   => 1,  //  $outer_var
                 ($base + 8)   => 1,  //  $outer_var2
