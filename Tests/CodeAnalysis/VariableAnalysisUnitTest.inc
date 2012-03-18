@@ -429,12 +429,14 @@ class ClassWithLateStaticBinding {
     }
 }
 
-function function_with_compact($param1, $param2, $param3) {
+function function_with_compact($param1, $param2, $param3, $param4) {
     $var1 = 'value1';
     $var2 = 'value2';
+    $var4 = 'value4';
     $squish1 = compact('var1');
     $squish2 = compact('var3');
     $squish3 = compact('param1');
     $squish4 = compact('var2', 'param3');
-    echo $squish1, $squish2, $squish3, $squish4;
+    $squish5 = compact(array('var4'), array('param4', 'var5'));
+    echo $squish1, $squish2, $squish3, $squish4, $squish5;
 }
