@@ -420,3 +420,11 @@ class ClassWithSymbolicRefProperty {
 function function_with_pass_by_ref_assign_only_arg(&$return_value) {
     $return_value = 42;
 }
+
+class ClassWithLateStaticBinding {
+    static function method_with_late_static($param) {
+        static::some_method($param);
+        static::some_method($var);
+        static::some_method(static::CONSTANT, $param);
+    }
+}
