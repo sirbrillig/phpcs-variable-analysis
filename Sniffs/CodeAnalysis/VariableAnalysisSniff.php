@@ -95,6 +95,11 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
     private $_scopes = array();
 
     /**
+     * A regexp for matching variable names in double-quoted strings.
+     */
+    private $_double_quoted_variable_regexp = '|(?<!\\\\)(?:\\\\{2})*\${?([a-zA-Z0-9_]+)}?|';
+
+    /**
      *  Array of known pass-by-reference functions and the argument(s) which are passed
      *  by reference, the arguments are numbered starting from 1 and an elipsis '...'
      *  means all argument numbers after the previous should be considered pass-by-reference.
@@ -367,6 +372,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             T_DOUBLE_QUOTED_STRING,
             T_HEREDOC,
             T_CLOSE_CURLY_BRACKET,
+            T_STRING,
             );
     }//end register()
 
@@ -397,6 +403,9 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         if (($token['code'] === T_DOUBLE_QUOTED_STRING) ||
             ($token['code'] === T_HEREDOC)) {
             return $this->processVariableInString($phpcsFile, $stackPtr);
+        }
+        if (($token['code'] === T_STRING) && ($token['content'] === 'compact')) {
+            return $this->processCompact($phpcsFile, $stackPtr);
         }
         if (($token['code'] === T_CLOSE_CURLY_BRACKET) &&
             isset($token['scope_condition'])) {
@@ -669,7 +678,9 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
     ) {
         $tokens = $phpcsFile->getTokens();
 
-        if ($tokens[$stackPtr]['code'] !== T_STRING) {
+        // Slight hack: also allow this to find args for array constructor.
+        // TODO: probably should refactor into three functions: arg-finding and bracket-finding
+        if (($tokens[$stackPtr]['code'] !== T_STRING) && ($tokens[$stackPtr]['code'] !== T_ARRAY)) {
             // Assume $stackPtr is something within the brackets, find our function call
             if (($stackPtr = $this->findFunctionCall($phpcsFile, $stackPtr)) === false) {
                 return false;
@@ -1318,8 +1329,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         $tokens = $phpcsFile->getTokens();
         $token  = $tokens[$stackPtr];
 
-        $pattern = '|(?<!\\\\)(?:\\\\{2})*\${?([a-zA-Z0-9_]+)}?|';
-        if (!preg_match_all($pattern, $token['content'], $matches)) {
+        if (!preg_match_all($this->_double_quoted_variable_regexp, $token['content'], $matches)) {
             return;
         }
 
@@ -1334,6 +1344,85 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
                 continue;
             }
             $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
+        }
+    }
+
+    protected function processCompactArguments(
+        PHP_CodeSniffer_File
+        $phpcsFile,
+        $stackPtr,
+        $arguments,
+        $currScope
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        foreach ($arguments as $argumentPtrs) {
+            $argumentPtrs = array_values(array_filter($argumentPtrs,
+                function ($argumentPtr) use ($tokens) {
+                    return $tokens[$argumentPtr]['code'] !== T_WHITESPACE;
+                }));
+            if (empty($argumentPtrs)) {
+                continue;
+            }
+            if (!isset($tokens[$argumentPtrs[0]])) {
+                continue;
+            }
+            $argument_first_token = $tokens[$argumentPtrs[0]];
+            if ($argument_first_token['code'] === T_ARRAY) {
+                // It's an array argument, recurse.
+                if (($array_arguments = $this->findFunctionCallArguments($phpcsFile, $argumentPtrs[0])) !== false) {
+                    $this->processCompactArguments($phpcsFile, $stackPtr, $array_arguments, $currScope);
+                }
+                continue;
+            }
+            if (count($argumentPtrs) > 1) {
+                // Complex argument, we can't handle it, ignore.
+                continue;
+            }
+            if ($argument_first_token['code'] === T_CONSTANT_ENCAPSED_STRING) {
+                // Single-quoted string literal, ie compact('whatever').
+                // Substr is to strip the enclosing single-quotes.
+                $varName = substr($argument_first_token['content'], 1, -1);
+                $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $argumentPtrs[0], $currScope);
+                continue;
+            }
+            if ($argument_first_token['code'] === T_DOUBLE_QUOTED_STRING) {
+                // Double-quoted string literal.
+                if (preg_match($this->_double_quoted_variable_regexp, $argument_first_token['content'])) {
+                    // Bail if the string needs variable expansion, that's runtime stuff.
+                    continue;
+                }
+                // Substr is to strip the enclosing double-quotes.
+                $varName = substr($argument_first_token['content'], 1, -1);
+                $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $argumentPtrs[0], $currScope);
+                continue;
+            }
+        }
+    }
+
+    /**
+     * Called to process variables named in a call to compact().
+     *
+     * @param PHP_CodeSniffer_File $phpcsFile The PHP_CodeSniffer file where this
+     *                                        token was found.
+     * @param int                  $stackPtr  The position where the call to compact()
+     *                                        was found.
+     *
+     * @return void
+     */
+    protected function processCompact(
+        PHP_CodeSniffer_File
+        $phpcsFile,
+        $stackPtr
+    ) {
+        $tokens = $phpcsFile->getTokens();
+        $token  = $tokens[$stackPtr];
+
+        $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
+
+        if (($arguments = $this->findFunctionCallArguments($phpcsFile, $stackPtr)) !== false) {
+            $this->processCompactArguments($phpcsFile, $stackPtr, $arguments, $currScope);
         }
     }
 
