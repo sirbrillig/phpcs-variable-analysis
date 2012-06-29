@@ -852,7 +852,7 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         $tokens = $phpcsFile->getTokens();
         $token  = $tokens[$stackPtr];
 
-        // Are we a superglobal varaible?
+        // Are we a superglobal variable?
         if (in_array($varName, array(
             'GLOBALS',
             '_SERVER',
@@ -863,6 +863,8 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
             '_SESSION',
             '_REQUEST',
             '_ENV',
+            'argv',
+            'argc',
             ))) {
             return true;
         }
