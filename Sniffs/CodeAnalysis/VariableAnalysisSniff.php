@@ -345,6 +345,12 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
     public $allowUnusedCaughtExceptions = false;
 
     /**
+     *  Allow function parameters to be unused without provoking unused-var warning.
+     *  Set generic.codeanalysis.variableanalysis.allowUnusedFunctionParameters to a true value.
+     */
+    public $allowUnusedFunctionParameters = false;
+
+    /**
      *  A list of names of placeholder variables that you want to ignore from
      *  unused variable warnings, ie things like $junk.
      */
@@ -1451,6 +1457,9 @@ class Generic_Sniffs_CodeAnalysis_VariableAnalysisSniff implements PHP_CodeSniff
         }
         foreach ($scopeInfo->variables as $varInfo) {
             if ($varInfo->ignoreUnused || isset($varInfo->firstRead)) {
+                continue;
+            }
+            if ($this->allowUnusedFunctionParameters && $varInfo->scopeType == 'param') {
                 continue;
             }
             if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {
