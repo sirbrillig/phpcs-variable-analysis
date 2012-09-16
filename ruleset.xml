@@ -40,6 +40,15 @@
    -->
    <property name="allowUnusedCaughtExceptions" value="1"/>
    <!--
+      Include the following property if you want to prevent function parametets from causing an
+      unused variable warning, this supports the common pattern of defining callback functions that
+      demand a fixed parameter list without actually using all the paramets.
+        function foo ($a, $b, $c) {
+            // Do something without ever using some of $a, $b and/or $c
+        }
+   -->
+   <property name="allowUnusedFunctionParameters" value="1"/>
+   <!--
       Include the following property if you want to have a whitelist of variable names
       that are commonly used for placeholder "junk" values that ignored and that you
       don't want to provoke an unused variable warning for.
