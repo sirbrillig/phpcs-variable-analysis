@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="PHP_Codesniffer Plugins VariableAnalysis">
- <description>Run ./install.sh and choose from the following rules to your standrd's ruleset.xml.</description>
+<ruleset name="VariableAnalysis">
+ <description>A code sniff to detect problems with variables.</description>
 
  <!-- If you want everything, with the defaults, just include this line -->
  <rule ref="VariableAnalysis.CodeAnalysis.VariableAnalysis"/>

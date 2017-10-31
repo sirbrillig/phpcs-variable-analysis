@@ -1,5 +1,7 @@
 <?php
 
+namespace VariableAnalysis\Sniffs\CodeAnalysis;
+use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 
 /**
@@ -83,7 +85,7 @@ class VariableInfo {
  * @copyright 2011 Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
-class VariableAnalysisSniff implements PHP_CodeSniffer\Sniffs\Sniff {
+class VariableAnalysisSniff implements Sniff {
     /**
      * The current phpcsFile being checked.
      *
