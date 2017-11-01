@@ -30,6 +30,12 @@ Then install these standards.
 composer require --dev sirbrillig/phpcs-variable-analysis
 ```
 
+You can then include the sniffs by adding a line like the following to [your phpcs.xml file](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#using-a-default-configuration-file).
+
+```
+<rule ref="phpcs-variable-analysis.CodeAnalysis.VariableAnalysis"/>
+```
+
 It should just work after that!
 
 ### Standalone
