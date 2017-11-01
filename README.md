@@ -56,3 +56,7 @@ a look at the included ruleset.xml for commented examples of a configuration.
 ## Original
 
 This was forked from the excellent work in https://github.com/illusori/PHP_Codesniffer-VariableAnalysis
+
+## Contributing
+
+Please open issues or PRs on this repository.
