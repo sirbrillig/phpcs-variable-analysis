@@ -2,3 +2,4 @@ util/
 mybuild
 mytest
 myrun
+/vendor/
