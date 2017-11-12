@@ -2,7 +2,7 @@
     "name": "sirbrillig/phpcs-variable-analysis",
     "description": "A PHPCS sniff to detect problems with variables.",
     "type": "phpcodesniffer-standard",
-    "license": "BSD",
+    "license": "BSD-2-Clause",
     "authors": [
         {
             "name": "Payton Swick",
