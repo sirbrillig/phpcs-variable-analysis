@@ -57,7 +57,7 @@ If you already have installed paths, [use a comma to separate them](https://gith
 ## Customization
 
 There's a variety of options to customize the behaviour of VariableAnalysis, take
-a look at the included ruleset.xml for commented examples of a configuration.
+a look at the included ruleset.xml.example for commented examples of a configuration.
 
 ## Original
 
