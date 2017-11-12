@@ -3,15 +3,20 @@
     "description": "A PHPCS sniff to detect problems with variables.",
     "type": "phpcodesniffer-standard",
     "license": "BSD",
-    "require" : {
-        "php" : ">=5.4.0",
-        "squizlabs/php_codesniffer" : "^3.0.2"
-    },
     "authors": [
         {
             "name": "Payton Swick",
             "email": "payton@foolord.com"
         }
     ],
-    "require": {}
+    "support"    : {
+        "issues": "https://github.com/sirbrillig/phpcs-variable-analysis/issues",
+        "wiki"  : "https://github.com/sirbrillig/phpcs-variable-analysis/wiki",
+        "source": "https://github.com/sirbrillig/phpcs-variable-analysis"
+    },
+    "require" : {
+        "php" : ">=5.4.0",
+        "squizlabs/php_codesniffer" : "^3.0.2",
+        "roave/security-advisories": "dev-master"
+    }
 }
