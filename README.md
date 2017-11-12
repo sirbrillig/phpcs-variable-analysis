@@ -38,6 +38,21 @@ You can then include the sniffs by adding a line like the following to [your php
 
 It should just work after that!
 
+#### Troubleshooting
+
+If you see an error like this when trying to install the library, you will need to include stability information in your composer.json.
+
+```
+- sirbrillig/phpcs-variable-analysis dev-master requires roave/security-advisories dev-master -> satisfiable by roave/security-advisories[dev-master] but these conflict with your requirements or minimum-stability.
+```
+
+To fix this, add the following lines to your composer.json file and then try installing again.
+
+```
+"minimum-stability": "dev",
+"prefer-stable": true,
+```
+
 ### Standalone
 
 1. Install PHP_CodeSniffer by following its [installation instructions](https://github.com/squizlabs/PHP_CodeSniffer#installation) (via Composer, Phar file, PEAR, or Git checkout).
