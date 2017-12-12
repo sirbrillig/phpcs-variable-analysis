@@ -1,23 +1,17 @@
 <?php
 namespace VariableAnalysis\Tests;
 
-use PHPUnit\Framework\TestCase;
 use PHP_CodeSniffer\Files\LocalFile;
 use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Config;
 
-class VariableAnalysisUnitTest extends TestCase {
+class VariableAnalysisUnitTest extends BaseTestCase {
   public function testAllErrors() {
     $fixtureFile = __DIR__ . '/VariableAnalysisUnitTestFixture.php';
     $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $config = new Config();
-    $ruleset = new Ruleset($config);
-    $ruleset->registerSniffs($sniffFiles, [], []);
-    $ruleset->populateTokenListeners();
-    $phpcsFile = new LocalFile($fixtureFile, $ruleset, $config);
+    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
     $phpcsFile->process();
-    $foundErrors = $phpcsFile->getErrors();
-    $lines = array_keys($foundErrors);
+    $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [
       185,
       189,
@@ -29,14 +23,9 @@ class VariableAnalysisUnitTest extends TestCase {
   public function testAllWarnings() {
     $fixtureFile = __DIR__ . '/VariableAnalysisUnitTestFixture.php';
     $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $config = new Config();
-    $ruleset = new Ruleset($config);
-    $ruleset->registerSniffs($sniffFiles, [], []);
-    $ruleset->populateTokenListeners();
-    $phpcsFile = new LocalFile($fixtureFile, $ruleset, $config);
+    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
     $phpcsFile->process();
-    $foundWarnings = $phpcsFile->getWarnings();
-    $lines = array_keys($foundWarnings);
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
       4,
       5,
