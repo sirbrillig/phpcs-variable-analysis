@@ -5,26 +5,7 @@ use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 
 /**
- * This file is part of the VariableAnalysis addon for PHP_CodeSniffer.
- *
- * PHP version 5
- *
- * @category  PHP
- * @package   PHP_CodeSniffer
- * @author    Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
- * @copyright 2011-2012 Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
- * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
- * @link      http://pear.php.net/package/PHP_CodeSniffer
- */
-
-/**
  * Holds details of a scope.
- *
- * @category  PHP
- * @package   PHP_CodeSniffer
- * @author    Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
- * @copyright 2011-2012 Sam Graham <php-codesniffer-plugins BLAHBLAH illusori.co.uk>
- * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 class ScopeInfo {
     public $owner;
@@ -40,12 +21,6 @@ class ScopeInfo {
 
 /**
  * Holds details of a variable within a scope.
- *
- * @category  PHP
- * @package   PHP_CodeSniffer
- * @author    Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
- * @copyright 2011 Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
- * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 class VariableInfo {
     public $name;
@@ -66,7 +41,7 @@ class VariableInfo {
         'static' => 'static variable',
         'global' => 'global variable',
         'bound'  => 'bound variable',
-        );
+    );
 
     function __construct($varName) {
         $this->name = $varName;
@@ -74,16 +49,10 @@ class VariableInfo {
 }
 
 /**
- * Checks the for undefined function variables.
+ * Checks the code for undefined function variables.
  *
  * This sniff checks that all function variables
  * are defined in the function body.
- *
- * @category  PHP
- * @package   VariableAnalysis
- * @author    Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
- * @copyright 2011 Sam Graham <php-codesniffer-variableanalysis BLAHBLAH illusori.co.uk>
- * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 class VariableAnalysisSniff implements Sniff {
     /**
@@ -334,7 +303,7 @@ class VariableAnalysisSniff implements Sniff {
         'yaz_hits' => array(2),
         'yaz_scan_result' => array(2),
         'yaz_wait' => array(1),
-        );
+    );
 
     /**
      *  Allows an install to extend the list of known pass-by-reference functions
@@ -383,7 +352,7 @@ class VariableAnalysisSniff implements Sniff {
             T_HEREDOC,
             T_CLOSE_CURLY_BRACKET,
             T_STRING,
-            );
+        );
     }//end register()
 
     /**
@@ -491,8 +460,8 @@ class VariableAnalysisSniff implements Sniff {
                         VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
                         "\${$varName}",
                         VariableInfo::$scopeTypeDescriptions[$scopeType],
-                        )
-                    );
+                    )
+                );
             }
         }
         $varInfo->scopeType = $scopeType;
@@ -750,7 +719,7 @@ class VariableAnalysisSniff implements Sniff {
             $openPtr - 1, null, true, null, true);
         if (($functionPtr !== false) &&
             (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
-             ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
+            ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
             // TODO: typeHint
             $this->markVariableDeclaration($varName, 'param', null, $stackPtr, $functionPtr);
             // Are we pass-by-reference?
@@ -875,7 +844,7 @@ class VariableAnalysisSniff implements Sniff {
             '_ENV',
             'argv',
             'argc',
-            ))) {
+        ))) {
             return true;
         }
 
@@ -1051,7 +1020,7 @@ class VariableAnalysisSniff implements Sniff {
                 T_DOUBLE_COLON,
                 T_START_HEREDOC, T_HEREDOC, T_END_HEREDOC,
                 T_START_NOWDOC, T_NOWDOC, T_END_NOWDOC,
-                ),
+            ),
             $stackPtr - 1, null, true, null, true);
         if (($staticPtr === false) || ($tokens[$staticPtr]['code'] !== T_STATIC)) {
             //if ($varName == 'static4') {
@@ -1481,8 +1450,8 @@ class VariableAnalysisSniff implements Sniff {
                     array(
                         VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
                         "\${$varInfo->name}",
-                        )
-                    );
+                    )
+                );
             }
             if (isset($varInfo->firstInitialized)) {
                 $phpcsFile->addWarning(
@@ -1492,8 +1461,8 @@ class VariableAnalysisSniff implements Sniff {
                     array(
                         VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
                         "\${$varInfo->name}",
-                        )
-                    );
+                    )
+                );
             }
         }
     }
