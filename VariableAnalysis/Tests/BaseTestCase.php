@@ -33,4 +33,8 @@ class BaseTestCase extends TestCase {
   public function getSniffFiles(): array {
     return [__DIR__ . '/../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
   }
+
+  public function getFixture(string $fixtureFilename): string {
+    return __DIR__ . '/CodeAnalysis/fixtures/' . $fixtureFilename;
+  }
 }
