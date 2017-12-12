@@ -351,12 +351,12 @@ class VariableAnalysisSniff implements Sniff {
     }
   }
 
-  function normalizeVarName($varName) {
+  public function normalizeVarName($varName) {
     $varName = preg_replace('/[{}$]/', '', $varName);
     return $varName;
   }
 
-  function scopeKey($currScope) {
+  public function scopeKey($currScope) {
     if ($currScope === false) {
       $currScope = 'file';
     }
@@ -365,7 +365,7 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   //  Warning: this is an autovivifying get
-  function getScopeInfo($currScope, $autoCreate = true) {
+  public function getScopeInfo($currScope, $autoCreate = true) {
     $scopeKey = $this->scopeKey($currScope);
     if (!isset($this->_scopes[$scopeKey])) {
       if (!$autoCreate) {
@@ -376,7 +376,7 @@ class VariableAnalysisSniff implements Sniff {
     return $this->_scopes[$scopeKey];
   }
 
-  function getVariableInfo($varName, $currScope, $autoCreate = true) {
+  public function getVariableInfo($varName, $currScope, $autoCreate = true) {
     $scopeInfo = $this->getScopeInfo($currScope, $autoCreate);
     if (!isset($scopeInfo->variables[$varName])) {
       if (!$autoCreate) {
@@ -391,7 +391,7 @@ class VariableAnalysisSniff implements Sniff {
     return $scopeInfo->variables[$varName];
   }
 
-  function markVariableAssignment($varName, $stackPtr, $currScope) {
+  protected function markVariableAssignment($varName, $stackPtr, $currScope) {
     $varInfo = $this->getVariableInfo($varName, $currScope);
     if (!isset($varInfo->scopeType)) {
       $varInfo->scopeType = 'local';
@@ -402,7 +402,7 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo->firstInitialized = $stackPtr;
   }
 
-  function markVariableDeclaration($varName, $scopeType, $typeHint, $stackPtr, $currScope, $permitMatchingRedeclaration = false) {
+  protected function markVariableDeclaration($varName, $scopeType, $typeHint, $stackPtr, $currScope, $permitMatchingRedeclaration = false) {
     $varInfo = $this->getVariableInfo($varName, $currScope);
     if (isset($varInfo->scopeType)) {
       if (($permitMatchingRedeclaration === false) ||
@@ -433,7 +433,7 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo->firstDeclared = $stackPtr;
   }
 
-  function markVariableRead($varName, $stackPtr, $currScope) {
+  protected function markVariableRead($varName, $stackPtr, $currScope) {
     $varInfo = $this->getVariableInfo($varName, $currScope);
     if (isset($varInfo->firstRead) && ($varInfo->firstRead <= $stackPtr)) {
       return;
@@ -441,7 +441,7 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo->firstRead = $stackPtr;
   }
 
-  function isVariableInitialized($varName, $stackPtr, $currScope) {
+  protected function isVariableInitialized($varName, $stackPtr, $currScope) {
     $varInfo = $this->getVariableInfo($varName, $currScope);
     if (isset($varInfo->firstInitialized) && $varInfo->firstInitialized <= $stackPtr) {
       return true;
@@ -449,7 +449,7 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  function isVariableUndefined($varName, $stackPtr, $currScope) {
+  protected function isVariableUndefined($varName, $stackPtr, $currScope) {
     $varInfo = $this->getVariableInfo($varName, $currScope, false);
     if (isset($varInfo->firstDeclared) && $varInfo->firstDeclared <= $stackPtr) {
       // TODO: do we want to check scopeType here?
@@ -461,7 +461,7 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
-  function markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope) {
+  protected function markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope) {
     $this->markVariableRead($varName, $stackPtr, $currScope);
 
     if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
@@ -473,7 +473,7 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
-  function findFunctionPrototype(
+  protected function findFunctionPrototype(
     File $phpcsFile,
     $stackPtr
   ) {
@@ -496,7 +496,7 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  function findVariableScope(
+  protected function findVariableScope(
     File $phpcsFile,
     $stackPtr
   ) {
@@ -528,7 +528,7 @@ class VariableAnalysisSniff implements Sniff {
     return 0;
   }
 
-  function isNextThingAnAssign(
+  protected function isNextThingAnAssign(
     File $phpcsFile,
     $stackPtr
   ) {
@@ -544,7 +544,7 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  function findWhereAssignExecuted(
+  protected function findWhereAssignExecuted(
     File $phpcsFile,
     $stackPtr
   ) {
@@ -579,7 +579,7 @@ class VariableAnalysisSniff implements Sniff {
     return $semicolonPtr;
   }
 
-  function findContainingBrackets(
+  protected function findContainingBrackets(
     File $phpcsFile,
     $stackPtr
   ) {
@@ -593,7 +593,7 @@ class VariableAnalysisSniff implements Sniff {
   }
 
 
-  function findFunctionCall(
+  protected function findFunctionCall(
     File $phpcsFile,
     $stackPtr
   ) {
@@ -610,7 +610,7 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  function findFunctionCallArguments(
+  protected function findFunctionCallArguments(
     File $phpcsFile,
     $stackPtr
   ) {
