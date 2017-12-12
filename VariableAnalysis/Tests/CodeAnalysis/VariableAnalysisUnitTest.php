@@ -1,4 +1,6 @@
 <?php
+namespace VariableAnalysis\Tests;
+
 use PHPUnit\Framework\TestCase;
 use PHP_CodeSniffer\Files\LocalFile;
 use PHP_CodeSniffer\Ruleset;
@@ -121,7 +123,7 @@ class VariableAnalysisUnitTest extends TestCase {
   }
 
   // TODO: remove this. Just keeping it until I cover everything with smaller tests.
-  private function _getWarningAndErrorList() {
+  private function deprecatedGetErrorsAndWarnings() {
     //  This is a maintainence nightmare.
     //    Value of a line is either:
     //    - an int: the number of warnings.
