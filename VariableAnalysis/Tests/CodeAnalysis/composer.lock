@@ -1,0 +1,55 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "ed8941dd9656705e5801d316da71262f",
+    "content-hash": "09dcd639ff7d8f5a147a32ddacbe00d8",
+    "packages": [],
+    "packages-dev": [
+        {
+            "name": "limedeck/phpunit-detailed-printer",
+            "version": "3.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/LimeDeck/phpunit-detailed-printer.git",
+                "reference": "0901b0abee9d10e656527e51c9de79126f99a5f4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/LimeDeck/phpunit-detailed-printer/zipball/0901b0abee9d10e656527e51c9de79126f99a5f4",
+                "reference": "0901b0abee9d10e656527e51c9de79126f99a5f4",
+                "shasum": ""
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~6.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "LimeDeck\\Testing\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "ISC"
+            ],
+            "authors": [
+                {
+                    "name": "LimeDeck",
+                    "email": "mail@limedeck.io"
+                }
+            ],
+            "description": "Formatter for the detailed output of PHPUnit tests.",
+            "time": "2017-11-15 18:09:13"
+        }
+    ],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}
