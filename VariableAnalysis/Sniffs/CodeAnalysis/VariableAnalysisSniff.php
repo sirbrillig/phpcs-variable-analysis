@@ -1,52 +1,11 @@
 <?php
 
 namespace VariableAnalysis\Sniffs\CodeAnalysis;
+
+use VariableAnalysis\ScopeInfo;
+use VariableAnalysis\VariableInfo;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
-
-/**
- * Holds details of a scope.
- */
-class ScopeInfo {
-    public $owner;
-    public $opener;
-    public $closer;
-    public $variables = array();
-
-    function __construct($currScope) {
-        $this->owner = $currScope;
-        // TODO: extract opener/closer
-    }
-}
-
-/**
- * Holds details of a variable within a scope.
- */
-class VariableInfo {
-    public $name;
-    /**
-     * What scope the variable has: local, param, static, global, bound
-     */
-    public $scopeType;
-    public $typeHint;
-    public $passByReference = false;
-    public $firstDeclared;
-    public $firstInitialized;
-    public $firstRead;
-    public $ignoreUnused = false;
-
-    static $scopeTypeDescriptions = array(
-        'local'  => 'variable',
-        'param'  => 'function parameter',
-        'static' => 'static variable',
-        'global' => 'global variable',
-        'bound'  => 'bound variable',
-    );
-
-    function __construct($varName) {
-        $this->name = $varName;
-    }
-}
 
 /**
  * Checks the code for undefined function variables.
