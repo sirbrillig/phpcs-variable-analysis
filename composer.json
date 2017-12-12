@@ -19,8 +19,16 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
+    "scripts": {
+        "test": "./vendor/bin/phpunit --bootstrap ./VariableAnalysis/Tests/bootstrap.php --printer=LimeDeck\\\\Testing\\\\Printer ./VariableAnalysis/Tests"
+    },
     "require" : {
-        "php" : ">=5.4.0",
-        "squizlabs/php_codesniffer" : "^3.0.2"
+        "php" : ">=5.4.0"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
+        "phpunit/phpunit": "^6.5",
+        "squizlabs/php_codesniffer": "^3.1",
+        "limedeck/phpunit-detailed-printer": "^3.1"
     }
 }

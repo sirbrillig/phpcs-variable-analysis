@@ -66,3 +66,10 @@ This was forked from the excellent work in https://github.com/illusori/PHP_Codes
 ## Contributing
 
 Please open issues or PRs on this repository.
+
+To run tests, make sure composer is installed, then run:
+
+```
+composer install # you only need to do this once
+composer test
+```
