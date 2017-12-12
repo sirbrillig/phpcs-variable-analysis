@@ -5,6 +5,10 @@
     "license": "BSD-2-Clause",
     "authors": [
         {
+            "name": "Sam Graham",
+            "email": "php-codesniffer-variableanalysis@illusori.co.uk"
+        },
+        {
             "name": "Payton Swick",
             "email": "payton@foolord.com"
         }
