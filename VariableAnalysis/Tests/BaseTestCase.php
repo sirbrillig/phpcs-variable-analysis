@@ -29,4 +29,8 @@ class BaseTestCase extends TestCase {
   public function getErrorLineNumbersFromFile(LocalFile $phpcsFile): array {
     return $this->getLineNumbersFromMessages($phpcsFile->getErrors());
   }
+
+  public function getSniffFiles(): array {
+    return [__DIR__ . '/../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
+  }
 }

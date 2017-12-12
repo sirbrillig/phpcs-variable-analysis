@@ -8,8 +8,7 @@ use PHP_CodeSniffer\Config;
 class VariableAnalysisTest extends BaseTestCase {
   public function testFunctionWithoutParamsErrors() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithoutParamFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -18,8 +17,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithoutParamsWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithoutParamFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -41,8 +39,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithDefaultParamErrors() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithDefaultParamFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -51,8 +48,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithDefaultParamWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithDefaultParamFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -64,8 +60,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithGlobalVarErrors() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithGlobalVarFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -74,8 +69,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithGlobalVarWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithGlobalVarFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -88,8 +82,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithForeachErrors() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithForeachFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -98,8 +91,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithForeachWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithForeachFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -121,8 +113,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testClassWithMembersErrors() {
     $fixtureFile = __DIR__ . '/fixtures/ClassWithMembersFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -131,8 +122,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testClassWithMembersWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/ClassWithMembersFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -154,8 +144,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionsOutsideClassErrors() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionsOutsideClassFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [
@@ -167,8 +156,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionsOutsideClassWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionsOutsideClassFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -179,8 +167,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithClosureErrors() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithClosureFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [
@@ -191,8 +178,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithClosureWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithClosureFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -217,8 +203,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithReferenceErrors() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithReferenceFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -227,8 +212,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithReferenceWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithReferenceFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -248,8 +232,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithTryCatchErrors() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithTryCatchFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -258,8 +241,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithTryCatchWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithTryCatchFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -271,8 +253,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithInlineAssignErrors() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithInlineAssignFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -281,8 +262,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithInlineAssignWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithInlineAssignFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -294,8 +274,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithRedeclarationsErrors() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithRedeclarationsFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -304,8 +283,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testFunctionWithRedeclarationsWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/FunctionWithRedeclarationsFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -328,8 +306,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testHeredocErrors() {
     $fixtureFile = __DIR__ . '/fixtures/HeredocFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -338,8 +315,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testHeredocWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/HeredocFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -353,8 +329,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testClassReferenceErrors() {
     $fixtureFile = __DIR__ . '/fixtures/ClassReferenceFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -363,8 +338,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testClassReferenceWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/ClassReferenceFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -378,8 +352,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testCompactErrors() {
     $fixtureFile = __DIR__ . '/fixtures/CompactFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
@@ -388,8 +361,7 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testCompactWarnings() {
     $fixtureFile = __DIR__ . '/fixtures/CompactFixture.php';
-    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
-    $phpcsFile = $this->prepareLocalFileForSniffs($sniffFiles, $fixtureFile);
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
