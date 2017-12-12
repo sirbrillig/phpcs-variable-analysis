@@ -7,7 +7,26 @@ use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Config;
 
 class VariableAnalysisUnitTest extends TestCase {
-  public function testEverything() {
+  public function testAllErrors() {
+    $fixtureFile = __DIR__ . '/VariableAnalysisUnitTestFixture.php';
+    $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
+    $config = new Config();
+    $ruleset = new Ruleset($config);
+    $ruleset->registerSniffs($sniffFiles, [], []);
+    $ruleset->populateTokenListeners();
+    $phpcsFile = new LocalFile($fixtureFile, $ruleset, $config);
+    $phpcsFile->process();
+    $foundErrors = $phpcsFile->getErrors();
+    $lines = array_keys($foundErrors);
+    $expectedErrors = [
+      185,
+      189,
+      306,
+    ];
+    $this->assertEquals($expectedErrors, $lines);
+  }
+
+  public function testAllWarnings() {
     $fixtureFile = __DIR__ . '/VariableAnalysisUnitTestFixture.php';
     $sniffFiles = [__DIR__ . '/../../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
     $config = new Config();
