@@ -9,3 +9,10 @@ function function_with_inline_assigns() {
     }
     echo $var2;
 }
+
+function function_with_assigns_and_usage() {
+    doSomething(
+        $foo = 'bar',
+        $foo
+    );
+}
