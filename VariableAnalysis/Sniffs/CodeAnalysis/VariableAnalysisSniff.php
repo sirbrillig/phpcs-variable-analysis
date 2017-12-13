@@ -566,6 +566,7 @@ class VariableAnalysisSniff implements Sniff {
     //  the closing bracket, if that's first.
     //  eg: echo (($var = 12) && ($var == 12));
     $semicolonPtr = $phpcsFile->findNext(T_SEMICOLON, $stackPtr + 1, null, false, null, true);
+    $commaPtr = $phpcsFile->findNext(T_COMMA, $stackPtr + 1, null, false, null, true);
     $closePtr = false;
     if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) !== false) {
       if (isset($tokens[$openPtr]['parenthesis_closer'])) {
@@ -573,19 +574,14 @@ class VariableAnalysisSniff implements Sniff {
       }
     }
 
-    if ($semicolonPtr === false) {
-      if ($closePtr === false) {
-        // TODO: panic
-        return $stackPtr;
-      }
-      return $closePtr;
+    // Return the first thing: comma, semicolon, close-bracket, or stackPtr if nothing else
+    $assignEndTokens = [$commaPtr, $semicolonPtr, $closePtr];
+    $assignEndTokens = array_filter($assignEndTokens); // remove false values
+    sort($assignEndTokens);
+    if (empty($assignEndTokens)) {
+      return $stackPtr;
     }
-
-    if ($closePtr < $semicolonPtr) {
-      return $closePtr;
-    }
-
-    return $semicolonPtr;
+    return $assignEndTokens[0];
   }
 
   protected function findContainingBrackets(
