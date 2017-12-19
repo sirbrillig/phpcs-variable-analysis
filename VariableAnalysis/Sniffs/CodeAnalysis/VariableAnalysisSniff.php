@@ -765,10 +765,10 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
-      //  $this within a closure is invalid
+      //  $this within a closure is valid
       //  Note: have to fetch code from $tokens, T_CLOSURE isn't set for conditions codes.
       if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
-        return false;
+        return true;
       }
       if ($scopeCode === T_CLASS) {
         return true;
