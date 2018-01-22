@@ -1,0 +1,47 @@
+<?php
+
+function function_with_first_unused_param($unused, $param) {
+    echo $param;
+    echo "xxx $param xxx";
+    echo "xxx {$param} xxx";
+    $param = 'set the param';
+    echo $param;
+    echo "xxx $param xxx";
+    echo "xxx {$param} xxx";
+    return $param;
+}
+
+function function_with_second_unused_param($param, $unused) {
+    echo $param;
+    echo "xxx $param xxx";
+    echo "xxx {$param} xxx";
+    $param = 'set the param';
+    echo $param;
+    echo "xxx $param xxx";
+    echo "xxx {$param} xxx";
+    return $param;
+}
+
+function function_with_all_unused_params($unused, $unused_two) {
+    $param = 'hello';
+    echo $param;
+    echo "xxx $param xxx";
+    echo "xxx {$param} xxx";
+    $param = 'set the param';
+    echo $param;
+    echo "xxx $param xxx";
+    echo "xxx {$param} xxx";
+    return $param;
+}
+
+function function_with_no_unused_params($param, $param_two) {
+    echo $param;
+    echo $param_two;
+    echo "xxx $param xxx";
+    echo "xxx {$param} xxx";
+    $param = 'set the param';
+    echo $param;
+    echo "xxx $param xxx";
+    echo "xxx {$param} xxx";
+    return $param;
+}

@@ -413,4 +413,17 @@ class VariableAnalysisTest extends BaseTestCase {
     $expectedErrors = [];
     $this->assertEquals($expectedErrors, $lines);
   }
+
+  public function testUnusedParams() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      3,
+      14,
+      25,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }
