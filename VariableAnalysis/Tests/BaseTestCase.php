@@ -19,7 +19,9 @@ class BaseTestCase extends TestCase {
   }
 
   public function getLineNumbersFromMessages(array $messages): array {
-    return array_keys($messages);
+    $lines = array_keys($messages);
+    sort($lines);
+    return $lines;
   }
 
   public function getWarningLineNumbersFromFile(LocalFile $phpcsFile): array {
