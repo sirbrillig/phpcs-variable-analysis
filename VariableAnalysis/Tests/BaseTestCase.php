@@ -15,6 +15,9 @@ class BaseTestCase extends TestCase {
     }
     $ruleset->registerSniffs($sniffFiles, [], []);
     $ruleset->populateTokenListeners();
+    if (! file_exists($fixtureFile)) {
+      throw new \Exception('Fixture file does not exist: ' . $fixtureFile);
+    }
     return new LocalFile($fixtureFile, $ruleset, $config);
   }
 

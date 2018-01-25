@@ -760,7 +760,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Are we $this within a class?
-    if (($varName != 'this') || empty($token['conditions'])) {
+    if (($varName !== 'this') || empty($token['conditions'])) {
       return false;
     }
 
@@ -770,7 +770,7 @@ class VariableAnalysisSniff implements Sniff {
       if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
         return true;
       }
-      if ($scopeCode === T_CLASS) {
+      if ($scopeCode === T_CLASS || $scopeCode === T_TRAIT) {
         return true;
       }
     }
