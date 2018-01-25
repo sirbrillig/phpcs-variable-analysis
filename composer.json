@@ -24,7 +24,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "test": "./vendor/bin/phpunit --bootstrap ./VariableAnalysis/Tests/bootstrap.php --printer=LimeDeck\\\\Testing\\\\Printer ./VariableAnalysis/Tests"
+        "test": "./vendor/bin/phpunit"
     },
     "require" : {
         "php" : ">=5.4.0"
