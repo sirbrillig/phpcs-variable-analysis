@@ -48,10 +48,6 @@ class VariableAnalysisSniff implements Sniff {
   public $validUnusedVariableNames = null;
 
   public function register() {
-    if (!empty($this->validUnusedVariableNames)) {
-      $this->validUnusedVariableNames =
-        preg_split('/\s+/', trim($this->validUnusedVariableNames));
-    }
     return [
       T_VARIABLE,
       T_DOUBLE_QUOTED_STRING,
@@ -124,7 +120,10 @@ class VariableAnalysisSniff implements Sniff {
     $scopeInfo = $this->getOrCreateScopeInfo($currScope);
     if (!isset($scopeInfo->variables[$varName])) {
       $scopeInfo->variables[$varName] = new VariableInfo($varName);
-      if ($this->validUnusedVariableNames && in_array($varName, $this->validUnusedVariableNames)) {
+      $validUnusedVariableNames = (empty($this->validUnusedVariableNames))
+        ? []
+        : preg_split('/\s+/', trim($this->validUnusedVariableNames));
+      if (in_array($varName, $validUnusedVariableNames)) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
       }
     }
