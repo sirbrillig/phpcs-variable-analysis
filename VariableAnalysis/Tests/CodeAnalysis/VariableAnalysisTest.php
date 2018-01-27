@@ -417,6 +417,11 @@ class VariableAnalysisTest extends BaseTestCase {
   public function testUnusedParams() {
     $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'validUnusedVariableNames',
+      'ignored'
+    );
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
