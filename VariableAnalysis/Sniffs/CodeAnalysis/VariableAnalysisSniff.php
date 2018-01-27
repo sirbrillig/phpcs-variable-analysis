@@ -41,8 +41,9 @@ class VariableAnalysisSniff implements Sniff {
   public $allowUnusedFunctionParameters = false;
 
   /**
-   *  A list of names of placeholder variables that you want to ignore from
-   *  unused variable warnings, ie things like $junk.
+   *  A space-separated list of names of placeholder variables that you want to
+   *  ignore from unused variable warnings. For example, to ignore the variables
+   *  `$junk` and `$unused`, this could be set to `'junk unused'`.
    */
   public $validUnusedVariableNames = null;
 
