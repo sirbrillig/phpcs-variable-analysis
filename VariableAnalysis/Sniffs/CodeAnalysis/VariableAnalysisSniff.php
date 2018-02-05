@@ -117,7 +117,7 @@ class VariableAnalysisSniff implements Sniff {
     return $varName;
   }
 
-  protected function scopeKey($currScope) {
+  protected function getScopeKey($currScope) {
     if ($currScope === false) {
       $currScope = 'file';
     }
@@ -126,7 +126,7 @@ class VariableAnalysisSniff implements Sniff {
 
   //  Warning: this is an autovivifying get
   protected function getScopeInfo($currScope, $autoCreate = true) {
-    $scopeKey = $this->scopeKey($currScope);
+    $scopeKey = $this->getScopeKey($currScope);
     if (!isset($this->scopes[$scopeKey])) {
       if (!$autoCreate) {
         return null;
