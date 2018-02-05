@@ -997,41 +997,45 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     foreach ($scopeInfo->variables as $varInfo) {
-      if ($varInfo->ignoreUnused || isset($varInfo->firstRead)) {
-        continue;
-      }
-      if ($this->allowUnusedFunctionParameters && $varInfo->scopeType == 'param') {
-        continue;
-      }
-      if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {
-        // If we're pass-by-reference then it's a common pattern to
-        // use the variable to return data to the caller, so any
-        // assignment also counts as "variable use" for the purposes
-        // of "unused variable" warnings.
-        continue;
-      }
-      if (isset($varInfo->firstDeclared)) {
-        $phpcsFile->addWarning(
-          "Unused %s %s.",
-          $varInfo->firstDeclared,
-          'UnusedVariable',
-          [
-            VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
-            "\${$varInfo->name}",
-          ]
-        );
-      }
-      if (isset($varInfo->firstInitialized)) {
-        $phpcsFile->addWarning(
-          "Unused %s %s.",
-          $varInfo->firstInitialized,
-          'UnusedVariable',
-          [
-            VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
-            "\${$varInfo->name}",
-          ]
-        );
-      }
+      $this->processScopeCloseForVariable($phpcsFile, $varInfo);
+    }
+  }
+
+  protected function processScopeCloseForVariable($phpcsFile, $varInfo) {
+    if ($varInfo->ignoreUnused || isset($varInfo->firstRead)) {
+      return;
+    }
+    if ($this->allowUnusedFunctionParameters && $varInfo->scopeType === 'param') {
+      return;
+    }
+    if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {
+      // If we're pass-by-reference then it's a common pattern to
+      // use the variable to return data to the caller, so any
+      // assignment also counts as "variable use" for the purposes
+      // of "unused variable" warnings.
+      return;
+    }
+    if (isset($varInfo->firstDeclared)) {
+      $phpcsFile->addWarning(
+        "Unused %s %s.",
+        $varInfo->firstDeclared,
+        'UnusedVariable',
+        [
+          VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
+          "\${$varInfo->name}",
+        ]
+      );
+    }
+    if (isset($varInfo->firstInitialized)) {
+      $phpcsFile->addWarning(
+        "Unused %s %s.",
+        $varInfo->firstInitialized,
+        'UnusedVariable',
+        [
+          VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
+          "\${$varInfo->name}",
+        ]
+      );
     }
   }
 }
