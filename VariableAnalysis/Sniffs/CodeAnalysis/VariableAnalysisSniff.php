@@ -2,9 +2,9 @@
 
 namespace VariableAnalysis\Sniffs\CodeAnalysis;
 
-use VariableAnalysis\ScopeInfo;
-use VariableAnalysis\VariableInfo;
-use VariableAnalysis\Constants;
+use VariableAnalysis\Lib\ScopeInfo;
+use VariableAnalysis\Lib\VariableInfo;
+use VariableAnalysis\Lib\Constants;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 
