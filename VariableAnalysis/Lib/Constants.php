@@ -8,7 +8,7 @@ class Constants {
    *  by reference, the arguments are numbered starting from 1 and an elipsis '...'
    *  means all argument numbers after the previous should be considered pass-by-reference.
    */
-  public static function getPassByReferenceFunctions(): array {
+  public static function getPassByReferenceFunctions() {
     return [
       '__soapCall' => [5],
       'addFunction' => [3],
@@ -241,7 +241,7 @@ class Constants {
   /**
    * A regexp for matching variable names in double-quoted strings.
    */
-  public static function getDoubleQuotedVarRegexp(): string {
+  public static function getDoubleQuotedVarRegexp() {
     return '|(?<!\\\\)(?:\\\\{2})*\${?([a-zA-Z0-9_]+)}?|';
   }
 }

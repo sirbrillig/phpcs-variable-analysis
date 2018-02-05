@@ -70,7 +70,7 @@ class VariableAnalysisSniff implements Sniff {
     ];
   }
 
-  private function getPassByReferenceFunction(string $functionName): ?array {
+  private function getPassByReferenceFunction(string $functionName) {
     $passByRefFunctions = Constants::getPassByReferenceFunctions();
     //  Magic to modfy $passByRefFunctions with any site-specific settings.
     if (!empty($this->sitePassByRefFunctions)) {
