@@ -199,7 +199,7 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   protected function isVariableUndefined($varName, $stackPtr, $currScope) {
-    $varInfo = $this->getVariableInfo($varName, $currScope, false);
+    $varInfo = $this->getVariableInfo($varName, $currScope);
     if (isset($varInfo->firstDeclared) && $varInfo->firstDeclared <= $stackPtr) {
       // TODO: do we want to check scopeType here?
       return false;
