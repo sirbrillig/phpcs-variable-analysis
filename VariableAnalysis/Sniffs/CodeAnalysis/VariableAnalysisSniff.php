@@ -259,14 +259,7 @@ class VariableAnalysisSniff implements Sniff {
     // so we look backwards from the opening bracket for the first thing that
     // isn't a function name, reference sigil or whitespace and check if
     // it's a function keyword.
-    $functionPtr = $phpcsFile->findPrevious(
-      [T_STRING, T_WHITESPACE, T_BITWISE_AND],
-      $openPtr - 1,
-      null,
-      true,
-      null,
-      true
-    );
+    $functionPtr = $this->findPreviousFunctionPtr($phpcsFile, $openPtr);
     if (($functionPtr !== false) &&
       ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
       return $functionPtr;
@@ -442,12 +435,7 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
-    // so we look backwards from the opening bracket for the first thing that
-    // isn't a function name, reference sigil or whitespace and check if
-    // it's a function keyword.
-    $functionPtrTypes = [T_STRING, T_WHITESPACE, T_BITWISE_AND];
-    $functionPtr = $phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true);
+    $functionPtr = $this->findPreviousFunctionPtr($phpcsFile, $openPtr);
     if (($functionPtr !== false) &&
       (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
       ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
@@ -486,6 +474,15 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
+  protected function findPreviousFunctionPtr($phpcsFile, $openPtr) {
+    // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
+    // so we look backwards from the opening bracket for the first thing that
+    // isn't a function name, reference sigil or whitespace and check if
+    // it's a function keyword.
+    $functionPtrTypes = [T_STRING, T_WHITESPACE, T_BITWISE_AND];
+    return $phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true);
+  }
+
   protected function checkForCatchBlock(
     File $phpcsFile,
     $stackPtr,
@@ -500,10 +497,6 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
-    // so we look backwards from the opening bracket for the first thing that
-    // isn't a function name, reference sigil or whitespace and check if
-    // it's a function keyword.
     $catchPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
     if (($catchPtr !== false) &&
       ($tokens[$catchPtr]['code'] === T_CATCH)) {
