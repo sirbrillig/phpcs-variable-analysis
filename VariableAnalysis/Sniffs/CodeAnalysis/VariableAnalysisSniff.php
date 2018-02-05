@@ -170,7 +170,14 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo->firstInitialized = $stackPtr;
   }
 
-  protected function markVariableDeclaration($varName, $scopeType, $typeHint, $stackPtr, $currScope, $permitMatchingRedeclaration = false) {
+  protected function markVariableDeclaration(
+    $varName,
+    $scopeType,
+    $typeHint,
+    $stackPtr,
+    $currScope,
+    $permitMatchingRedeclaration = false
+  ) {
     $varInfo = $this->getVariableInfo($varName, $currScope);
     if (isset($varInfo->scopeType)) {
       if (($permitMatchingRedeclaration === false) ||
