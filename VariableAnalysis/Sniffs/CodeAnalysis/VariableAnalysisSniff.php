@@ -240,7 +240,6 @@ class VariableAnalysisSniff implements Sniff {
         ["\${$varName}"]
       );
     }
-    return true;
   }
 
   protected function findFunctionPrototype(File $phpcsFile, $stackPtr) {
