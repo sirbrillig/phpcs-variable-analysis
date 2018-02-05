@@ -124,8 +124,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($currScope === false) {
       $currScope = 'file';
     }
-    return ($this->currentFile ? $this->currentFile->getFilename() : 'unknown file') .
-      ':' . $currScope;
+    return ($this->currentFile ? $this->currentFile->getFilename() : 'unknown file') . ':' . $currScope;
   }
 
   //  Warning: this is an autovivifying get
@@ -147,8 +146,7 @@ class VariableAnalysisSniff implements Sniff {
         return null;
       }
       $scopeInfo->variables[$varName] = new VariableInfo($varName);
-      if ($this->validUnusedVariableNames &&
-        in_array($varName, $this->validUnusedVariableNames)) {
+      if ($this->validUnusedVariableNames && in_array($varName, $this->validUnusedVariableNames)) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
       }
     }
