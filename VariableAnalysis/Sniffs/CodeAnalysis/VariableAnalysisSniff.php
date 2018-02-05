@@ -25,7 +25,7 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * A list of scopes encountered so far and the variables within them.
    */
-  private $scopes = array();
+  private $scopes = [];
 
   /**
    *  Allows an install to extend the list of known pass-by-reference functions
@@ -61,14 +61,14 @@ class VariableAnalysisSniff implements Sniff {
       $this->validUnusedVariableNames =
         preg_split('/\s+/', trim($this->validUnusedVariableNames));
     }
-    return array(
+    return [
       T_VARIABLE,
       T_DOUBLE_QUOTED_STRING,
       T_HEREDOC,
       T_CLOSE_CURLY_BRACKET,
       T_STRING,
-    );
-  }//end register()
+    ];
+  }
 
   private function getPassByReferenceFunction(string $functionName): ?array {
     $passByRefFunctions = Constants::getPassByReferenceFunctions();
@@ -190,11 +190,11 @@ class VariableAnalysisSniff implements Sniff {
           "Redeclaration of %s %s as %s.",
           $stackPtr,
           'VariableRedeclaration',
-          array(
+          [
             VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
             "\${$varName}",
             VariableInfo::$scopeTypeDescriptions[$scopeType],
-          )
+          ]
         );
       }
     }
@@ -245,7 +245,7 @@ class VariableAnalysisSniff implements Sniff {
         "Variable %s is undefined.",
         $stackPtr,
         'UndefinedVariable',
-        array("\${$varName}")
+        ["\${$varName}"]
       );
     }
     return true;
@@ -266,7 +266,7 @@ class VariableAnalysisSniff implements Sniff {
     // isn't a function name, reference sigil or whitespace and check if
     // it's a function keyword.
     $functionPtr = $phpcsFile->findPrevious(
-      array(T_STRING, T_WHITESPACE, T_BITWISE_AND),
+      [T_STRING, T_WHITESPACE, T_BITWISE_AND],
       $openPtr - 1,
       null,
       true,
@@ -415,7 +415,7 @@ class VariableAnalysisSniff implements Sniff {
     }
     $closePtr = $tokens[$openPtr]['parenthesis_closer'];
 
-    $argPtrs = array();
+    $argPtrs = [];
     $lastPtr = $openPtr;
     $lastArgComma = $openPtr;
     while (($nextPtr = $phpcsFile->findNext(T_COMMA, $lastPtr + 1, $closePtr)) !== false) {
@@ -452,7 +452,7 @@ class VariableAnalysisSniff implements Sniff {
     // so we look backwards from the opening bracket for the first thing that
     // isn't a function name, reference sigil or whitespace and check if
     // it's a function keyword.
-    $functionPtr = $phpcsFile->findPrevious(array(T_STRING, T_WHITESPACE, T_BITWISE_AND), $openPtr - 1, null, true, null, true);
+    $functionPtr = $phpcsFile->findPrevious([T_STRING, T_WHITESPACE, T_BITWISE_AND], $openPtr - 1, null, true, null, true);
     if (($functionPtr !== false) &&
       (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
       ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
@@ -476,7 +476,7 @@ class VariableAnalysisSniff implements Sniff {
       $this->markVariableRead($varName, $stackPtr, $currScope);
       if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
         // We haven't been defined by this point.
-        $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr, 'UndefinedVariable', array("\${$varName}"));
+        $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr, 'UndefinedVariable', ["\${$varName}"]);
         return true;
       }
       // $functionPtr is at the use, we need the function keyword for start of scope.
@@ -563,7 +563,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Are we a superglobal variable?
-    if (in_array($varName, array(
+    if (in_array($varName, [
       'GLOBALS',
       '_SERVER',
       '_GET',
@@ -575,7 +575,7 @@ class VariableAnalysisSniff implements Sniff {
       '_ENV',
       'argv',
       'argc',
-    ))) {
+    ])) {
       return true;
     }
 
@@ -619,7 +619,7 @@ class VariableAnalysisSniff implements Sniff {
           //  self within a closure is invalid
           //  Note: have to fetch code from $tokens, T_CLOSURE isn't set for conditions codes.
           if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
-            $phpcsFile->addError("Use of {$err_desc}%s inside closure.", $stackPtr, $err_class, array("\${$varName}"));
+            $phpcsFile->addError("Use of {$err_desc}%s inside closure.", $stackPtr, $err_class, ["\${$varName}"]);
             return true;
           }
           if ($scopeCode === T_CLASS) {
@@ -627,7 +627,7 @@ class VariableAnalysisSniff implements Sniff {
           }
         }
       }
-      $phpcsFile->addError("Use of {$err_desc}%s outside class definition.", $stackPtr, $err_class, array("\${$varName}"));
+      $phpcsFile->addError("Use of {$err_desc}%s outside class definition.", $stackPtr, $err_class, ["\${$varName}"]);
       return true;
     }
 
@@ -698,7 +698,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we a global declaration?
     // Search backwards for first token that isn't whitespace, comma or variable.
-    $globalPtr = $phpcsFile->findPrevious(array(T_WHITESPACE, T_VARIABLE, T_COMMA), $stackPtr - 1, null, true, null, true);
+    $globalPtr = $phpcsFile->findPrevious([T_WHITESPACE, T_VARIABLE, T_COMMA], $stackPtr - 1, null, true, null, true);
     if (($globalPtr === false) || ($tokens[$globalPtr]['code'] !== T_GLOBAL)) {
       return false;
     }
@@ -737,7 +737,7 @@ class VariableAnalysisSniff implements Sniff {
     // Search backwards for first token that isn't whitespace, comma, variable,
     // equals, or on the list of assignable constant values above.
     $staticPtr = $phpcsFile->findPrevious(
-      array(
+      [
         T_WHITESPACE, T_VARIABLE, T_COMMA, T_EQUAL,
         T_MINUS, T_LNUMBER, T_DNUMBER,
         T_CONSTANT_ENCAPSED_STRING,
@@ -745,7 +745,7 @@ class VariableAnalysisSniff implements Sniff {
         T_DOUBLE_COLON,
         T_START_HEREDOC, T_HEREDOC, T_END_HEREDOC,
         T_START_NOWDOC, T_NOWDOC, T_END_NOWDOC,
-      ),
+      ],
       $stackPtr - 1,
       null,
       true,
@@ -1173,10 +1173,10 @@ class VariableAnalysisSniff implements Sniff {
           "Unused %s %s.",
           $varInfo->firstDeclared,
           'UnusedVariable',
-          array(
+          [
             VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
             "\${$varInfo->name}",
-          )
+          ]
         );
       }
       if (isset($varInfo->firstInitialized)) {
@@ -1184,10 +1184,10 @@ class VariableAnalysisSniff implements Sniff {
           "Unused %s %s.",
           $varInfo->firstInitialized,
           'UnusedVariable',
-          array(
+          [
             VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
             "\${$varInfo->name}",
-          )
+          ]
         );
       }
     }
