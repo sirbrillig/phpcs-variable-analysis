@@ -232,9 +232,7 @@ class VariableAnalysisSniff implements Sniff {
 
   protected function markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope) {
     $this->markVariableRead($varName, $stackPtr, $currScope);
-
     if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
-      // We haven't been defined by this point.
       $phpcsFile->addWarning(
         "Variable %s is undefined.",
         $stackPtr,
