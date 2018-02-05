@@ -25,7 +25,7 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * A list of scopes encountered so far and the variables within them.
    */
-  private $_scopes = array();
+  private $scopes = array();
 
   /**
    *  Allows an install to extend the list of known pass-by-reference functions
@@ -135,13 +135,13 @@ class VariableAnalysisSniff implements Sniff {
   //  Warning: this is an autovivifying get
   public function getScopeInfo($currScope, $autoCreate = true) {
     $scopeKey = $this->scopeKey($currScope);
-    if (!isset($this->_scopes[$scopeKey])) {
+    if (!isset($this->scopes[$scopeKey])) {
       if (!$autoCreate) {
         return null;
       }
-      $this->_scopes[$scopeKey] = new ScopeInfo($currScope);
+      $this->scopes[$scopeKey] = new ScopeInfo($currScope);
     }
-    return $this->_scopes[$scopeKey];
+    return $this->scopes[$scopeKey];
   }
 
   public function getVariableInfo($varName, $currScope, $autoCreate = true) {
