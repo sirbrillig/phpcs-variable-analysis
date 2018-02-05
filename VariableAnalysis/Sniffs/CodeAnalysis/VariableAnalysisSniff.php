@@ -452,7 +452,8 @@ class VariableAnalysisSniff implements Sniff {
     // so we look backwards from the opening bracket for the first thing that
     // isn't a function name, reference sigil or whitespace and check if
     // it's a function keyword.
-    $functionPtr = $phpcsFile->findPrevious([T_STRING, T_WHITESPACE, T_BITWISE_AND], $openPtr - 1, null, true, null, true);
+    $functionPtrTypes = [T_STRING, T_WHITESPACE, T_BITWISE_AND];
+    $functionPtr = $phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true);
     if (($functionPtr !== false) &&
       (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
       ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
