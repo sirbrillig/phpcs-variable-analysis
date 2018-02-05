@@ -242,20 +242,13 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
-  protected function findFunctionPrototype(
-    File $phpcsFile,
-    $stackPtr
-  ) {
+  protected function findFunctionPrototype(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
     if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
       return false;
     }
-    // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
-    // so we look backwards from the opening bracket for the first thing that
-    // isn't a function name, reference sigil or whitespace and check if
-    // it's a function keyword.
     $functionPtr = $this->findPreviousFunctionPtr($phpcsFile, $openPtr);
     if (($functionPtr !== false) &&
       ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
@@ -264,10 +257,7 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  protected function findVariableScope(
-    File $phpcsFile,
-    $stackPtr
-  ) {
+  protected function findVariableScope(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -296,10 +286,7 @@ class VariableAnalysisSniff implements Sniff {
     return 0;
   }
 
-  protected function isNextThingAnAssign(
-    File $phpcsFile,
-    $stackPtr
-  ) {
+  protected function isNextThingAnAssign(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     // Is the next non-whitespace an assignment?
@@ -312,10 +299,7 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  protected function findWhereAssignExecuted(
-    File $phpcsFile,
-    $stackPtr
-  ) {
+  protected function findWhereAssignExecuted(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     //  Write should be recorded at the next statement to ensure we treat the
@@ -343,10 +327,7 @@ class VariableAnalysisSniff implements Sniff {
     return $assignEndTokens[0];
   }
 
-  protected function findContainingBrackets(
-    File $phpcsFile,
-    $stackPtr
-  ) {
+  protected function findContainingBrackets(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
@@ -357,10 +338,7 @@ class VariableAnalysisSniff implements Sniff {
   }
 
 
-  protected function findFunctionCall(
-    File $phpcsFile,
-    $stackPtr
-  ) {
+  protected function findFunctionCall(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     if ($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) {
@@ -373,10 +351,7 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  protected function findFunctionCallArguments(
-    File $phpcsFile,
-    $stackPtr
-  ) {
+  protected function findFunctionCallArguments(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     // Slight hack: also allow this to find args for array constructor.
@@ -415,12 +390,7 @@ class VariableAnalysisSniff implements Sniff {
     return $argPtrs;
   }
 
-  protected function checkForFunctionPrototype(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForFunctionPrototype(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -480,12 +450,7 @@ class VariableAnalysisSniff implements Sniff {
     return $phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true);
   }
 
-  protected function checkForCatchBlock(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForCatchBlock(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -510,12 +475,7 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  protected function checkForThisWithinClass(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForThisWithinClass(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -538,12 +498,7 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  protected function checkForSuperGlobal(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForSuperGlobal(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -567,12 +522,7 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  protected function checkForStaticMember(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForStaticMember(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -619,12 +569,7 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
-  protected function checkForAssignment(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -641,12 +586,7 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
-  protected function checkForListAssignment(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForListAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -672,12 +612,7 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
-  protected function checkForGlobalDeclaration(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForGlobalDeclaration(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -693,12 +628,7 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
-  protected function checkForStaticDeclaration(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForStaticDeclaration(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -759,12 +689,7 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
-  protected function checkForForeachLoopVar(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForForeachLoopVar(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -782,12 +707,7 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
-  protected function checkForPassByReferenceFunctionCall(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForPassByReferenceFunctionCall(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -846,12 +766,7 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
-  protected function checkForSymbolicObjectProperty(
-    File $phpcsFile,
-    $stackPtr,
-    $varName,
-    $currScope
-  ) {
+  protected function checkForSymbolicObjectProperty(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -872,10 +787,7 @@ class VariableAnalysisSniff implements Sniff {
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
    * @param int $stackPtr  The position where the token was found.
    */
-  protected function processMemberVar(
-    File $phpcsFile,
-    $stackPtr
-  ) {
+  protected function processMemberVar(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
     // TODO: don't care for now
@@ -884,14 +796,10 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * Called to process normal member vars.
    *
-   * @param File $phpcsFile The PHP_CodeSniffer file where this
-   *                                        token was found.
-   * @param int                  $stackPtr  The position where the token was found.
+   * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
+   * @param int $stackPtr  The position where the token was found.
    */
-  protected function processVariable(
-    File $phpcsFile,
-    $stackPtr
-  ) {
+  protected function processVariable(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -993,11 +901,7 @@ class VariableAnalysisSniff implements Sniff {
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
    * @param int $stackPtr  The position where the double quoted string was found.
    */
-  protected function processVariableInString(
-    File
-    $phpcsFile,
-    $stackPtr
-  ) {
+  protected function processVariableInString(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -1019,13 +923,7 @@ class VariableAnalysisSniff implements Sniff {
     }
   }
 
-  protected function processCompactArguments(
-    File
-    $phpcsFile,
-    $stackPtr,
-    $arguments,
-    $currScope
-  ) {
+  protected function processCompactArguments(File $phpcsFile, $stackPtr, $arguments, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -1078,11 +976,7 @@ class VariableAnalysisSniff implements Sniff {
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
    * @param int $stackPtr  The position where the call to compact() was found.
    */
-  protected function processCompact(
-    File
-    $phpcsFile,
-    $stackPtr
-  ) {
+  protected function processCompact(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -1102,11 +996,7 @@ class VariableAnalysisSniff implements Sniff {
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
    * @param int $stackPtr  The position of the scope conditional.
    */
-  protected function processScopeClose(
-    File
-    $phpcsFile,
-    $stackPtr
-  ) {
+  protected function processScopeClose(File $phpcsFile, $stackPtr) {
     $scopeInfo = $this->getScopeInfo($stackPtr, false);
     if (is_null($scopeInfo)) {
       return;
