@@ -137,12 +137,14 @@ class VariableAnalysisSniff implements Sniff {
     return $this->scopes[$scopeKey];
   }
 
-  protected function getVariableInfo($varName, $currScope, $autoCreate = true) {
-    $scopeInfo = $autoCreate === true ? $this->getOrCreateScopeInfo($currScope) : $this->getScopeInfo($currScope);
+  protected function getVariableInfo($varName, $currScope) {
+    $scopeInfo = $this->getScopeInfo($currScope);
+    return $scopeInfo->variables[$varName] ?? null;
+  }
+
+  protected function getOrCreateVariableInfo($varName, $currScope) {
+    $scopeInfo = $this->getOrCreateScopeInfo($currScope);
     if (!isset($scopeInfo->variables[$varName])) {
-      if (!$autoCreate) {
-        return null;
-      }
       $scopeInfo->variables[$varName] = new VariableInfo($varName);
       if ($this->validUnusedVariableNames && in_array($varName, $this->validUnusedVariableNames)) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
@@ -152,7 +154,7 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   protected function markVariableAssignment($varName, $stackPtr, $currScope) {
-    $varInfo = $this->getVariableInfo($varName, $currScope);
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (!isset($varInfo->scopeType)) {
       $varInfo->scopeType = 'local';
     }
@@ -170,7 +172,7 @@ class VariableAnalysisSniff implements Sniff {
     $currScope,
     $permitMatchingRedeclaration = false
   ) {
-    $varInfo = $this->getVariableInfo($varName, $currScope);
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (isset($varInfo->scopeType)) {
       if (($permitMatchingRedeclaration === false) ||
         ($varInfo->scopeType !== $scopeType)) {
@@ -201,7 +203,7 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   protected function markVariableRead($varName, $stackPtr, $currScope) {
-    $varInfo = $this->getVariableInfo($varName, $currScope);
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (isset($varInfo->firstRead) && ($varInfo->firstRead <= $stackPtr)) {
       return;
     }
@@ -209,7 +211,7 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   protected function isVariableInitialized($varName, $stackPtr, $currScope) {
-    $varInfo = $this->getVariableInfo($varName, $currScope);
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (isset($varInfo->firstInitialized) && $varInfo->firstInitialized <= $stackPtr) {
       return true;
     }
@@ -411,7 +413,7 @@ class VariableAnalysisSniff implements Sniff {
       // Are we pass-by-reference?
       $referencePtr = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true, null, true);
       if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
-        $varInfo = $this->getVariableInfo($varName, $functionPtr);
+        $varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
         $varInfo->passByReference = true;
       }
       //  Are we optional with a default?
@@ -466,7 +468,7 @@ class VariableAnalysisSniff implements Sniff {
       $this->markVariableDeclaration($varName, 'local', null, $stackPtr, $currScope, true);
       $this->markVariableAssignment($varName, $stackPtr, $currScope);
       if ($this->allowUnusedCaughtExceptions) {
-        $varInfo = $this->getVariableInfo($varName, $currScope);
+        $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
         $varInfo->ignoreUnused = true;
       }
       return true;
