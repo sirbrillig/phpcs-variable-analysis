@@ -115,12 +115,12 @@ class VariableAnalysisSniff implements Sniff {
     }
   }
 
-  public function normalizeVarName($varName) {
+  protected function normalizeVarName($varName) {
     $varName = preg_replace('/[{}$]/', '', $varName);
     return $varName;
   }
 
-  public function scopeKey($currScope) {
+  protected function scopeKey($currScope) {
     if ($currScope === false) {
       $currScope = 'file';
     }
@@ -129,7 +129,7 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   //  Warning: this is an autovivifying get
-  public function getScopeInfo($currScope, $autoCreate = true) {
+  protected function getScopeInfo($currScope, $autoCreate = true) {
     $scopeKey = $this->scopeKey($currScope);
     if (!isset($this->scopes[$scopeKey])) {
       if (!$autoCreate) {
@@ -140,7 +140,7 @@ class VariableAnalysisSniff implements Sniff {
     return $this->scopes[$scopeKey];
   }
 
-  public function getVariableInfo($varName, $currScope, $autoCreate = true) {
+  protected function getVariableInfo($varName, $currScope, $autoCreate = true) {
     $scopeInfo = $this->getScopeInfo($currScope, $autoCreate);
     if (!isset($scopeInfo->variables[$varName])) {
       if (!$autoCreate) {
