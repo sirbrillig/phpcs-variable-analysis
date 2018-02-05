@@ -95,10 +95,6 @@ class VariableAnalysisSniff implements Sniff {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
-    //if ($token['content'] == '$param') {
-    //echo "Found token on line {$token['line']}.\n" . print_r($token, true);
-    //}
-
     if ($this->currentFile !== $phpcsFile) {
       $this->currentFile = $phpcsFile;
     }
@@ -754,9 +750,6 @@ class VariableAnalysisSniff implements Sniff {
       true
     );
     if (($staticPtr === false) || ($tokens[$staticPtr]['code'] !== T_STATIC)) {
-      //if ($varName == 'static4') {
-      //    echo "Failing token:\n" . print_r($tokens[$staticPtr], true);
-      //}
       return false;
     }
 
@@ -923,15 +916,6 @@ class VariableAnalysisSniff implements Sniff {
     if (($currScope = $this->findVariableScope($phpcsFile, $stackPtr)) === false) {
       return;
     }
-
-    //static $dump_token = false;
-    //if ($varName == 'property') {
-    //    $dump_token = true;
-    //}
-    //if ($dump_token) {
-    //    echo "Found variable {$varName} on line {$token['line']} in scope {$currScope}.\n" . print_r($token, true);
-    //    echo "Prev:\n" . print_r($tokens[$stackPtr - 1], true);
-    //}
 
     // Determine if variable is being assigned or read.
 
