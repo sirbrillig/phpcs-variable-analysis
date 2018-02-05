@@ -8,12 +8,6 @@ use VariableAnalysis\Lib\Constants;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 
-/**
- * Checks the code for undefined function variables.
- *
- * This sniff checks that all function variables
- * are defined in the function body.
- */
 class VariableAnalysisSniff implements Sniff {
   /**
    * The current phpcsFile being checked.
@@ -51,11 +45,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   public $validUnusedVariableNames = null;
 
-  /**
-   * Returns an array of tokens this test wants to listen for.
-   *
-   * @return array
-   */
   public function register() {
     if (!empty($this->validUnusedVariableNames)) {
       $this->validUnusedVariableNames =
@@ -82,12 +71,6 @@ class VariableAnalysisSniff implements Sniff {
     return isset($passByRefFunctions[$functionName]) ? $passByRefFunctions[$functionName] : null;
   }
 
-  /**
-   * Processes this test, when one of its tokens is encountered.
-   *
-   * @param File $phpcsFile The file being scanned.
-   * @param int $stackPtr  The position of the current token in the stack passed in $tokens.
-   */
   public function process(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
