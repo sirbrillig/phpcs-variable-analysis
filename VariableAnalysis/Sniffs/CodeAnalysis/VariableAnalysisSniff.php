@@ -124,20 +124,24 @@ class VariableAnalysisSniff implements Sniff {
     return ($this->currentFile ? $this->currentFile->getFilename() : 'unknown file') . ':' . $currScope;
   }
 
-  //  Warning: this is an autovivifying get
-  protected function getScopeInfo($currScope, $autoCreate = true) {
+  protected function getScopeInfo($currScope) {
     $scopeKey = $this->getScopeKey($currScope);
     if (!isset($this->scopes[$scopeKey])) {
-      if (!$autoCreate) {
-        return null;
-      }
+      return null;
+    }
+    return $this->scopes[$scopeKey];
+  }
+
+  protected function getOrCreateScopeInfo($currScope) {
+    $scopeKey = $this->getScopeKey($currScope);
+    if (!isset($this->scopes[$scopeKey])) {
       $this->scopes[$scopeKey] = new ScopeInfo($currScope);
     }
     return $this->scopes[$scopeKey];
   }
 
   protected function getVariableInfo($varName, $currScope, $autoCreate = true) {
-    $scopeInfo = $this->getScopeInfo($currScope, $autoCreate);
+    $scopeInfo = $autoCreate === true ? $this->getOrCreateScopeInfo($currScope) : $this->getScopeInfo($currScope);
     if (!isset($scopeInfo->variables[$varName])) {
       if (!$autoCreate) {
         return null;
@@ -994,7 +998,7 @@ class VariableAnalysisSniff implements Sniff {
    * @param int $stackPtr  The position of the scope conditional.
    */
   protected function processScopeClose(File $phpcsFile, $stackPtr) {
-    $scopeInfo = $this->getScopeInfo($stackPtr, false);
+    $scopeInfo = $this->getScopeInfo($stackPtr);
     if (is_null($scopeInfo)) {
       return;
     }
