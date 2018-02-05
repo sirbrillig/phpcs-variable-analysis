@@ -9,7 +9,7 @@ class ScopeInfo {
   public $owner;
   public $opener;
   public $closer;
-  public $variables = array();
+  public $variables = [];
 
   public function __construct($currScope) {
     $this->owner = $currScope;
