@@ -86,10 +86,7 @@ class VariableAnalysisSniff implements Sniff {
    * Processes this test, when one of its tokens is encountered.
    *
    * @param File $phpcsFile The file being scanned.
-   * @param int                  $stackPtr  The position of the current token
-   *                                        in the stack passed in $tokens.
-   *
-   * @return void
+   * @param int $stackPtr  The position of the current token in the stack passed in $tokens.
    */
   public function process(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -321,11 +318,11 @@ class VariableAnalysisSniff implements Sniff {
   ) {
     $tokens = $phpcsFile->getTokens();
 
-    //  Write should be recorded at the next statement to ensure we treat
-    //  the assign as happening after the RHS execution.
+    //  Write should be recorded at the next statement to ensure we treat the
+    //  assign as happening after the RHS execution.
     //  eg: $var = $var + 1; -> RHS could still be undef.
-    //  However, if we're within a bracketed expression, we take place at
-    //  the closing bracket, if that's first.
+    //  However, if we're within a bracketed expression, we take place at the
+    //  closing bracket, if that's first.
     //  eg: echo (($var = 12) && ($var == 12));
     $semicolonPtr = $phpcsFile->findNext(T_SEMICOLON, $stackPtr + 1, null, false, null, true);
     $commaPtr = $phpcsFile->findNext(T_COMMA, $stackPtr + 1, null, false, null, true);
@@ -477,8 +474,8 @@ class VariableAnalysisSniff implements Sniff {
   protected function findPreviousFunctionPtr($phpcsFile, $openPtr) {
     // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
     // so we look backwards from the opening bracket for the first thing that
-    // isn't a function name, reference sigil or whitespace and check if
-    // it's a function keyword.
+    // isn't a function name, reference sigil or whitespace and check if it's a
+    // function keyword.
     $functionPtrTypes = [T_STRING, T_WHITESPACE, T_BITWISE_AND];
     return $phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true);
   }
@@ -872,11 +869,8 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * Called to process class member vars.
    *
-   * @param File $phpcsFile The PHP_CodeSniffer file where this
-   *                                        token was found.
-   * @param int                  $stackPtr  The position where the token was found.
-   *
-   * @return void
+   * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
+   * @param int $stackPtr  The position where the token was found.
    */
   protected function processMemberVar(
     File $phpcsFile,
@@ -893,8 +887,6 @@ class VariableAnalysisSniff implements Sniff {
    * @param File $phpcsFile The PHP_CodeSniffer file where this
    *                                        token was found.
    * @param int                  $stackPtr  The position where the token was found.
-   *
-   * @return void
    */
   protected function processVariable(
     File $phpcsFile,
@@ -998,12 +990,8 @@ class VariableAnalysisSniff implements Sniff {
    * Note that there may be more than one variable in the string, which will
    * result only in one call for the string.
    *
-   * @param File $phpcsFile The PHP_CodeSniffer file where this
-   *                                        token was found.
-   * @param int                  $stackPtr  The position where the double quoted
-   *                                        string was found.
-   *
-   * @return void
+   * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
+   * @param int $stackPtr  The position where the double quoted string was found.
    */
   protected function processVariableInString(
     File
@@ -1087,12 +1075,8 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * Called to process variables named in a call to compact().
    *
-   * @param File $phpcsFile The PHP_CodeSniffer file where this
-   *                                        token was found.
-   * @param int                  $stackPtr  The position where the call to compact()
-   *                                        was found.
-   *
-   * @return void
+   * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
+   * @param int $stackPtr  The position where the call to compact() was found.
    */
   protected function processCompact(
     File
@@ -1115,11 +1099,8 @@ class VariableAnalysisSniff implements Sniff {
    * Note that although triggered by the closing curly brace of the scope, $stackPtr is
    * the scope conditional, not the closing curly brace.
    *
-   * @param File $phpcsFile The PHP_CodeSniffer file where this
-   *                                        token was found.
-   * @param int                  $stackPtr  The position of the scope conditional.
-   *
-   * @return void
+   * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
+   * @param int $stackPtr  The position of the scope conditional.
    */
   protected function processScopeClose(
     File
