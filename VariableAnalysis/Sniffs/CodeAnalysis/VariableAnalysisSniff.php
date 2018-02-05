@@ -99,15 +99,13 @@ class VariableAnalysisSniff implements Sniff {
     if ($token['code'] === T_VARIABLE) {
       return $this->processVariable($phpcsFile, $stackPtr);
     }
-    if (($token['code'] === T_DOUBLE_QUOTED_STRING) ||
-      ($token['code'] === T_HEREDOC)) {
+    if (($token['code'] === T_DOUBLE_QUOTED_STRING) || ($token['code'] === T_HEREDOC)) {
       return $this->processVariableInString($phpcsFile, $stackPtr);
     }
     if (($token['code'] === T_STRING) && ($token['content'] === 'compact')) {
       return $this->processCompact($phpcsFile, $stackPtr);
     }
-    if (($token['code'] === T_CLOSE_CURLY_BRACKET) &&
-      isset($token['scope_condition'])) {
+    if (($token['code'] === T_CLOSE_CURLY_BRACKET) && isset($token['scope_condition'])) {
       return $this->processScopeClose($phpcsFile, $token['scope_condition']);
     }
   }
@@ -174,8 +172,7 @@ class VariableAnalysisSniff implements Sniff {
   ) {
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (isset($varInfo->scopeType)) {
-      if (($permitMatchingRedeclaration === false) ||
-        ($varInfo->scopeType !== $scopeType)) {
+      if (($permitMatchingRedeclaration === false) || ($varInfo->scopeType !== $scopeType)) {
         //  Issue redeclaration/reuse warning
         //  Note: we check off scopeType not firstDeclared, this is so that
         //    we catch declarations that come after implicit declarations like
@@ -246,7 +243,8 @@ class VariableAnalysisSniff implements Sniff {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
-    if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
+    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    if ($openPtr === false) {
       return false;
     }
     $functionPtr = $this->findPreviousFunctionPtr($phpcsFile, $openPtr);
@@ -272,7 +270,8 @@ class VariableAnalysisSniff implements Sniff {
       }
     }
 
-    if (($scopePtr = $this->findFunctionPrototype($phpcsFile, $stackPtr)) !== false) {
+    $scopePtr = $this->findFunctionPrototype($phpcsFile, $stackPtr);
+    if ($scopePtr !== false) {
       return $scopePtr;
     }
 
@@ -310,7 +309,8 @@ class VariableAnalysisSniff implements Sniff {
     $semicolonPtr = $phpcsFile->findNext(T_SEMICOLON, $stackPtr + 1, null, false, null, true);
     $commaPtr = $phpcsFile->findNext(T_COMMA, $stackPtr + 1, null, false, null, true);
     $closePtr = false;
-    if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) !== false) {
+    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    if ($openPtr !== false) {
       if (isset($tokens[$openPtr]['parenthesis_closer'])) {
         $closePtr = $tokens[$openPtr]['parenthesis_closer'];
       }
@@ -340,7 +340,8 @@ class VariableAnalysisSniff implements Sniff {
   protected function findFunctionCall(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
-    if ($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) {
+    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    if ($openPtr) {
       // First non-whitespace thing and see if it's a T_STRING function name
       $functionPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
       if ($tokens[$functionPtr]['code'] === T_STRING) {
@@ -357,7 +358,8 @@ class VariableAnalysisSniff implements Sniff {
     // TODO: probably should refactor into three functions: arg-finding and bracket-finding
     if (($tokens[$stackPtr]['code'] !== T_STRING) && ($tokens[$stackPtr]['code'] !== T_ARRAY)) {
       // Assume $stackPtr is something within the brackets, find our function call
-      if (($stackPtr = $this->findFunctionCall($phpcsFile, $stackPtr)) === false) {
+      $stackPtr = $this->findFunctionCall($phpcsFile, $stackPtr);
+      if ($stackPtr === false) {
         return false;
       }
     }
@@ -397,14 +399,15 @@ class VariableAnalysisSniff implements Sniff {
     // It would be nice to get the list of function parameters from watching for
     // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
     // we need to do that as private or final, so we have to do it this hackish way.
-    if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
+    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    if ($openPtr === false) {
       return false;
     }
 
     $functionPtr = $this->findPreviousFunctionPtr($phpcsFile, $openPtr);
-    if (($functionPtr !== false) &&
-      (($tokens[$functionPtr]['code'] === T_FUNCTION) ||
-      ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
+    if (($functionPtr !== false)
+      && (($tokens[$functionPtr]['code'] === T_FUNCTION)
+      || ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
       // TODO: typeHint
       $this->markVariableDeclaration($varName, 'param', null, $stackPtr, $functionPtr);
       // Are we pass-by-reference?
@@ -454,7 +457,8 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Are we a catch block parameter?
-    if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
+    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    if ($openPtr === false) {
       return false;
     }
 
@@ -529,7 +533,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
       return false;
     }
-    $classNamePtr   = $stackPtr - 2;
+    $classNamePtr = $stackPtr - 2;
     if (($tokens[$classNamePtr]['code'] !== T_STRING)
       && ($tokens[$classNamePtr]['code'] !== T_SELF)
       && ($tokens[$classNamePtr]['code'] !== T_STATIC)) {
@@ -571,12 +575,14 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Is the next non-whitespace an assignment?
-    if (($assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr)) === false) {
+    $assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr);
+    if ($assignPtr === false) {
       return false;
     }
 
     // Plain ol' assignment. Simpl(ish).
-    if (($writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr)) === false) {
+    $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
+    if ($writtenPtr === false) {
       $writtenPtr = $stackPtr;  // I dunno
     }
     $this->markVariableAssignment($varName, $writtenPtr, $currScope);
@@ -588,7 +594,8 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // OK, are we within a list (...) construct?
-    if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
+    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    if ($openPtr === false) {
       return false;
     }
 
@@ -599,7 +606,8 @@ class VariableAnalysisSniff implements Sniff {
 
     // OK, we're a list (...) construct... are we being assigned to?
     $closePtr = $tokens[$openPtr]['parenthesis_closer'];
-    if (($assignPtr = $this->isNextThingAnAssign($phpcsFile, $closePtr)) === false) {
+    $assignPtr = $this->isNextThingAnAssign($phpcsFile, $closePtr);
+    if ($assignPtr === false) {
       return false;
     }
 
@@ -691,7 +699,8 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Are we a foreach loopvar?
-    if (($openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr)) === false) {
+    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    if ($openPtr === false) {
       return false;
     }
 
@@ -709,7 +718,8 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Are we pass-by-reference to known pass-by-reference function?
-    if (($functionPtr = $this->findFunctionCall($phpcsFile, $stackPtr)) === false) {
+    $functionPtr = $this->findFunctionCall($phpcsFile, $stackPtr);
+    if ($functionPtr === false) {
       return false;
     }
 
@@ -720,7 +730,8 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    if (($argPtrs = $this->findFunctionCallArguments($phpcsFile, $stackPtr)) === false) {
+    $argPtrs = $this->findFunctionCallArguments($phpcsFile, $stackPtr);
+    if ($argPtrs === false) {
       return false;
     }
 
@@ -737,7 +748,8 @@ class VariableAnalysisSniff implements Sniff {
     }
     if (!in_array($argPos, $refArgs)) {
       // Our arg wasn't mentioned explicitly, are we after an elipsis catch-all?
-      if (($elipsis = array_search('...', $refArgs)) === false) {
+      $elipsis = array_search('...', $refArgs);
+      if ($elipsis === false) {
         return false;
       }
       if ($argPos < $refArgs[$elipsis - 1]) {
@@ -801,7 +813,8 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     $varName = $this->normalizeVarName($token['content']);
-    if (($currScope = $this->findVariableScope($phpcsFile, $stackPtr)) === false) {
+    $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
+    if ($currScope === false) {
       return;
     }
 
@@ -937,7 +950,8 @@ class VariableAnalysisSniff implements Sniff {
       $argument_first_token = $tokens[$argumentPtrs[0]];
       if ($argument_first_token['code'] === T_ARRAY) {
         // It's an array argument, recurse.
-        if (($array_arguments = $this->findFunctionCallArguments($phpcsFile, $argumentPtrs[0])) !== false) {
+        $array_arguments = $this->findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
+        if ($array_arguments !== false) {
           $this->processCompactArguments($phpcsFile, $stackPtr, $array_arguments, $currScope);
         }
         continue;
@@ -979,7 +993,8 @@ class VariableAnalysisSniff implements Sniff {
 
     $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
 
-    if (($arguments = $this->findFunctionCallArguments($phpcsFile, $stackPtr)) !== false) {
+    $arguments = $this->findFunctionCallArguments($phpcsFile, $stackPtr);
+    if ($arguments !== false) {
       $this->processCompactArguments($phpcsFile, $stackPtr, $arguments, $currScope);
     }
   }
