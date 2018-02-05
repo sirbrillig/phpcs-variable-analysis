@@ -107,7 +107,7 @@ class VariableAnalysisSniff implements Sniff {
 
   protected function getScopeInfo($currScope) {
     $scopeKey = $this->getScopeKey($currScope);
-    return $this->scopes[$scopeKey] ?? null;
+    return isset($this->scopes[$scopeKey]) ? $this->scopes[$scopeKey] : null;
   }
 
   protected function getOrCreateScopeInfo($currScope) {
@@ -120,7 +120,7 @@ class VariableAnalysisSniff implements Sniff {
 
   protected function getVariableInfo($varName, $currScope) {
     $scopeInfo = $this->getScopeInfo($currScope);
-    return $scopeInfo->variables[$varName] ?? null;
+    return isset($scopeInfo->variables[$varName]) ? $scopeInfo->variables[$varName] : null;
   }
 
   protected function getOrCreateVariableInfo($varName, $currScope) {
