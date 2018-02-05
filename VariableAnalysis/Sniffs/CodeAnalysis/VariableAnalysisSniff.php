@@ -79,7 +79,7 @@ class VariableAnalysisSniff implements Sniff {
         $passByRefFunctions[$function] = explode(',', $args);
       }
     }
-    return $passByRefFunctions[$functionName] ?? null;
+    return isset($passByRefFunctions[$functionName]) ? $passByRefFunctions[$functionName] : null;
   }
 
   /**
