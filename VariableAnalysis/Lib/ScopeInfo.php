@@ -1,6 +1,6 @@
 <?php
 
-namespace VariableAnalysis;
+namespace VariableAnalysis\Lib;
 
 /**
  * Holds details of a scope.
