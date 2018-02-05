@@ -250,8 +250,7 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
     $functionPtr = $this->findPreviousFunctionPtr($phpcsFile, $openPtr);
-    if (($functionPtr !== false) &&
-      ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
+    if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
       return $functionPtr;
     }
     return false;
@@ -460,8 +459,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $catchPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
-    if (($catchPtr !== false) &&
-      ($tokens[$catchPtr]['code'] === T_CATCH)) {
+    if (($catchPtr !== false) && ($tokens[$catchPtr]['code'] === T_CATCH)) {
       // Scope of the exception var is actually the function, not just the catch block.
       // TODO: typeHint
       $this->markVariableDeclaration($varName, 'local', null, $stackPtr, $currScope, true);
@@ -532,16 +530,15 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
     $classNamePtr   = $stackPtr - 2;
-    if (($tokens[$classNamePtr]['code'] !== T_STRING) &&
-      ($tokens[$classNamePtr]['code'] !== T_SELF) &&
-      ($tokens[$classNamePtr]['code'] !== T_STATIC)) {
+    if (($tokens[$classNamePtr]['code'] !== T_STRING)
+      && ($tokens[$classNamePtr]['code'] !== T_SELF)
+      && ($tokens[$classNamePtr]['code'] !== T_STATIC)) {
       return false;
     }
 
     // Are we refering to self:: outside a class?
     // TODO: not sure this is our business or should be some other sniff.
-    if (($tokens[$classNamePtr]['code'] === T_SELF) ||
-      ($tokens[$classNamePtr]['code'] === T_STATIC)) {
+    if (($tokens[$classNamePtr]['code'] === T_SELF) || ($tokens[$classNamePtr]['code'] === T_STATIC)) {
       if ($tokens[$classNamePtr]['code'] === T_SELF) {
         $err_class = 'SelfOutsideClass';
         $err_desc  = 'self::';
