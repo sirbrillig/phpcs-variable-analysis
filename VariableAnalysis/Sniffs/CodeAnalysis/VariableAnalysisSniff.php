@@ -809,18 +809,6 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   /**
-   * Called to process class member vars.
-   *
-   * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
-   * @param int $stackPtr  The position where the token was found.
-   */
-  protected function processMemberVar(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-    // TODO: don't care for now
-  }
-
-  /**
    * Called to process normal member vars.
    *
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
