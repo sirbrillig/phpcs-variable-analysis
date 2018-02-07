@@ -517,9 +517,12 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
     $classNamePtr = $stackPtr - 2;
-    if (($tokens[$classNamePtr]['code'] !== T_STRING)
-      && ($tokens[$classNamePtr]['code'] !== T_SELF)
-      && ($tokens[$classNamePtr]['code'] !== T_STATIC)) {
+    $staticReferences = [
+      T_STRING,
+      T_SELF,
+      T_STATIC,
+    ];
+    if (! in_array($tokens[$classNamePtr]['code'], $staticReferences, true)) {
       return false;
     }
 
