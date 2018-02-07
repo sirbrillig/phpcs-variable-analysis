@@ -1015,27 +1015,27 @@ class VariableAnalysisSniff implements Sniff {
       // of "unused variable" warnings.
       return;
     }
-    if (isset($varInfo->firstDeclared)) {
+    $stackPtr = $this->getStackPtrIfVariableIsUnused($varInfo);
+    if ($stackPtr) {
       $phpcsFile->addWarning(
         "Unused %s %s.",
-        $varInfo->firstDeclared,
+        $stackPtr,
         'UnusedVariable',
         [
           VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
           "\${$varInfo->name}",
         ]
       );
+    }
+  }
+
+  protected function getStackPtrIfVariableIsUnused($varInfo) {
+    if (isset($varInfo->firstDeclared)) {
+      return $varInfo->firstDeclared;
     }
     if (isset($varInfo->firstInitialized)) {
-      $phpcsFile->addWarning(
-        "Unused %s %s.",
-        $varInfo->firstInitialized,
-        'UnusedVariable',
-        [
-          VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
-          "\${$varInfo->name}",
-        ]
-      );
+      return $varInfo->firstInitialized;
     }
+    return null;
   }
 }
