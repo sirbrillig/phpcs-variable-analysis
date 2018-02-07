@@ -555,7 +555,7 @@ class VariableAnalysisSniff implements Sniff {
         return true;
       }
       if ($this->areAnyConditionsAClass($token['conditions'])) {
-        return true;
+        return false;
       }
     }
     $phpcsFile->addError(
