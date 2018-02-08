@@ -385,4 +385,16 @@ class VariableAnalysisTest extends BaseTestCase {
     $expectedErrors = [];
     $this->assertEquals($expectedErrors, $lines);
   }
+
+  public function testVariableFunctionCallsCountAsUsage() {
+    $fixtureFile = $this->getFixture('FunctionWithVariableCallFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [18];
+    $this->assertEquals($expectedWarnings, $lines);
+    $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
+    $expectedErrors = [];
+    $this->assertEquals($expectedErrors, $lines);
+  }
 }
