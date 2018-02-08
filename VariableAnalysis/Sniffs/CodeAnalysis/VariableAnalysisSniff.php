@@ -511,46 +511,81 @@ class VariableAnalysisSniff implements Sniff {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
-    // Are we a static member?
     $doubleColonPtr = $stackPtr - 1;
     if ($tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
       return false;
     }
     $classNamePtr = $stackPtr - 2;
-    if (($tokens[$classNamePtr]['code'] !== T_STRING)
-      && ($tokens[$classNamePtr]['code'] !== T_SELF)
-      && ($tokens[$classNamePtr]['code'] !== T_STATIC)) {
+    $staticReferences = [
+      T_STRING,
+      T_SELF,
+      T_STATIC,
+    ];
+    if (! in_array($tokens[$classNamePtr]['code'], $staticReferences, true)) {
       return false;
     }
+    return true;
+  }
 
+  protected function checkForStaticOutsideClass(File $phpcsFile, $stackPtr, $varName, $currScope) {
     // Are we refering to self:: outside a class?
     // TODO: not sure this is our business or should be some other sniff.
-    if (($tokens[$classNamePtr]['code'] === T_SELF) || ($tokens[$classNamePtr]['code'] === T_STATIC)) {
-      if ($tokens[$classNamePtr]['code'] === T_SELF) {
-        $err_class = 'SelfOutsideClass';
-        $err_desc  = 'self::';
-      } else {
-        $err_class = 'StaticOutsideClass';
-        $err_desc  = 'static::';
-      }
-      if (!empty($token['conditions'])) {
-        foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
-          //  self within a closure is invalid
-          //  Note: have to fetch code from $tokens, T_CLOSURE isn't set for conditions codes.
-          if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
-            $phpcsFile->addError("Use of {$err_desc}%s inside closure.", $stackPtr, $err_class, ["\${$varName}"]);
-            return true;
-          }
-          if ($scopeCode === T_CLASS) {
-            return true;
-          }
-        }
-      }
-      $phpcsFile->addError("Use of {$err_desc}%s outside class definition.", $stackPtr, $err_class, ["\${$varName}"]);
-      return true;
-    }
 
+    $tokens = $phpcsFile->getTokens();
+    $token  = $tokens[$stackPtr];
+
+    $doubleColonPtr = $stackPtr - 1;
+    if ($tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
+      return false;
+    }
+    $classNamePtr = $stackPtr - 2;
+    $code = $tokens[$classNamePtr]['code'];
+    $staticReferences = [
+      T_SELF,
+      T_STATIC,
+    ];
+    if (! in_array($code, $staticReferences, true)) {
+      return false;
+    }
+    $errorClass = $code === T_SELF ? 'SelfOutsideClass' : 'StaticOutsideClass';
+    $staticRefType = $code === T_SELF ? 'self::' : 'static::';
+    if (!empty($token['conditions'])) {
+      if ($this->areAnyConditionsAClosure($phpcsFile, $token['conditions'])) {
+        $phpcsFile->addError("Use of {$staticRefType}%s inside closure.", $stackPtr, $errorClass, ["\${$varName}"]);
+        return true;
+      }
+      if ($this->areAnyConditionsAClass($token['conditions'])) {
+        return true;
+      }
+    }
+    $phpcsFile->addError(
+      "Use of {$staticRefType}%s outside class definition.",
+      $stackPtr,
+      $errorClass,
+      ["\${$varName}"]
+    );
     return true;
+  }
+
+  protected function areAnyConditionsAClosure($phpcsFile, $conditions) {
+    // self within a closure is invalid
+    $tokens = $phpcsFile->getTokens();
+    foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
+      //  Note: have to fetch code from $tokens, T_CLOSURE isn't set for conditions codes.
+      if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  protected function areAnyConditionsAClass($conditions) {
+    foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
+      if ($scopeCode === T_CLASS) {
+        return true;
+      }
+    }
+    return false;
   }
 
   protected function checkForAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
@@ -774,18 +809,6 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   /**
-   * Called to process class member vars.
-   *
-   * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
-   * @param int $stackPtr  The position where the token was found.
-   */
-  protected function processMemberVar(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-    // TODO: don't care for now
-  }
-
-  /**
    * Called to process normal member vars.
    *
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
@@ -843,6 +866,11 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we a $GLOBALS, $_REQUEST, etc superglobal?
     if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName, $currScope)) {
+      return;
+    }
+
+    // Check for static members used outside a class
+    if ($this->checkForStaticOutsideClass($phpcsFile, $stackPtr, $varName, $currScope)) {
       return;
     }
 
@@ -1015,27 +1043,27 @@ class VariableAnalysisSniff implements Sniff {
       // of "unused variable" warnings.
       return;
     }
-    if (isset($varInfo->firstDeclared)) {
+    $stackPtr = $this->getStackPtrIfVariableIsUnused($varInfo);
+    if ($stackPtr) {
       $phpcsFile->addWarning(
         "Unused %s %s.",
-        $varInfo->firstDeclared,
+        $stackPtr,
         'UnusedVariable',
         [
           VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
           "\${$varInfo->name}",
         ]
       );
+    }
+  }
+
+  protected function getStackPtrIfVariableIsUnused($varInfo) {
+    if (isset($varInfo->firstDeclared)) {
+      return $varInfo->firstDeclared;
     }
     if (isset($varInfo->firstInitialized)) {
-      $phpcsFile->addWarning(
-        "Unused %s %s.",
-        $varInfo->firstInitialized,
-        'UnusedVariable',
-        [
-          VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
-          "\${$varInfo->name}",
-        ]
-      );
+      return $varInfo->firstInitialized;
     }
+    return null;
   }
 }
