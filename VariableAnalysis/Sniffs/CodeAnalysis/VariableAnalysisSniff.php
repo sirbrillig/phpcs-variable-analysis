@@ -281,35 +281,6 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  protected function findWhereAssignExecuted(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
-
-    //  Write should be recorded at the next statement to ensure we treat the
-    //  assign as happening after the RHS execution.
-    //  eg: $var = $var + 1; -> RHS could still be undef.
-    //  However, if we're within a bracketed expression, we take place at the
-    //  closing bracket, if that's first.
-    //  eg: echo (($var = 12) && ($var == 12));
-    $semicolonPtr = $phpcsFile->findNext(T_SEMICOLON, $stackPtr + 1, null, false, null, true);
-    $commaPtr = $phpcsFile->findNext(T_COMMA, $stackPtr + 1, null, false, null, true);
-    $closePtr = false;
-    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
-    if ($openPtr !== false) {
-      if (isset($tokens[$openPtr]['parenthesis_closer'])) {
-        $closePtr = $tokens[$openPtr]['parenthesis_closer'];
-      }
-    }
-
-    // Return the first thing: comma, semicolon, close-bracket, or stackPtr if nothing else
-    $assignEndTokens = [$commaPtr, $semicolonPtr, $closePtr];
-    $assignEndTokens = array_filter($assignEndTokens); // remove false values
-    sort($assignEndTokens);
-    if (empty($assignEndTokens)) {
-      return $stackPtr;
-    }
-    return $assignEndTokens[0];
-  }
-
   protected function checkForFunctionPrototype(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
@@ -511,7 +482,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // Plain ol' assignment. Simpl(ish).
-    $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
+    $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
     if ($writtenPtr === false) {
       $writtenPtr = $stackPtr;  // I dunno
     }
@@ -542,7 +513,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // Yes, we're being assigned.
-    $writtenPtr = $this->findWhereAssignExecuted($phpcsFile, $assignPtr);
+    $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
     $this->markVariableAssignment($varName, $writtenPtr, $currScope);
     return true;
   }
