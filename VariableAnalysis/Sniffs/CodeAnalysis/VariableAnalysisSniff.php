@@ -231,7 +231,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($openPtr === false) {
       return false;
     }
-    $functionPtr = $this->findPreviousFunctionPtr($phpcsFile, $openPtr);
+    $functionPtr = Helpers::findPreviousFunctionPtr($phpcsFile, $openPtr);
     if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
       return $functionPtr;
     }
@@ -377,7 +377,7 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    $functionPtr = $this->findPreviousFunctionPtr($phpcsFile, $openPtr);
+    $functionPtr = Helpers::findPreviousFunctionPtr($phpcsFile, $openPtr);
     if (($functionPtr !== false)
       && (($tokens[$functionPtr]['code'] === T_FUNCTION)
       || ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
@@ -414,15 +414,6 @@ class VariableAnalysisSniff implements Sniff {
       }
     }
     return false;
-  }
-
-  protected function findPreviousFunctionPtr($phpcsFile, $openPtr) {
-    // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
-    // so we look backwards from the opening bracket for the first thing that
-    // isn't a function name, reference sigil or whitespace and check if it's a
-    // function keyword.
-    $functionPtrTypes = [T_STRING, T_WHITESPACE, T_BITWISE_AND];
-    return $phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true);
   }
 
   protected function checkForCatchBlock(File $phpcsFile, $stackPtr, $varName, $currScope) {
