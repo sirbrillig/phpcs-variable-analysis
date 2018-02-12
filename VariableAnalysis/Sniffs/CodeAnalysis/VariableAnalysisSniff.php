@@ -5,6 +5,7 @@ namespace VariableAnalysis\Sniffs\CodeAnalysis;
 use VariableAnalysis\Lib\ScopeInfo;
 use VariableAnalysis\Lib\VariableInfo;
 use VariableAnalysis\Lib\Constants;
+use VariableAnalysis\Lib\Helpers;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 
@@ -226,7 +227,7 @@ class VariableAnalysisSniff implements Sniff {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
-    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
     if ($openPtr === false) {
       return false;
     }
@@ -292,7 +293,7 @@ class VariableAnalysisSniff implements Sniff {
     $semicolonPtr = $phpcsFile->findNext(T_SEMICOLON, $stackPtr + 1, null, false, null, true);
     $commaPtr = $phpcsFile->findNext(T_COMMA, $stackPtr + 1, null, false, null, true);
     $closePtr = false;
-    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
     if ($openPtr !== false) {
       if (isset($tokens[$openPtr]['parenthesis_closer'])) {
         $closePtr = $tokens[$openPtr]['parenthesis_closer'];
@@ -309,21 +310,10 @@ class VariableAnalysisSniff implements Sniff {
     return $assignEndTokens[0];
   }
 
-  protected function findContainingBrackets(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
-
-    if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
-      $openPtrs = array_keys($tokens[$stackPtr]['nested_parenthesis']);
-      return end($openPtrs);
-    }
-    return false;
-  }
-
-
   protected function findFunctionCall(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
-    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
     if ($openPtr) {
       // First non-whitespace thing and see if it's a T_STRING function name
       $functionPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
@@ -362,7 +352,7 @@ class VariableAnalysisSniff implements Sniff {
     $lastPtr = $openPtr;
     $lastArgComma = $openPtr;
     while (($nextPtr = $phpcsFile->findNext(T_COMMA, $lastPtr + 1, $closePtr)) !== false) {
-      if ($this->findContainingBrackets($phpcsFile, $nextPtr) == $openPtr) {
+      if (Helpers::findContainingBrackets($phpcsFile, $nextPtr) == $openPtr) {
         // Comma is at our level of brackets, it's an argument delimiter.
         array_push($argPtrs, range($lastArgComma + 1, $nextPtr - 1));
         $lastArgComma = $nextPtr;
@@ -382,7 +372,7 @@ class VariableAnalysisSniff implements Sniff {
     // It would be nice to get the list of function parameters from watching for
     // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
     // we need to do that as private or final, so we have to do it this hackish way.
-    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
     if ($openPtr === false) {
       return false;
     }
@@ -440,7 +430,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Are we a catch block parameter?
-    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
     if ($openPtr === false) {
       return false;
     }
@@ -618,7 +608,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // OK, are we within a list (...) construct?
-    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
     if ($openPtr === false) {
       return false;
     }
@@ -723,7 +713,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Are we a foreach loopvar?
-    $openPtr = $this->findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
     if ($openPtr === false) {
       return false;
     }
