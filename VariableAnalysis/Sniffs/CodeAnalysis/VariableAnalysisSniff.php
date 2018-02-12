@@ -863,7 +863,7 @@ class VariableAnalysisSniff implements Sniff {
       // of "unused variable" warnings.
       return;
     }
-    $stackPtr = $this->getStackPtrIfVariableIsUnused($varInfo);
+    $stackPtr = Helpers::getStackPtrIfVariableIsUnused($varInfo);
     if ($stackPtr) {
       $phpcsFile->addWarning(
         "Unused %s %s.",
@@ -875,15 +875,5 @@ class VariableAnalysisSniff implements Sniff {
         ]
       );
     }
-  }
-
-  protected function getStackPtrIfVariableIsUnused($varInfo) {
-    if (isset($varInfo->firstDeclared)) {
-      return $varInfo->firstDeclared;
-    }
-    if (isset($varInfo->firstInitialized)) {
-      return $varInfo->firstInitialized;
-    }
-    return null;
   }
 }

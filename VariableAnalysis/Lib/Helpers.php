@@ -189,4 +189,13 @@ class Helpers {
     return 0;
   }
 
+  public static function getStackPtrIfVariableIsUnused(VariableInfo $varInfo) {
+    if (isset($varInfo->firstDeclared)) {
+      return $varInfo->firstDeclared;
+    }
+    if (isset($varInfo->firstInitialized)) {
+      return $varInfo->firstInitialized;
+    }
+    return null;
+  }
 }
