@@ -54,3 +54,15 @@ function function_with_defined_foreach() {
     foreach ($array as $key4 => &$value4) {
     }
 }
+
+$data = [
+    ['foo', 'Foo'],
+    ['bar', 'Bar'],
+
+];
+foreach ($data as $val) {
+    echo json_encode($val);
+}
+foreach ($data as list($name, $label)) {
+    printf('<div id="%s">%s</div>', $name, $label);
+}
