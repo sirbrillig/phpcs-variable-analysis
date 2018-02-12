@@ -126,4 +126,17 @@ class Helpers {
     }
     return $assignEndTokens[0];
   }
+
+  public static function isNextThingAnAssign(File $phpcsFile, int $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+
+    // Is the next non-whitespace an assignment?
+    $nextPtr = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true, null, true);
+    if ($nextPtr !== false) {
+      if ($tokens[$nextPtr]['code'] === T_EQUAL) {
+        return $nextPtr;
+      }
+    }
+    return false;
+  }
 }

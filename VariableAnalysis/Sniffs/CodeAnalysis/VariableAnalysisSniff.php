@@ -268,19 +268,6 @@ class VariableAnalysisSniff implements Sniff {
     return 0;
   }
 
-  protected function isNextThingAnAssign(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
-
-    // Is the next non-whitespace an assignment?
-    $nextPtr = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true, null, true);
-    if ($nextPtr !== false) {
-      if ($tokens[$nextPtr]['code'] === T_EQUAL) {
-        return $nextPtr;
-      }
-    }
-    return false;
-  }
-
   protected function checkForFunctionPrototype(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
@@ -307,7 +294,7 @@ class VariableAnalysisSniff implements Sniff {
         $varInfo->passByReference = true;
       }
       //  Are we optional with a default?
-      if ($this->isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
+      if (Helpers::isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
         $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
       }
       return true;
@@ -476,7 +463,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Is the next non-whitespace an assignment?
-    $assignPtr = $this->isNextThingAnAssign($phpcsFile, $stackPtr);
+    $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $stackPtr);
     if ($assignPtr === false) {
       return false;
     }
@@ -507,7 +494,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // OK, we're a list (...) construct... are we being assigned to?
     $closePtr = $tokens[$openPtr]['parenthesis_closer'];
-    $assignPtr = $this->isNextThingAnAssign($phpcsFile, $closePtr);
+    $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $closePtr);
     if ($assignPtr === false) {
       return false;
     }
@@ -589,7 +576,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // It's a static declaration.
     $this->markVariableDeclaration($varName, 'static', null, $stackPtr, $currScope);
-    if ($this->isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
+    if (Helpers::isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
       $this->markVariableAssignment($varName, $stackPtr, $currScope);
     }
     return true;
