@@ -143,4 +143,50 @@ class Helpers {
   public static function normalizeVarName($varName) {
     return preg_replace('/[{}$]/', '', $varName);
   }
+
+  public static function findFunctionPrototype(File $phpcsFile, int $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $token  = $tokens[$stackPtr];
+
+    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
+    if ($openPtr === false) {
+      return false;
+    }
+    $functionPtr = Helpers::findPreviousFunctionPtr($phpcsFile, $openPtr);
+    if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
+      return $functionPtr;
+    }
+    return false;
+  }
+
+  public static function findVariableScope(File $phpcsFile, int $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $token  = $tokens[$stackPtr];
+
+    $in_class = false;
+    if (!empty($token['conditions'])) {
+      foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
+        if (($scopeCode === T_FUNCTION) || ($scopeCode === T_CLOSURE)) {
+          return $scopePtr;
+        }
+        if (($scopeCode === T_CLASS) || ($scopeCode === T_INTERFACE)) {
+          $in_class = true;
+        }
+      }
+    }
+
+    $scopePtr = Helpers::findFunctionPrototype($phpcsFile, $stackPtr);
+    if ($scopePtr !== false) {
+      return $scopePtr;
+    }
+
+    if ($in_class) {
+      // Member var of a class, we don't care.
+      return false;
+    }
+
+    // File scope, hmm, lets use first token of file?
+    return 0;
+  }
+
 }

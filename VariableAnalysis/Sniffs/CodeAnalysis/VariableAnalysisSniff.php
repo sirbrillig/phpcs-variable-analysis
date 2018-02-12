@@ -218,51 +218,6 @@ class VariableAnalysisSniff implements Sniff {
     }
   }
 
-  protected function findFunctionPrototype(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
-    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
-    if ($openPtr === false) {
-      return false;
-    }
-    $functionPtr = Helpers::findPreviousFunctionPtr($phpcsFile, $openPtr);
-    if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
-      return $functionPtr;
-    }
-    return false;
-  }
-
-  protected function findVariableScope(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
-    $in_class = false;
-    if (!empty($token['conditions'])) {
-      foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
-        if (($scopeCode === T_FUNCTION) || ($scopeCode === T_CLOSURE)) {
-          return $scopePtr;
-        }
-        if (($scopeCode === T_CLASS) || ($scopeCode === T_INTERFACE)) {
-          $in_class = true;
-        }
-      }
-    }
-
-    $scopePtr = $this->findFunctionPrototype($phpcsFile, $stackPtr);
-    if ($scopePtr !== false) {
-      return $scopePtr;
-    }
-
-    if ($in_class) {
-      // Member var of a class, we don't care.
-      return false;
-    }
-
-    // File scope, hmm, lets use first token of file?
-    return 0;
-  }
-
   protected function checkForFunctionPrototype(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
@@ -684,7 +639,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     $varName = Helpers::normalizeVarName($token['content']);
-    $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
+    $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
     if ($currScope === false) {
       return;
     }
@@ -795,7 +750,7 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
 
-    $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
+    $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
     foreach ($matches[1] as $varName) {
       $varName = Helpers::normalizeVarName($varName);
       // Are we $this within a class?
@@ -867,7 +822,7 @@ class VariableAnalysisSniff implements Sniff {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
-    $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
+    $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
 
     $arguments = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);
     if ($arguments !== false) {
