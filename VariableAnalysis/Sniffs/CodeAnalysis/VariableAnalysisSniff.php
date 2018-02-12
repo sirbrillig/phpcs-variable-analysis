@@ -94,11 +94,6 @@ class VariableAnalysisSniff implements Sniff {
     }
   }
 
-  protected function normalizeVarName($varName) {
-    $varName = preg_replace('/[{}$]/', '', $varName);
-    return $varName;
-  }
-
   protected function getScopeKey($currScope) {
     if ($currScope === false) {
       $currScope = 'file';
@@ -688,7 +683,7 @@ class VariableAnalysisSniff implements Sniff {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
-    $varName = $this->normalizeVarName($token['content']);
+    $varName = Helpers::normalizeVarName($token['content']);
     $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
     if ($currScope === false) {
       return;
@@ -802,7 +797,7 @@ class VariableAnalysisSniff implements Sniff {
 
     $currScope = $this->findVariableScope($phpcsFile, $stackPtr);
     foreach ($matches[1] as $varName) {
-      $varName = $this->normalizeVarName($varName);
+      $varName = Helpers::normalizeVarName($varName);
       // Are we $this within a class?
       if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
         continue;

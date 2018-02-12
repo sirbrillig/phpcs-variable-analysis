@@ -139,4 +139,8 @@ class Helpers {
     }
     return false;
   }
+
+  public static function normalizeVarName($varName) {
+    return preg_replace('/[{}$]/', '', $varName);
+  }
 }
