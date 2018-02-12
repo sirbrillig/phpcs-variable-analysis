@@ -5,7 +5,7 @@ namespace VariableAnalysis\Lib;
 use PHP_CodeSniffer\Files\File;
 
 class Helpers {
-  public static function findContainingBrackets(File $phpcsFile, int $stackPtr) {
+  public static function findContainingOpeningBracket(File $phpcsFile, int $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
       $openPtrs = array_keys($tokens[$stackPtr]['nested_parenthesis']);
@@ -47,7 +47,7 @@ class Helpers {
   public static function findFunctionCall(File $phpcsFile, int $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
-    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if ($openPtr) {
       // First non-whitespace thing and see if it's a T_STRING function name
       $functionPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
@@ -86,7 +86,7 @@ class Helpers {
     $lastPtr = $openPtr;
     $lastArgComma = $openPtr;
     while (($nextPtr = $phpcsFile->findNext(T_COMMA, $lastPtr + 1, $closePtr)) !== false) {
-      if (Helpers::findContainingBrackets($phpcsFile, $nextPtr) == $openPtr) {
+      if (Helpers::findContainingOpeningBracket($phpcsFile, $nextPtr) == $openPtr) {
         // Comma is at our level of brackets, it's an argument delimiter.
         array_push($argPtrs, range($lastArgComma + 1, $nextPtr - 1));
         $lastArgComma = $nextPtr;
@@ -110,7 +110,7 @@ class Helpers {
     $semicolonPtr = $phpcsFile->findNext(T_SEMICOLON, $stackPtr + 1, null, false, null, true);
     $commaPtr = $phpcsFile->findNext(T_COMMA, $stackPtr + 1, null, false, null, true);
     $closePtr = false;
-    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if ($openPtr !== false) {
       if (isset($tokens[$openPtr]['parenthesis_closer'])) {
         $closePtr = $tokens[$openPtr]['parenthesis_closer'];
@@ -148,7 +148,7 @@ class Helpers {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
-    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if ($openPtr === false) {
       return false;
     }

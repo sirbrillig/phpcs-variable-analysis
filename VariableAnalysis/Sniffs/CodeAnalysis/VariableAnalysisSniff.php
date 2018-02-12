@@ -226,7 +226,7 @@ class VariableAnalysisSniff implements Sniff {
     // It would be nice to get the list of function parameters from watching for
     // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
     // we need to do that as private or final, so we have to do it this hackish way.
-    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if ($openPtr === false) {
       return false;
     }
@@ -275,7 +275,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Are we a catch block parameter?
-    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if ($openPtr === false) {
       return false;
     }
@@ -432,7 +432,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // OK, are we within a list (...) construct?
-    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if ($openPtr === false) {
       return false;
     }
@@ -537,7 +537,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Are we a foreach loopvar?
-    $openPtr = Helpers::findContainingBrackets($phpcsFile, $stackPtr);
+    $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if ($openPtr === false) {
       return false;
     }
