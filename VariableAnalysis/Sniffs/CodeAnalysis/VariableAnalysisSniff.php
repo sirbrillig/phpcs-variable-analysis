@@ -546,11 +546,11 @@ class VariableAnalysisSniff implements Sniff {
     $errorClass = $code === T_SELF ? 'SelfOutsideClass' : 'StaticOutsideClass';
     $staticRefType = $code === T_SELF ? 'self::' : 'static::';
     if (!empty($token['conditions'])) {
-      if ($this->areAnyConditionsAClosure($phpcsFile, $token['conditions'])) {
+      if (Helpers::areAnyConditionsAClosure($phpcsFile, $token['conditions'])) {
         $phpcsFile->addError("Use of {$staticRefType}%s inside closure.", $stackPtr, $errorClass, ["\${$varName}"]);
         return true;
       }
-      if ($this->areAnyConditionsAClass($token['conditions'])) {
+      if (Helpers::areAnyConditionsAClass($token['conditions'])) {
         return false;
       }
     }
@@ -561,27 +561,6 @@ class VariableAnalysisSniff implements Sniff {
       ["\${$varName}"]
     );
     return true;
-  }
-
-  protected function areAnyConditionsAClosure($phpcsFile, $conditions) {
-    // self within a closure is invalid
-    $tokens = $phpcsFile->getTokens();
-    foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
-      //  Note: have to fetch code from $tokens, T_CLOSURE isn't set for conditions codes.
-      if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  protected function areAnyConditionsAClass($conditions) {
-    foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
-      if ($scopeCode === T_CLASS) {
-        return true;
-      }
-    }
-    return false;
   }
 
   protected function checkForAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
