@@ -71,6 +71,9 @@ foreach ($data as $val) {
 foreach ($data as list($name, $label)) {
     printf('<div id="%s">%s</div>', $name, $label);
 }
+foreach ($data as [$first, $second]) {
+    printf('<div id="%s">%s</div>', $first, $second);
+}
 function doSomethingLoopy($receipts) {
     foreach ( $receipts as &$receipt ) {
         $items = $receipt->items;
