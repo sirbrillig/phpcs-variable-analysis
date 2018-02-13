@@ -63,6 +63,22 @@ $data = [
 foreach ($data as $val) {
     echo json_encode($val);
 }
+foreach ($data as $val) {
+    foreach( $val as $el ) {
+        echo "hi";
+    }
+}
 foreach ($data as list($name, $label)) {
     printf('<div id="%s">%s</div>', $name, $label);
+}
+foreach ($data as [$first, $second]) {
+    printf('<div id="%s">%s</div>', $first, $second);
+}
+function doSomethingLoopy($receipts) {
+    foreach ( $receipts as &$receipt ) {
+        $items = $receipt->items;
+        foreach ( $items AS $item ) {
+            $receipt->receipt_items[] = array_filter( $item );
+        }
+    }
 }

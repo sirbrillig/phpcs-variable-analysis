@@ -537,17 +537,30 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     // Are we a foreach loopvar?
-    $lastStatementPtr = $phpcsFile->findPrevious(T_SEMICOLON, $stackPtr);
-    if ($lastStatementPtr === false) {
-      $lastStatementPtr = 0;
+    $openParenPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
+    if ($openParenPtr === false) {
+      return false;
     }
-    $openPtr = $phpcsFile->findPrevious(T_FOREACH, $stackPtr, $lastStatementPtr);
-    if ($openPtr === false) {
+    $foreachPtr = Helpers::findParenthesisOwner($phpcsFile, $openParenPtr);
+    if ($foreachPtr === false) {
+      return false;
+    }
+    if ($tokens[$foreachPtr]['code'] === T_LIST) {
+      $openParenPtr = Helpers::findContainingOpeningBracket($phpcsFile, $foreachPtr);
+      if ($openParenPtr === false) {
+        return false;
+      }
+      $foreachPtr = Helpers::findParenthesisOwner($phpcsFile, $openParenPtr);
+      if ($foreachPtr === false) {
+        return false;
+      }
+    }
+    if ($tokens[$foreachPtr]['code'] !== T_FOREACH) {
       return false;
     }
 
     // Is there an 'as' token between us and the foreach?
-    if ($phpcsFile->findPrevious(T_AS, $stackPtr - 1, $openPtr) === false) {
+    if ($phpcsFile->findPrevious(T_AS, $stackPtr - 1, $openParenPtr) === false) {
       return false;
     }
 

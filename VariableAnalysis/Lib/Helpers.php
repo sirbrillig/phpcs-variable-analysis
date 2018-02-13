@@ -14,6 +14,11 @@ class Helpers {
     return false;
   }
 
+  public static function findParenthesisOwner(File $phpcsFile, int $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    return $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
+  }
+
   public static function areAnyConditionsAClosure(File $phpcsFile, array $conditions) {
     // self within a closure is invalid
     $tokens = $phpcsFile->getTokens();
