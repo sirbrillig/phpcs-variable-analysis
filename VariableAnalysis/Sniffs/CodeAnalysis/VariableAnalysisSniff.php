@@ -47,6 +47,13 @@ class VariableAnalysisSniff implements Sniff {
    */
   public $validUnusedVariableNames = null;
 
+  /**
+   *  A PHP regexp string for variables that you want to ignore from unused
+   *  variable warnings. For example, to ignore the variables `$_junk` and
+   *  `$_unused`, this could be set to `'/^_/'`.
+   */
+  public $ignoreUnusedRegexp = null;
+
   public function register() {
     return [
       T_VARIABLE,
@@ -124,6 +131,9 @@ class VariableAnalysisSniff implements Sniff {
         ? []
         : preg_split('/\s+/', trim($this->validUnusedVariableNames));
       if (in_array($varName, $validUnusedVariableNames)) {
+        $scopeInfo->variables[$varName]->ignoreUnused = true;
+      }
+      if (isset($this->ignoreUnusedRegexp) && preg_match($this->ignoreUnusedRegexp, $varName) === 1) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
       }
     }
