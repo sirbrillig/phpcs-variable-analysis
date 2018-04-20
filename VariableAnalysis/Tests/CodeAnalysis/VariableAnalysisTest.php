@@ -448,6 +448,25 @@ class VariableAnalysisTest extends BaseTestCase {
     $this->assertEquals($expectedWarnings, $lines);
   }
 
+  public function testAllowUnusedCaughtExceptionsIgnoresUnusedVariables() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedCaughtExceptions',
+      'true'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      16,
+      27,
+      39,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
   public function testIgnoreUnusedRegexpIgnoresUnusedVariables() {
     $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
