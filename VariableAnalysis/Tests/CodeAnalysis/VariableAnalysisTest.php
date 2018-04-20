@@ -414,7 +414,22 @@ class VariableAnalysisTest extends BaseTestCase {
     $this->assertEquals($expectedErrors, $lines);
   }
 
-  public function testUnusedParams() {
+  public function testUnusedParamsAreReported() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      16,
+      27,
+      39,
+      66,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testValidUnusedVariableNamesIgnoresUnusedVariables() {
     $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->ruleset->setSniffProperty(
@@ -427,6 +442,26 @@ class VariableAnalysisTest extends BaseTestCase {
     $expectedWarnings = [
       4,
       16,
+      39,
+      66,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testIgnoreUnusedRegexpIgnoresUnusedVariables() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'ignoreUnusedRegexp',
+      '/^unused_/'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      16,
+      27,
       39,
     ];
     $this->assertEquals($expectedWarnings, $lines);

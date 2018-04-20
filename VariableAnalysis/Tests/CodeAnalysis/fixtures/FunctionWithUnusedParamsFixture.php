@@ -59,3 +59,11 @@ function function_with_no_unused_params($param, $param_two) {
     echo "xxx {$param} xxx";
     return $param;
 }
+
+function function_with_try_catch_and_unused_exception() {
+    try {
+        doAThing();
+    } catch (Exception $unused_param) {
+        echo "unused";
+    }
+}
