@@ -67,3 +67,18 @@ function function_with_try_catch_and_unused_exception() {
         echo "unused";
     }
 }
+
+function function_with_multi_line_unused_params(
+    $unused,
+    $unused_two
+) {
+    $param = 'hello';
+    echo $param;
+    echo "xxx $param xxx";
+    echo "xxx {$param} xxx";
+    $param = 'set the param';
+    echo $param;
+    echo "xxx $param xxx";
+    echo "xxx {$param} xxx";
+    return $param;
+}
