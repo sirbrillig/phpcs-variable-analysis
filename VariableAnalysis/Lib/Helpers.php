@@ -174,7 +174,7 @@ class Helpers {
         if (($scopeCode === T_FUNCTION) || ($scopeCode === T_CLOSURE)) {
           return $scopePtr;
         }
-        if (($scopeCode === T_CLASS) || ($scopeCode === T_INTERFACE)) {
+        if (in_array($scopeCode, [T_CLASS, T_INTERFACE, T_TRAIT])) {
           $in_class = true;
         }
       }
