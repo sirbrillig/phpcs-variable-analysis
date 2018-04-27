@@ -413,4 +413,99 @@ class VariableAnalysisTest extends BaseTestCase {
     $expectedErrors = [];
     $this->assertEquals($expectedErrors, $lines);
   }
+
+  public function testUnusedParamsAreReported() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      16,
+      27,
+      39,
+      66,
+      72,
+      73,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testValidUnusedVariableNamesIgnoresUnusedVariables() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'validUnusedVariableNames',
+      'ignored'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      16,
+      39,
+      66,
+      72,
+      73,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testAllowUnusedFunctionParametersIgnoresUnusedVariables() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedFunctionParameters',
+      'true'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      66,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testAllowUnusedCaughtExceptionsIgnoresUnusedVariables() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedCaughtExceptions',
+      'true'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      16,
+      27,
+      39,
+      72,
+      73,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testIgnoreUnusedRegexpIgnoresUnusedVariables() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'ignoreUnusedRegexp',
+      '/^unused_/'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      16,
+      27,
+      39,
+      72,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }

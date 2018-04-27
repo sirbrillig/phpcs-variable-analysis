@@ -41,16 +41,20 @@ class VariableAnalysisSniff implements Sniff {
   public $allowUnusedFunctionParameters = false;
 
   /**
-   *  A list of names of placeholder variables that you want to ignore from
-   *  unused variable warnings, ie things like $junk.
+   *  A space-separated list of names of placeholder variables that you want to
+   *  ignore from unused variable warnings. For example, to ignore the variables
+   *  `$junk` and `$unused`, this could be set to `'junk unused'`.
    */
   public $validUnusedVariableNames = null;
 
+  /**
+   *  A PHP regexp string for variables that you want to ignore from unused
+   *  variable warnings. For example, to ignore the variables `$_junk` and
+   *  `$_unused`, this could be set to `'/^_/'`.
+   */
+  public $ignoreUnusedRegexp = null;
+
   public function register() {
-    if (!empty($this->validUnusedVariableNames)) {
-      $this->validUnusedVariableNames =
-        preg_split('/\s+/', trim($this->validUnusedVariableNames));
-    }
     return [
       T_VARIABLE,
       T_DOUBLE_QUOTED_STRING,
@@ -123,7 +127,13 @@ class VariableAnalysisSniff implements Sniff {
     $scopeInfo = $this->getOrCreateScopeInfo($currScope);
     if (!isset($scopeInfo->variables[$varName])) {
       $scopeInfo->variables[$varName] = new VariableInfo($varName);
-      if ($this->validUnusedVariableNames && in_array($varName, $this->validUnusedVariableNames)) {
+      $validUnusedVariableNames = (empty($this->validUnusedVariableNames))
+        ? []
+        : preg_split('/\s+/', trim($this->validUnusedVariableNames));
+      if (in_array($varName, $validUnusedVariableNames)) {
+        $scopeInfo->variables[$varName]->ignoreUnused = true;
+      }
+      if (isset($this->ignoreUnusedRegexp) && preg_match($this->ignoreUnusedRegexp, $varName) === 1) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
       }
     }
