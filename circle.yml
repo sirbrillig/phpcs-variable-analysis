@@ -1,6 +1,0 @@
-machine:
-  php:
-    version: 7.1.9
-test:
-  override:
-    - composer test
