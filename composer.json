@@ -21,6 +21,11 @@
     "config": {
         "sort-order": true
     },
+    "autoload": {
+        "psr-4": {
+            "VariableAnalysis\\": "VariableAnalysis/"
+        }
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
