@@ -1,0 +1,9 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/php:7.1.19-fpm-node-browsers
+    steps:
+      - checkout
+      - run: composer install
+      - run: composer test
