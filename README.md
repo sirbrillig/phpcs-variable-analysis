@@ -77,6 +77,11 @@ To set these these options, you must use XML in your ruleset. For details, see t
 </rule>
 ```
 
+## See Also
+
+- [ImportDetection](https://github.com/sirbrillig/phpcs-import-detection): A set of phpcs sniffs to look for unused or unimported symbols.
+
+
 ## Original
 
 This was forked from the excellent work in https://github.com/illusori/PHP_Codesniffer-VariableAnalysis
