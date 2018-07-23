@@ -63,3 +63,10 @@ class ClassWithLateStaticBinding {
         static::some_method(static::CONSTANT, $param);
     }
 }
+
+class ChildClassWithMembers extends ClassWithMembers {
+    function method_with_parent_reference() {
+        echo self::$static_member_var;
+        echo parent::$no_such_static_member_var;
+    }
+}
