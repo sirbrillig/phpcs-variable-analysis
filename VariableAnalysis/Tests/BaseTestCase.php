@@ -7,7 +7,7 @@ use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Config;
 
 class BaseTestCase extends TestCase {
-  public function prepareLocalFileForSniffs($sniffFiles, string $fixtureFile): LocalFile {
+  public function prepareLocalFileForSniffs($sniffFiles, $fixtureFile): LocalFile {
     $config = new Config();
     $ruleset = new Ruleset($config);
     if (! is_array($sniffFiles)) {
@@ -39,7 +39,7 @@ class BaseTestCase extends TestCase {
     return [__DIR__ . '/../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
   }
 
-  public function getFixture(string $fixtureFilename): string {
+  public function getFixture($fixtureFilename) {
     return __DIR__ . '/CodeAnalysis/fixtures/' . $fixtureFilename;
   }
 }
