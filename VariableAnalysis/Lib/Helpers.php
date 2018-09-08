@@ -5,7 +5,7 @@ namespace VariableAnalysis\Lib;
 use PHP_CodeSniffer\Files\File;
 
 class Helpers {
-  public static function findContainingOpeningBracket(File $phpcsFile, int $stackPtr) {
+  public static function findContainingOpeningBracket(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
       $openPtrs = array_keys($tokens[$stackPtr]['nested_parenthesis']);
@@ -14,7 +14,7 @@ class Helpers {
     return false;
   }
 
-  public static function findParenthesisOwner(File $phpcsFile, int $stackPtr) {
+  public static function findParenthesisOwner(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     return $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
   }
@@ -40,7 +40,7 @@ class Helpers {
     return false;
   }
 
-  public static function findPreviousFunctionPtr(File $phpcsFile, int $openPtr) {
+  public static function findPreviousFunctionPtr(File $phpcsFile, $openPtr) {
     // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
     // so we look backwards from the opening bracket for the first thing that
     // isn't a function name, reference sigil or whitespace and check if it's a
@@ -49,7 +49,7 @@ class Helpers {
     return $phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true);
   }
 
-  public static function findFunctionCall(File $phpcsFile, int $stackPtr) {
+  public static function findFunctionCall(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
@@ -103,7 +103,7 @@ class Helpers {
     return $argPtrs;
   }
 
-  public static function findWhereAssignExecuted(File $phpcsFile, int $stackPtr) {
+  public static function findWhereAssignExecuted(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     //  Write should be recorded at the next statement to ensure we treat the
@@ -132,7 +132,7 @@ class Helpers {
     return $assignEndTokens[0];
   }
 
-  public static function isNextThingAnAssign(File $phpcsFile, int $stackPtr) {
+  public static function isNextThingAnAssign(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     // Is the next non-whitespace an assignment?
@@ -149,7 +149,7 @@ class Helpers {
     return preg_replace('/[{}$]/', '', $varName);
   }
 
-  public static function findFunctionPrototype(File $phpcsFile, int $stackPtr) {
+  public static function findFunctionPrototype(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -164,7 +164,7 @@ class Helpers {
     return false;
   }
 
-  public static function findVariableScope(File $phpcsFile, int $stackPtr) {
+  public static function findVariableScope(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
