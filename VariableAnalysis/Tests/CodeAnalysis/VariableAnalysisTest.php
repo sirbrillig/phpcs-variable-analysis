@@ -541,4 +541,16 @@ class VariableAnalysisTest extends BaseTestCase {
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
+
+  public function testAllowDestructuringAssignment() {
+    $fixtureFile = $this->getFixture('DestructuringFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      12,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }
