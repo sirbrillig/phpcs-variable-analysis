@@ -37,6 +37,15 @@ class VariableAnalysisTest extends BaseTestCase {
     $this->assertEquals($expectedWarnings, $lines);
   }
 
+  public function testFunctionWithUseReferenceWarnings() {
+    $fixtureFile = $this->getFixture('FunctionWithUseReferenceFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedErrors = [];
+    $this->assertEquals($expectedErrors, $lines);
+  }
+
   public function testFunctionWithDefaultParamErrors() {
     $fixtureFile = $this->getFixture('FunctionWithDefaultParamFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
