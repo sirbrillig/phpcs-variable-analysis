@@ -446,6 +446,29 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  protected function checkForListShorthandAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
+    $tokens = $phpcsFile->getTokens();
+    $token  = $tokens[$stackPtr];
+
+    // OK, are we within a [ ... ] construct?
+    $openPtr = Helpers::findContainingOpeningSquareBracket($phpcsFile, $stackPtr);
+    if ($openPtr === false) {
+      return false;
+    }
+
+    // OK, we're a [ ... ] construct... are we being assigned to?
+    $closePtr = Helpers::findContainingClosingSquareBracket($phpcsFile, $stackPtr);
+    $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $closePtr);
+    if ($assignPtr === false) {
+      return false;
+    }
+
+    // Yes, we're being assigned.
+    $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
+    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+    return true;
+  }
+
   protected function checkForListAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
@@ -742,6 +765,11 @@ class VariableAnalysisSniff implements Sniff {
 
     // OK, are we within a list (...) = construct?
     if ($this->checkForListAssignment($phpcsFile, $stackPtr, $varName, $currScope)) {
+      return;
+    }
+
+    // OK, are we within a [...] = construct?
+    if ($this->checkForListShorthandAssignment($phpcsFile, $stackPtr, $varName, $currScope)) {
       return;
     }
 

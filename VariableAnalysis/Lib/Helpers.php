@@ -5,6 +5,25 @@ namespace VariableAnalysis\Lib;
 use PHP_CodeSniffer\Files\File;
 
 class Helpers {
+  public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
+    return $phpcsFile->findPrevious(T_OPEN_SHORT_ARRAY, $stackPtr - 1, $previousStatementPtr);
+  }
+
+  public static function findContainingClosingSquareBracket(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $endOfStatementPtr = $phpcsFile->findNext([T_SEMICOLON], $stackPtr + 1);
+    if (! $endOfStatementPtr) {
+      return false;
+    }
+    return $phpcsFile->findNext(T_CLOSE_SHORT_ARRAY, $stackPtr + 1, $endOfStatementPtr);
+  }
+
+  public static function getPreviousStatementPtr(File $phpcsFile, $stackPtr) {
+    return $phpcsFile->findPrevious([T_SEMICOLON, T_CLOSE_CURLY_BRACKET], $stackPtr - 1) ?: 1;
+  }
+
   public static function findContainingOpeningBracket(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
