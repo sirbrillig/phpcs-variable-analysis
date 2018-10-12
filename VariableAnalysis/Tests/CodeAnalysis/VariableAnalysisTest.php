@@ -390,6 +390,18 @@ class VariableAnalysisTest extends BaseTestCase {
     $this->assertEquals($expectedErrors, $lines);
   }
 
+  public function testAnonymousClassAllowsThis() {
+    $fixtureFile = $this->getFixture('AnonymousClassFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [];
+    $this->assertEquals($expectedWarnings, $lines);
+    $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
+    $expectedErrors = [];
+    $this->assertEquals($expectedErrors, $lines);
+  }
+
   public function testVariableFunctionCallsCountAsUsage() {
     $fixtureFile = $this->getFixture('FunctionWithVariableCallFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
@@ -404,6 +416,18 @@ class VariableAnalysisTest extends BaseTestCase {
 
   public function testTraitsAllowPropertyDefinitions() {
     $fixtureFile = $this->getFixture('TraitWithPropertiesFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [];
+    $this->assertEquals($expectedWarnings, $lines);
+    $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
+    $expectedErrors = [];
+    $this->assertEquals($expectedErrors, $lines);
+  }
+
+  public function testAnonymousClassAllowPropertyDefinitions() {
+    $fixtureFile = $this->getFixture('AnonymousClassWithPropertiesFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
