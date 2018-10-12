@@ -274,6 +274,14 @@ class VariableAnalysisSniff implements Sniff {
         // TODO: typeHints in use?
         $this->markVariableDeclaration($varName, 'bound', null, $stackPtr, $functionPtr);
         $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
+
+        // Are we pass-by-reference?
+        $referencePtr = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true, null, true);
+        if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
+          $varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
+          $varInfo->passByReference = true;
+        }
+
         return true;
       }
     }
