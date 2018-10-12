@@ -320,7 +320,7 @@ class VariableAnalysisSniff implements Sniff {
       if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
         return true;
       }
-      if ($scopeCode === T_CLASS || $scopeCode === T_TRAIT) {
+      if ($scopeCode === T_CLASS || $scopeCode === T_ANON_CLASS || $scopeCode === T_TRAIT) {
         return true;
       }
     }
