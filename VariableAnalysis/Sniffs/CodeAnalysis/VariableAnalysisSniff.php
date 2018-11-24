@@ -54,6 +54,13 @@ class VariableAnalysisSniff implements Sniff {
    */
   public $ignoreUnusedRegexp = null;
 
+  /**
+   *  A space-separated list of names of placeholder variables that you want to
+   *  ignore from undefined variable warnings. For example, to ignore the variables
+   *  `$post` and `$undefined`, this could be set to `'post undefined'`.
+   */
+  public $validUdefinedVariableNames = null;
+
   public function register() {
     return [
       T_VARIABLE,
@@ -130,11 +137,17 @@ class VariableAnalysisSniff implements Sniff {
       $validUnusedVariableNames = (empty($this->validUnusedVariableNames))
         ? []
         : preg_split('/\s+/', trim($this->validUnusedVariableNames));
+      $validUndefinedVariableNames = (empty($this->validUndefinedVariableNames))
+        ? []
+        : preg_split('/\s+/', trim($this->validUndefinedVariableNames));
       if (in_array($varName, $validUnusedVariableNames)) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
       }
       if (isset($this->ignoreUnusedRegexp) && preg_match($this->ignoreUnusedRegexp, $varName) === 1) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
+      }
+      if (in_array($varName, $validUndefinedVariableNames)) {
+        $scopeInfo->variables[$varName]->ignoreUndefined = true;
       }
     }
     return $scopeInfo->variables[$varName];
@@ -206,6 +219,9 @@ class VariableAnalysisSniff implements Sniff {
 
   protected function isVariableUndefined($varName, $stackPtr, $currScope) {
     $varInfo = $this->getVariableInfo($varName, $currScope);
+    if ($varInfo->ignoreUndefined) {
+      return false;
+    }
     if (isset($varInfo->firstDeclared) && $varInfo->firstDeclared <= $stackPtr) {
       // TODO: do we want to check scopeType here?
       return false;
