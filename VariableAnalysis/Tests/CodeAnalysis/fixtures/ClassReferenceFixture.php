@@ -9,6 +9,8 @@ class ClassWithSymbolicRefProperty {
             $this -> $property = 'some value';
             $this->$undefined_property = 'some value';
             $this -> $undefined_property = 'some value';
+            $this->$ignored_property = 'some value';
+            $this -> $ignored_property = 'some value';
         }
     }
 
@@ -19,6 +21,8 @@ class ClassWithSymbolicRefProperty {
             $this -> $method();
             $this->$undefined_method();
             $this -> $undefined_method();
+            $this->$ignored_method();
+            $this -> $ignored_method();
         }
     }
 }
