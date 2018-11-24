@@ -17,6 +17,7 @@ class VariableInfo {
   public $firstInitialized;
   public $firstRead;
   public $ignoreUnused = false;
+  public $ignoreUndefined = false;
 
   public static $scopeTypeDescriptions = array(
     'local'  => 'variable',

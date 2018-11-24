@@ -5,6 +5,7 @@ function function_with_global_var() {
 
     echo $var;
     echo $var3;
+    echo $ice_cream;
     return $var2;
 }
 
@@ -20,4 +21,11 @@ function function_with_superglobals() {
     echo print_r($_ENV, true);
     echo "{$GLOBALS['whatever']}";
     echo "{$GLOBALS['whatever']} $var";
+}
+
+// Variables within the global scope
+$cherry = 'topping';
+$sunday = $ice_cream . 'and a ' . $cherry;
+if ( $ice_cream ) {
+    echo 'Two scoops please!';
 }

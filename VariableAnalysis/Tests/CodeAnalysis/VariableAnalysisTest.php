@@ -84,7 +84,10 @@ class VariableAnalysisTest extends BaseTestCase {
     $expectedWarnings = [
       4,
       7,
-      22,
+      8,
+      23,
+      28,
+      29
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -355,8 +358,12 @@ class VariableAnalysisTest extends BaseTestCase {
     $expectedWarnings = [
       10,
       11,
-      20,
-      21,
+      12,
+      13,
+      22,
+      23,
+      24,
+      25
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -550,6 +557,45 @@ class VariableAnalysisTest extends BaseTestCase {
     $expectedWarnings = [
       4,
       12,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testValidUndefinedVariableNamesIgnoresVarsInGlobalScope() {
+    $fixtureFile = $this->getFixture('FunctionWithGlobalVarFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'validUndefinedVariableNames',
+      'ice_cream'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      7,
+      23,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testValidUndefinedVariableNamesIgnoresUndefinedProperties() {
+    $fixtureFile = $this->getFixture('ClassReferenceFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'validUndefinedVariableNames',
+      'ignored_property'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      10,
+      11,
+      22,
+      23,
+      24,
+      25
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
