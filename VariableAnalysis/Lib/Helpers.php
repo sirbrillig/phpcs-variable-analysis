@@ -3,6 +3,7 @@
 namespace VariableAnalysis\Lib;
 
 use PHP_CodeSniffer\Files\File;
+use VariableAnalysis\Lib\VariableInfo;
 
 class Helpers {
   public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr) {
@@ -86,7 +87,6 @@ class Helpers {
     $tokens = $phpcsFile->getTokens();
 
     // Slight hack: also allow this to find args for array constructor.
-    // TODO: probably should refactor into three functions: arg-finding and bracket-finding
     if (($tokens[$stackPtr]['code'] !== T_STRING) && ($tokens[$stackPtr]['code'] !== T_ARRAY)) {
       // Assume $stackPtr is something within the brackets, find our function call
       $stackPtr = Helpers::findFunctionCall($phpcsFile, $stackPtr);

@@ -10,6 +10,7 @@
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine" />
         <exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine" />
         <exclude name="Generic.WhiteSpace.DisallowTabIndent"/>
+        <exclude name="Generic.Files.LineLength.TooLong" />
     </rule>
     <arg name="tab-width" value="2"/>
     <rule ref="Generic.WhiteSpace.ScopeIndent">
@@ -29,4 +30,5 @@
     </rule>
     <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie" />
     <rule ref="Generic.Classes.OpeningBraceSameLine"/>
+    <rule ref="ImportDetection" />
 </ruleset>

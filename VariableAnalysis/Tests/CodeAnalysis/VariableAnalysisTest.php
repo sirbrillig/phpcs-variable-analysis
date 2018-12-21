@@ -1,9 +1,7 @@
 <?php
 namespace VariableAnalysis\Tests;
 
-use PHP_CodeSniffer\Files\LocalFile;
-use PHP_CodeSniffer\Ruleset;
-use PHP_CodeSniffer\Config;
+use VariableAnalysis\Tests\BaseTestCase;
 
 class VariableAnalysisTest extends BaseTestCase {
   public function testFunctionWithoutParamsErrors() {
@@ -596,6 +594,34 @@ class VariableAnalysisTest extends BaseTestCase {
       23,
       24,
       25
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testUnusedArgumentsBeforeUsedArgumentsAreFound() {
+    $fixtureFile = $this->getFixture('UnusedAfterUsedFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      5,
+      8,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testUnusedArgumentsBeforeUsedArgumentsAreIgnoredIfSet() {
+    $fixtureFile = $this->getFixture('UnusedAfterUsedFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedParametersBeforeUsed',
+      'true'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      8,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
