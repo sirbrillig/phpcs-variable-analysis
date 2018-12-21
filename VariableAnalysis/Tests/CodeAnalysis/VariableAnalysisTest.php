@@ -599,4 +599,32 @@ class VariableAnalysisTest extends BaseTestCase {
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
+
+  public function testUnusedArgumentsBeforeUsedArgumentsAreFound() {
+    $fixtureFile = $this->getFixture('UnusedAfterUsedFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      5,
+      8,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testUnusedArgumentsBeforeUsedArgumentsAreIgnoredIfSet() {
+    $fixtureFile = $this->getFixture('UnusedAfterUsedFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'ignoreUnusedArgsBeforeUsed',
+      'true'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      8,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }
