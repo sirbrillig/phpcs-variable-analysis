@@ -13,6 +13,5 @@ class ScopeInfo {
 
   public function __construct($currScope) {
     $this->owner = $currScope;
-    // TODO: extract opener/closer
   }
 }

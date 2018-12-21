@@ -246,7 +246,6 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
     if (isset($varInfo->firstDeclared) && $varInfo->firstDeclared <= $stackPtr) {
-      // TODO: do we want to check scopeType here?
       return false;
     }
     if (isset($varInfo->firstInitialized) && $varInfo->firstInitialized <= $stackPtr) {
@@ -284,7 +283,6 @@ class VariableAnalysisSniff implements Sniff {
     if (($functionPtr !== false)
       && (($tokens[$functionPtr]['code'] === T_FUNCTION)
       || ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
-      // TODO: typeHint
       $this->markVariableDeclaration($varName, 'param', null, $stackPtr, $functionPtr);
       // Are we pass-by-reference?
       $referencePtr = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true, null, true);
@@ -310,7 +308,6 @@ class VariableAnalysisSniff implements Sniff {
       // $functionPtr is at the use, we need the function keyword for start of scope.
       $functionPtr = $phpcsFile->findPrevious(T_CLOSURE, $functionPtr - 1, $currScope + 1, false, null, true);
       if ($functionPtr !== false) {
-        // TODO: typeHints in use?
         $this->markVariableDeclaration($varName, 'bound', null, $stackPtr, $functionPtr);
         $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
 
@@ -340,7 +337,6 @@ class VariableAnalysisSniff implements Sniff {
     $catchPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
     if (($catchPtr !== false) && ($tokens[$catchPtr]['code'] === T_CATCH)) {
       // Scope of the exception var is actually the function, not just the catch block.
-      // TODO: typeHint
       $this->markVariableDeclaration($varName, 'local', null, $stackPtr, $currScope, true);
       $this->markVariableAssignment($varName, $stackPtr, $currScope);
       if ($this->allowUnusedCaughtExceptions) {
@@ -428,7 +424,6 @@ class VariableAnalysisSniff implements Sniff {
 
   protected function checkForStaticOutsideClass(File $phpcsFile, $stackPtr, $varName, $currScope) {
     // Are we refering to self:: outside a class?
-    // TODO: not sure this is our business or should be some other sniff.
 
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
