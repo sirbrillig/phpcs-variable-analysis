@@ -29,4 +29,5 @@
     </rule>
     <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie" />
     <rule ref="Generic.Classes.OpeningBraceSameLine"/>
+    <rule ref="ImportDetection" />
 </ruleset>
