@@ -59,7 +59,7 @@ class VariableAnalysisSniff implements Sniff {
    *  ignore from undefined variable warnings. For example, to ignore the variables
    *  `$post` and `$undefined`, this could be set to `'post undefined'`.
    */
-  public $validUdefinedVariableNames = null;
+  public $validUndefinedVariableNames = null;
 
   /**
    * Allows unused arguments in a function definition if they are
