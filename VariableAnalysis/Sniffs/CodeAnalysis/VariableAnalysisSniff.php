@@ -61,6 +61,12 @@ class VariableAnalysisSniff implements Sniff {
    */
   public $validUdefinedVariableNames = null;
 
+  /**
+   * Allows unused arguments in a function definition if they are
+   * followed by an argument which is used.
+   */
+  public $ignoreUnusedArgsBeforeUsed = false;
+
   public function register() {
     return [
       T_VARIABLE,
@@ -151,6 +157,23 @@ class VariableAnalysisSniff implements Sniff {
       }
     }
     return $scopeInfo->variables[$varName];
+  }
+
+  protected function areFollowingArgumentsUsed($varInfo, $scopeInfo) {
+    $foundVarPosition = false;
+    foreach ($scopeInfo->variables as $variable) {
+      if ($variable === $varInfo) {
+        $foundVarPosition = true;
+        continue;
+      }
+      if (! $foundVarPosition) {
+        continue;
+      }
+      if ($variable->firstRead) {
+        return true;
+      }
+    }
+    return false;
   }
 
   protected function markVariableAssignment($varName, $stackPtr, $currScope) {
@@ -925,15 +948,18 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     foreach ($scopeInfo->variables as $varInfo) {
-      $this->processScopeCloseForVariable($phpcsFile, $varInfo);
+      $this->processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo);
     }
   }
 
-  protected function processScopeCloseForVariable($phpcsFile, $varInfo) {
+  protected function processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo) {
     if ($varInfo->ignoreUnused || isset($varInfo->firstRead)) {
       return;
     }
     if ($this->allowUnusedFunctionParameters && $varInfo->scopeType === 'param') {
+      return;
+    }
+    if ($this->ignoreUnusedArgsBeforeUsed && $varInfo->scopeType === 'param' && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
       return;
     }
     if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {
