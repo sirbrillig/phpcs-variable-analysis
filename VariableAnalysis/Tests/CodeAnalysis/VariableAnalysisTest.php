@@ -1,9 +1,7 @@
 <?php
 namespace VariableAnalysis\Tests;
 
-use PHP_CodeSniffer\Files\LocalFile;
-use PHP_CodeSniffer\Ruleset;
-use PHP_CodeSniffer\Config;
+use VariableAnalysis\Tests\BaseTestCase;
 
 class VariableAnalysisTest extends BaseTestCase {
   public function testFunctionWithoutParamsErrors() {
