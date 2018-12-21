@@ -65,7 +65,7 @@ class VariableAnalysisSniff implements Sniff {
    * Allows unused arguments in a function definition if they are
    * followed by an argument which is used.
    */
-  public $ignoreUnusedArgsBeforeUsed = false;
+  public $allowUnusedParametersBeforeUsed = false;
 
   public function register() {
     return [
@@ -954,7 +954,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($this->allowUnusedFunctionParameters && $varInfo->scopeType === 'param') {
       return;
     }
-    if ($this->ignoreUnusedArgsBeforeUsed && $varInfo->scopeType === 'param' && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
+    if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === 'param' && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
       return;
     }
     if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {

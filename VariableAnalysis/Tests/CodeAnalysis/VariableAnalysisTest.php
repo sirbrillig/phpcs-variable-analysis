@@ -615,7 +615,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->ruleset->setSniffProperty(
       'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-      'ignoreUnusedArgsBeforeUsed',
+      'allowUnusedParametersBeforeUsed',
       'true'
     );
     $phpcsFile->process();
