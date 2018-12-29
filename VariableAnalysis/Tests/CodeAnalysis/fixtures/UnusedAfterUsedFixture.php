@@ -10,3 +10,16 @@ function check_thumbnail_updated_post_meta(
     echo $post_id;
     echo $meta_key;
 }
+
+function inner_function() {
+    $foo = function(
+        $meta_id,
+        $post_id,
+        $meta_key,
+        $foobar
+    ) {
+        echo $post_id;
+        echo $meta_key;
+    }
+    $foo();
+}
