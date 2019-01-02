@@ -65,7 +65,7 @@ class VariableAnalysisSniff implements Sniff {
    * Allows unused arguments in a function definition if they are
    * followed by an argument which is used.
    */
-  public $allowUnusedParametersBeforeUsed = false;
+  public $allowUnusedParametersBeforeUsed = true;
 
   public function register() {
     return [
