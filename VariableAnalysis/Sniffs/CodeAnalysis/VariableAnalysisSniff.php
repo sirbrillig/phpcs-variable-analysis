@@ -608,6 +608,10 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  protected function checkForNumericVariable($varName) {
+    return is_numeric(substr($varName, 0, 1));
+  }
+
   protected function checkForForeachLoopVar(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
@@ -827,6 +831,11 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
 
+    // Are we a numeric variable used for constructs like preg_replace?
+    if ($this->checkForNumericVariable($varName)) {
+      return;
+    }
+
     // OK, we don't appear to be a write to the var, assume we're a read.
     $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
   }
@@ -855,9 +864,16 @@ class VariableAnalysisSniff implements Sniff {
       if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
         continue;
       }
+
       if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName, $currScope)) {
         continue;
       }
+
+      // Are we a numeric variable used for constructs like preg_replace?
+      if ($this->checkForNumericVariable($varName)) {
+        continue;
+      }
+
       $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
     }
   }

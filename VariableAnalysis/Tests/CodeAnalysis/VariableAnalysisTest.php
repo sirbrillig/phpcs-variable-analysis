@@ -688,4 +688,16 @@ class VariableAnalysisTest extends BaseTestCase {
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
+
+  public function testPregReplaceIgnoresNumericVariables() {
+    $fixtureFile = $this->getFixture('PregReplaceFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      15,
+      20,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }
