@@ -57,10 +57,14 @@ class ClassWithMembers {
 }
 
 class ClassWithLateStaticBinding {
+    public static $static_member_var;
+
     static function method_with_late_static_binding($param) {
         static::some_method($param);
-        static::some_method($var);
+        static::some_method($var); // should report a warning
         static::some_method(static::CONSTANT, $param);
+        $called_class = get_called_class();
+        echo $called_class::$static_member_var;
     }
 }
 
