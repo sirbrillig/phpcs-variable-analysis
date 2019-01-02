@@ -409,6 +409,7 @@ class VariableAnalysisSniff implements Sniff {
       T_SELF,
       T_PARENT,
       T_STATIC,
+      T_VARIABLE,
     ];
     if (! in_array($tokens[$classNamePtr]['code'], $staticReferences, true)) {
       return false;
