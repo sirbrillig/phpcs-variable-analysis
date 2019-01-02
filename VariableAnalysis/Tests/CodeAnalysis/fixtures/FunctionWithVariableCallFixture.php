@@ -41,4 +41,14 @@ class MyClass {
     public function funcUsingPropertyReferenceWithStatic($meta) {
         return static::$$meta;
     }
+
+    public function funcUsingPropertyReferenceWithVariableClass($meta) {
+        $called_class = get_called_class();
+        return $called_class::$$meta;
+    }
+
+    public function funcUsingNamedPropertyReferenceWithVariableClass() {
+        $called_class = get_called_class();
+        return $called_class::$staticProperty;
+    }
 }
