@@ -26,3 +26,11 @@ function loopWithUnusedKeyAndValue() {
         echo $undefined; // should always be marked as undefined
     }
 }
+
+function loopWithUnusedValueOnly() {
+    $array = [];
+    foreach ( $array as $value ) { // maybe marked as unused
+        $unused = 'foobar'; // should always be marked as unused
+        echo $undefined; // should always be marked as undefined
+    }
+}
