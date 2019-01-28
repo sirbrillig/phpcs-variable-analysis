@@ -18,6 +18,7 @@ class VariableInfo {
   public $firstRead;
   public $ignoreUnused = false;
   public $ignoreUndefined = false;
+  public $isForeachLoopVar = false;
 
   public static $scopeTypeDescriptions = array(
     'local'  => 'variable',
