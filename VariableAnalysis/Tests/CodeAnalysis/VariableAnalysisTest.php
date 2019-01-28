@@ -706,7 +706,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->ruleset->setSniffProperty(
       'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-      'ignoreUnusedForeachVariables',
+      'allowUnusedForeachVariables',
       'false'
     );
     $phpcsFile->process();
@@ -730,7 +730,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->ruleset->setSniffProperty(
       'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-      'ignoreUnusedForeachVariables',
+      'allowUnusedForeachVariables',
       'true'
     );
     $phpcsFile->process();

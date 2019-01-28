@@ -71,7 +71,7 @@ class VariableAnalysisSniff implements Sniff {
    * If set to true, unused keys or values created by the `as` statement
    * in a `foreach` loop will never be marked as unused.
    */
-  public $ignoreUnusedForeachVariables = false;
+  public $allowUnusedForeachVariables = false;
 
   public function register() {
     return [
@@ -982,7 +982,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === 'param' && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
       return;
     }
-    if ($this->ignoreUnusedForeachVariables && $varInfo->isForeachLoopVar) {
+    if ($this->allowUnusedForeachVariables && $varInfo->isForeachLoopVar) {
       return;
     }
     if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {
