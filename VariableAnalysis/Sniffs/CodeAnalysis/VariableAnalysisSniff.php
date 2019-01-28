@@ -67,6 +67,12 @@ class VariableAnalysisSniff implements Sniff {
    */
   public $allowUnusedParametersBeforeUsed = true;
 
+  /**
+   * If set to true, unused keys or values created by the `as` statement
+   * in a `foreach` loop will never be marked as unused.
+   */
+  public $ignoreUnusedForeachVariables = false;
+
   public function register() {
     return [
       T_VARIABLE,
