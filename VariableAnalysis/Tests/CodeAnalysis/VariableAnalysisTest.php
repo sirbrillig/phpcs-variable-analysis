@@ -700,4 +700,54 @@ class VariableAnalysisTest extends BaseTestCase {
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
+
+  public function testUnusedForeachVariablesAreNotIgnoredByDefault() {
+    $fixtureFile = $this->getFixture('UnusedForeachFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedForeachVariables',
+      'false'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      5,
+      7,
+      8,
+      14,
+      16,
+      17,
+      23,
+      25,
+      26,
+      32,
+      33,
+      34,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testUnusedForeachVariablesAreIgnoredIfSet() {
+    $fixtureFile = $this->getFixture('UnusedForeachFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedForeachVariables',
+      'true'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      7,
+      8,
+      16,
+      17,
+      25,
+      26,
+      33,
+      34,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }

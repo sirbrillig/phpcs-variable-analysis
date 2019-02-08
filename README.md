@@ -68,6 +68,7 @@ The available options are as follows:
 - `validUnusedVariableNames` (string, default `null`): a space-separated list of names of placeholder variables that you want to ignore from unused variable warnings. For example, to ignore the variables `$junk` and `$unused`, this could be set to `'junk unused'`.
 - `ignoreUnusedRegexp` (string, default `null`): a PHP regexp string (note that this requires explicit delimiters) for variables that you want to ignore from unused variable warnings. For example, to ignore the variables `$_junk` and `$_unused`, this could be set to `'/^_/'`.
 - `validUndefinedVariableNames` (string, default `null`): a space-separated list of names of placeholder variables that you want to ignore from undefined variable warnings. For example, to ignore the variables `$post` and `$undefined`, this could be set to `'post undefined'`.
+- `allowUnusedForeachVariables` (bool, default `false`): if set to true, unused keys or values created by the `as` statement in a `foreach` loop will never be marked as unused.
 
 To set these these options, you must use XML in your ruleset. For details, see the [phpcs customizable sniff properties page](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Customisable-Sniff-Properties). Here is an example that ignores all variables that start with an underscore:
 
