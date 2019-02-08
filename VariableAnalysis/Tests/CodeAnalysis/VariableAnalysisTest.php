@@ -260,6 +260,33 @@ class VariableAnalysisTest extends BaseTestCase {
       39,
       40,
       46,
+      59,
+      60,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testFunctionWithReferenceWarningsAllowsCustomFunctions() {
+    $fixtureFile = $this->getFixture('FunctionWithReferenceFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'sitePassByRefFunctions',
+      'my_reference_function:2,3 another_reference_function:2,...'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      8,
+      20,
+      32,
+      33,
+      34,
+      36,
+      37,
+      39,
+      40,
+      46,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
