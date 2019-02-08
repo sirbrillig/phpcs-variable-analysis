@@ -199,9 +199,7 @@ class VariableAnalysisTest extends BaseTestCase {
     );
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
-    $expectedErrors = [
-      50,
-    ];
+    $expectedErrors = [];
     $this->assertEquals($expectedErrors, $lines);
   }
 
