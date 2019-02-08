@@ -450,14 +450,8 @@ class VariableAnalysisSniff implements Sniff {
     }
     $errorClass = $code === T_SELF ? 'SelfOutsideClass' : 'StaticOutsideClass';
     $staticRefType = $code === T_SELF ? 'self::' : 'static::';
-    if (!empty($token['conditions'])) {
-      if (Helpers::areAnyConditionsAClosure($phpcsFile, $token['conditions'])) {
-        $phpcsFile->addError("Use of {$staticRefType}%s inside closure.", $stackPtr, $errorClass, ["\${$varName}"]);
-        return true;
-      }
-      if (Helpers::areAnyConditionsAClass($token['conditions'])) {
-        return false;
-      }
+    if (!empty($token['conditions']) && Helpers::areAnyConditionsAClass($token['conditions'])) {
+      return false;
     }
     $phpcsFile->addError(
       "Use of {$staticRefType}%s outside class definition.",
@@ -760,7 +754,7 @@ class VariableAnalysisSniff implements Sniff {
     //   Is an optional function/closure parameter with non-null value
     //   Is closure use declaration of a variable defined within containing scope
     //   catch (...) block start
-    //   $this within a class (but not within a closure).
+    //   $this within a class.
     //   $GLOBALS, $_REQUEST, etc superglobals.
     //   $var part of class::$var static member
     //   Assignment via =
