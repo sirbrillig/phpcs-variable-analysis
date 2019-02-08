@@ -33,6 +33,12 @@ class VariableAnalysisSniff implements Sniff {
   public $sitePassByRefFunctions = null;
 
   /**
+   * If set, allows common WordPress pass-by-reference functions in addition to
+   * the standard PHP ones.
+   */
+  public $allowWordPressPassByRefFunctions = false;
+
+  /**
    *  Allows exceptions in a catch block to be unused without provoking unused-var warning.
    *  Set generic.codeanalysis.variableanalysis.allowUnusedCaughtExceptions to a true value.
    */
@@ -89,12 +95,14 @@ class VariableAnalysisSniff implements Sniff {
 
   private function getPassByReferenceFunction($functionName) {
     $passByRefFunctions = Constants::getPassByReferenceFunctions();
-    //  Magic to modfy $passByRefFunctions with any site-specific settings.
     if (!empty($this->sitePassByRefFunctions)) {
       foreach (preg_split('/\s+/', trim($this->sitePassByRefFunctions)) as $line) {
         list ($function, $args) = explode(':', $line);
         $passByRefFunctions[$function] = explode(',', $args);
       }
+    }
+    if ($this->allowWordPressPassByRefFunctions) {
+      $passByRefFunctions = array_merge($passByRefFunctions, Constants::getWordPressPassByReferenceFunctions());
     }
     return isset($passByRefFunctions[$functionName]) ? $passByRefFunctions[$functionName] : null;
   }

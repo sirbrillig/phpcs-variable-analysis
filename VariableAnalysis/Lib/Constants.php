@@ -238,6 +238,13 @@ class Constants {
     ];
   }
 
+  public static function getWordPressPassByReferenceFunctions() {
+    return [
+      'wp_parse_str' => [2],
+      'wp_cache_get' => [4],
+    ];
+  }
+
   /**
    * A regexp for matching variable names in double-quoted strings.
    */
