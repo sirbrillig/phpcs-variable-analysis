@@ -262,6 +262,7 @@ class VariableAnalysisTest extends BaseTestCase {
       46,
       59,
       60,
+      64,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -287,6 +288,34 @@ class VariableAnalysisTest extends BaseTestCase {
       39,
       40,
       46,
+      64,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testFunctionWithReferenceWarningsAllowsWordPressFunctionsIfSet() {
+    $fixtureFile = $this->getFixture('FunctionWithReferenceFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowWordPressPassByRefFunctions',
+      'true'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      8,
+      20,
+      32,
+      33,
+      34,
+      36,
+      37,
+      39,
+      40,
+      46,
+      59,
+      60,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }

@@ -59,3 +59,7 @@ function function_with_ignored_reference_call() {
     my_reference_function($foo, $baz, $bip);
     another_reference_function($foo, $foo2, $foo3);
 }
+
+function function_with_wordpress_reference_calls() {
+    wp_parse_str('foo=bar', $vars);
+}
