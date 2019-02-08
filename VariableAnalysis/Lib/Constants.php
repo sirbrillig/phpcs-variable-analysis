@@ -241,6 +241,7 @@ class Constants {
   public static function getWordPressPassByReferenceFunctions() {
     return [
       'wp_parse_str' => [2],
+      'wp_cache_get' => [4],
     ];
   }
 
