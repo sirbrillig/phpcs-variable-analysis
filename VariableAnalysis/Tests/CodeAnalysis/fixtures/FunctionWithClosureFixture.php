@@ -52,3 +52,33 @@ class ClassWithSelfInsideClosure {
         echo self::$static_member;
     }
 }
+
+function function_with_self_in_closure() {
+    return function() {
+        return self::$foobar; // should be an error
+    }
+}
+
+function function_with_this_in_closure() {
+    return function() {
+        return $this->$foobar; // should be an error
+    }
+}
+
+function function_with_static_in_closure() {
+    return function() {
+        return static::$foobar; // should be an error
+    }
+}
+
+class ClassWithStaticInsideClosure {
+    static $static_member;
+
+    function method_with_self_inside_closure() {
+        echo static::$static_member;
+        array_map(function () {
+                echo static::$static_member;
+            }, array());
+        echo static::$static_member;
+    }
+}
