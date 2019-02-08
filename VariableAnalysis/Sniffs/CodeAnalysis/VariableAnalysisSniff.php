@@ -23,8 +23,12 @@ class VariableAnalysisSniff implements Sniff {
   private $scopes = [];
 
   /**
-   *  Allows an install to extend the list of known pass-by-reference functions
-   *  by defining generic.codeanalysis.variableanalysis.sitePassByRefFunctions.
+   * An associative array of additional pass-by-reference functions. The keys
+   * are the function names, and the values are indexed arrays containing the
+   * argument numbers (starting from 1) of arguments which should be considered
+   * variable definitions. The special value `'...'` in the arguments array
+   * will cause all arguments after the last number to be considered variable
+   * definitions.
    */
   public $sitePassByRefFunctions = null;
 

@@ -53,3 +53,9 @@ function function_with_pass_by_reference_calls() {
 function function_with_pass_by_ref_assign_only_arg(&$return_value) {
     $return_value = 42;
 }
+
+function function_with_ignored_reference_call() {
+    $foo = 'bar';
+    my_reference_function($foo, $baz, $bip);
+    another_reference_function($foo, $foo2, $foo3);
+}
