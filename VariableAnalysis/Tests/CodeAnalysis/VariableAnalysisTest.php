@@ -759,7 +759,25 @@ class VariableAnalysisTest extends BaseTestCase {
     $this->assertEquals($expectedWarnings, $lines);
   }
 
-  public function testUnusedForeachVariablesAreNotIgnoredByDefault() {
+  public function testUnusedForeachVariablesAreIgnoredByDefault() {
+    $fixtureFile = $this->getFixture('UnusedForeachFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      7,
+      8,
+      16,
+      17,
+      25,
+      26,
+      33,
+      34,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testUnusedForeachVariablesAreNotIgnoredIfDisabled() {
     $fixtureFile = $this->getFixture('UnusedForeachFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->ruleset->setSniffProperty(
