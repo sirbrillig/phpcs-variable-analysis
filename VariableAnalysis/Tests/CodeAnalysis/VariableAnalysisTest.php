@@ -123,10 +123,6 @@ class VariableAnalysisTest extends BaseTestCase {
       22,
       24,
       26,
-      48,
-      50,
-      52,
-      54,
       // FIXME: this is an unused variable that needs to be fixed but for now
       // we will ignore it. See
       // https://github.com/sirbrillig/phpcs-variable-analysis/pull/36
