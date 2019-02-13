@@ -556,7 +556,6 @@ class VariableAnalysisTest extends BaseTestCase {
       16,
       27,
       39,
-      66,
       72,
       73,
     ];
@@ -582,7 +581,6 @@ class VariableAnalysisTest extends BaseTestCase {
       4,
       16,
       39,
-      66,
       72,
       73,
     ];
@@ -604,13 +602,11 @@ class VariableAnalysisTest extends BaseTestCase {
     );
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
-    $expectedWarnings = [
-      66,
-    ];
+    $expectedWarnings = [];
     $this->assertEquals($expectedWarnings, $lines);
   }
 
-  public function testAllowUnusedCaughtExceptionsIgnoresUnusedVariables() {
+  public function testAllowUnusedCaughtExceptionsIgnoresUnusedVariablesIfSet() {
     $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->ruleset->setSniffProperty(
@@ -630,6 +626,33 @@ class VariableAnalysisTest extends BaseTestCase {
       16,
       27,
       39,
+      72,
+      73,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testAllowUnusedCaughtExceptionsDoesNotIgnoreUnusedVariablesIfFalse() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedParametersBeforeUsed',
+      'false'
+    );
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedCaughtExceptions',
+      'false'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      16,
+      27,
+      39,
+      66,
       72,
       73,
     ];
