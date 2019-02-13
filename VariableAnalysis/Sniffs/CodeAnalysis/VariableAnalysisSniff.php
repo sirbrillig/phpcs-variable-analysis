@@ -39,10 +39,9 @@ class VariableAnalysisSniff implements Sniff {
   public $allowWordPressPassByRefFunctions = false;
 
   /**
-   *  Allows exceptions in a catch block to be unused without provoking unused-var warning.
-   *  Set generic.codeanalysis.variableanalysis.allowUnusedCaughtExceptions to a true value.
+   *  Allow exceptions in a catch block to be unused without warning.
    */
-  public $allowUnusedCaughtExceptions = false;
+  public $allowUnusedCaughtExceptions = true;
 
   /**
    *  Allow function parameters to be unused without provoking unused-var warning.
