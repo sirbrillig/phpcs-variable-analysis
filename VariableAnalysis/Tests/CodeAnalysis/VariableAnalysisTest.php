@@ -140,6 +140,15 @@ class VariableAnalysisTest extends BaseTestCase {
     $this->assertEquals($expectedErrors, $lines);
   }
 
+  public function testTraitWithMembersErrors() {
+    $fixtureFile = $this->getFixture('TraitWithMembersFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
+    $expectedErrors = [];
+    $this->assertEquals($expectedErrors, $lines);
+  }
+
   public function testClassWithMembersWarnings() {
     $fixtureFile = $this->getFixture('ClassWithMembersFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
