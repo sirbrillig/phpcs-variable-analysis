@@ -346,6 +346,7 @@ class VariableAnalysisSniff implements Sniff {
       T_PUBLIC,
       T_PRIVATE,
       T_PROTECTED,
+      T_VAR,
     ];
     $stopAtPtr = $stackPtr - 2;
     $visibilityPtr = $phpcsFile->findPrevious($propertyDeclarationKeywords, $stackPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
