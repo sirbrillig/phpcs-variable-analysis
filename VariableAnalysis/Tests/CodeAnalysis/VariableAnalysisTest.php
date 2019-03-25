@@ -534,7 +534,9 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
-    $expectedWarnings = [];
+    $expectedWarnings = [
+      17,
+    ];
     $this->assertEquals($expectedWarnings, $lines);
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];

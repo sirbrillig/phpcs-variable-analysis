@@ -12,6 +12,10 @@ class ClassWithAnonymousClass {
             public function sayHelloWorld() {
                 echo "hello world";
             }
+
+            public function methodWithStaticVar() {
+                static $myStaticVar; // should trigger unused warning
+            }
         };
     }
 }
