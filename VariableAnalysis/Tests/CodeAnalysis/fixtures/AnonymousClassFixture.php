@@ -1,11 +1,15 @@
 <?php
 
-new class {
-    public function sayHelloWorld() {
-        echo 'Hello'.$this->getWorld();
-    }
+class ClassWithAnonymousClass {
+    public function getMyClass() {
+        return new class {
+            public function sayHelloWorld() {
+                echo 'Hello'.$this->getWorld();
+            }
 
-    protected function getWorld() {
-        return ' World!';
+            protected function getWorld() {
+                return ' World!';
+            }
+        };
     }
-};
+}

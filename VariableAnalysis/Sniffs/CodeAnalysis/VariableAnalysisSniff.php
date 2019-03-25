@@ -341,6 +341,38 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
+  protected function checkForClassProperty(File $phpcsFile, $stackPtr, $varName, $currScope) {
+    $propertyDeclarationKeywords = [
+      T_PUBLIC,
+      T_PRIVATE,
+      T_PROTECTED,
+      T_VAR,
+    ];
+    $stopAtPtr = $stackPtr - 2;
+    $visibilityPtr = $phpcsFile->findPrevious($propertyDeclarationKeywords, $stackPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
+    if ($visibilityPtr) {
+      return true;
+    }
+    $staticPtr = $phpcsFile->findPrevious(T_STATIC, $stackPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
+    if (! $staticPtr) {
+      return false;
+    }
+    $stopAtPtr = $staticPtr - 2;
+    $visibilityPtr = $phpcsFile->findPrevious($propertyDeclarationKeywords, $staticPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
+    if ($visibilityPtr) {
+      return true;
+    }
+    // it's legal to use `static` to define properties as well as to
+    // define variables, so make sure we are not in a function before
+    // assuming it's a property.
+    $tokens = $phpcsFile->getTokens();
+    $token  = $tokens[$stackPtr];
+    if ($token && !empty($token['conditions']) && end($token['conditions']) !== T_FUNCTION) {
+      return Helpers::areAnyConditionsAClass($token['conditions']);
+    }
+    return false;
+  }
+
   protected function checkForCatchBlock(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
@@ -816,6 +848,11 @@ class VariableAnalysisSniff implements Sniff {
     // $var part of class::$var static member
     if ($this->checkForStaticMember($phpcsFile, $stackPtr, $varName, $currScope)) {
       Helpers::debug('found static member');
+      return;
+    }
+
+    if ($this->checkForClassProperty($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found class property definition');
       return;
     }
 
