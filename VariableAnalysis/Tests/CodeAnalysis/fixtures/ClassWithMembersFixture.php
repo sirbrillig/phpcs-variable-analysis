@@ -45,6 +45,8 @@ class ClassWithoutMembers {
 
 class ClassWithMembers {
     public $member_var;
+    private $private_member_var;
+    protected $protected_member_var;
     static $static_member_var;
 
     function method_with_member_var() {
