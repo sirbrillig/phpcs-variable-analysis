@@ -222,4 +222,13 @@ class Helpers {
     }
     return null;
   }
+
+  public static function debug($message) {
+    if (! defined('PHP_CODESNIFFER_VERBOSITY')) {
+      return;
+    }
+    if (PHP_CODESNIFFER_VERBOSITY > 3) {
+      echo PHP_EOL . "VariableAnalysisSniff: DEBUG: $message" . PHP_EOL;
+    }
+  }
 }

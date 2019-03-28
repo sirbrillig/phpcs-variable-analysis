@@ -341,6 +341,38 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
+  protected function checkForClassProperty(File $phpcsFile, $stackPtr, $varName, $currScope) {
+    $propertyDeclarationKeywords = [
+      T_PUBLIC,
+      T_PRIVATE,
+      T_PROTECTED,
+      T_VAR,
+    ];
+    $stopAtPtr = $stackPtr - 2;
+    $visibilityPtr = $phpcsFile->findPrevious($propertyDeclarationKeywords, $stackPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
+    if ($visibilityPtr) {
+      return true;
+    }
+    $staticPtr = $phpcsFile->findPrevious(T_STATIC, $stackPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
+    if (! $staticPtr) {
+      return false;
+    }
+    $stopAtPtr = $staticPtr - 2;
+    $visibilityPtr = $phpcsFile->findPrevious($propertyDeclarationKeywords, $staticPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
+    if ($visibilityPtr) {
+      return true;
+    }
+    // it's legal to use `static` to define properties as well as to
+    // define variables, so make sure we are not in a function before
+    // assuming it's a property.
+    $tokens = $phpcsFile->getTokens();
+    $token  = $tokens[$stackPtr];
+    if ($token && !empty($token['conditions']) && end($token['conditions']) !== T_FUNCTION) {
+      return Helpers::areAnyConditionsAClass($token['conditions']);
+    }
+    return false;
+  }
+
   protected function checkForCatchBlock(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
@@ -750,8 +782,10 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     $varName = Helpers::normalizeVarName($token['content']);
+    Helpers::debug('examining token ' . $varName);
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
     if ($currScope === false) {
+      Helpers::debug('no scope found');
       return;
     }
 
@@ -777,80 +811,101 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we a $object->$property type symbolic reference?
     if ($this->checkForSymbolicObjectProperty($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found symbolic object property');
       return;
     }
 
     // Are we a function or closure parameter?
     if ($this->checkForFunctionPrototype($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found function prototype');
       return;
     }
 
     // Are we a catch parameter?
     if ($this->checkForCatchBlock($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found catch block');
       return;
     }
 
     // Are we $this within a class?
     if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found this usage within a class');
       return;
     }
 
     // Are we a $GLOBALS, $_REQUEST, etc superglobal?
     if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found superglobal');
       return;
     }
 
     // Check for static members used outside a class
     if ($this->checkForStaticOutsideClass($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found static usage outside of class');
       return;
     }
 
     // $var part of class::$var static member
     if ($this->checkForStaticMember($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found static member');
+      return;
+    }
+
+    if ($this->checkForClassProperty($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found class property definition');
       return;
     }
 
     // Is the next non-whitespace an assignment?
     if ($this->checkForAssignment($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found assignment');
       return;
     }
 
     // OK, are we within a list (...) = construct?
     if ($this->checkForListAssignment($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found list assignment');
       return;
     }
 
     // OK, are we within a [...] = construct?
     if ($this->checkForListShorthandAssignment($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found list shorthand assignment');
       return;
     }
 
     // Are we a global declaration?
     if ($this->checkForGlobalDeclaration($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found global declaration');
       return;
     }
 
     // Are we a static declaration?
     if ($this->checkForStaticDeclaration($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found static declaration');
       return;
     }
 
     // Are we a foreach loopvar?
     if ($this->checkForForeachLoopVar($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found foreach loop variable');
       return;
     }
 
     // Are we pass-by-reference to known pass-by-reference function?
     if ($this->checkForPassByReferenceFunctionCall($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found pass by reference');
       return;
     }
 
     // Are we a numeric variable used for constructs like preg_replace?
     if ($this->checkForNumericVariable($varName)) {
+      Helpers::debug('found numeric variable');
       return;
     }
 
     // OK, we don't appear to be a write to the var, assume we're a read.
+    Helpers::debug('looks like a variable read');
     $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
   }
 
