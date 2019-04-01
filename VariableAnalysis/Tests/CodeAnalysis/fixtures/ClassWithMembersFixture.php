@@ -97,4 +97,14 @@ class ClassWithAssignedMembers {
             echo 'it is null';
         }
     }
+
+    function method_with_static_assigned_var_inside_block() {
+        $bool = true;
+        if ($bool === true) {
+            static $new_var = null;
+            if ($new_var === null) {
+                echo 'it is null';
+            }
+        }
+    }
 }
