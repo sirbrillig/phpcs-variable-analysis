@@ -60,6 +60,21 @@ class Helpers {
     return false;
   }
 
+  public static function areConditionsWithinFunctionBeforeClass(array $conditions) {
+    // Return true if the token conditions are within a function before
+    // they are within a class.
+    $classTypes = [T_CLASS, T_ANON_CLASS, T_TRAIT];
+    foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
+      if (in_array($scopeCode, $classTypes)) {
+        return false;
+      }
+      if ($scopeCode === T_FUNCTION) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public static function findPreviousFunctionPtr(File $phpcsFile, $openPtr) {
     // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
     // so we look backwards from the opening bracket for the first thing that
