@@ -367,7 +367,7 @@ class VariableAnalysisSniff implements Sniff {
     // assuming it's a property.
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
-    if ($token && !empty($token['conditions']) && end($token['conditions']) !== T_FUNCTION) {
+    if ($token && !empty($token['conditions']) && !Helpers::areConditionsWithinFunctionBeforeClass($token['conditions'])) {
       return Helpers::areAnyConditionsAClass($token['conditions']);
     }
     return false;
