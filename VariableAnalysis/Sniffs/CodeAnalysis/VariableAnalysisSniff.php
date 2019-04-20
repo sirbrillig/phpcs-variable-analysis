@@ -274,6 +274,7 @@ class VariableAnalysisSniff implements Sniff {
   protected function markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope) {
     $this->markVariableRead($varName, $stackPtr, $currScope);
     if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
+      Helpers::debug("variable $varName looks undefined");
       $phpcsFile->addWarning(
         "Variable %s is undefined.",
         $stackPtr,
@@ -319,6 +320,7 @@ class VariableAnalysisSniff implements Sniff {
       $this->markVariableRead($varName, $stackPtr, $currScope);
       if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
         // We haven't been defined by this point.
+        Helpers::debug("variable $varName in function prototype looks undefined");
         $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr, 'UndefinedVariable', ["\${$varName}"]);
         return true;
       }
@@ -577,7 +579,6 @@ class VariableAnalysisSniff implements Sniff {
 
   protected function checkForGlobalDeclaration(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a global declaration?
     // Search backwards for first token that isn't whitespace, comma or variable.
@@ -1054,6 +1055,7 @@ class VariableAnalysisSniff implements Sniff {
     }
     $stackPtr = Helpers::getStackPtrIfVariableIsUnused($varInfo);
     if ($stackPtr) {
+      Helpers::debug("variable {$varInfo->name} at end of scope looks undefined");
       $phpcsFile->addWarning(
         "Unused %s %s.",
         $stackPtr,
