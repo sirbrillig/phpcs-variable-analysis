@@ -1053,6 +1053,12 @@ class VariableAnalysisSniff implements Sniff {
       // of "unused variable" warnings.
       return;
     }
+    if ($varInfo->scopeType === 'global' && isset($varInfo->firstInitialized)) {
+      // If we imported this variable from the global scope, any further use of
+      // the variable, including assignment, should count as "variable use" for
+      // the purposes of "unused variable" warnings.
+      return;
+    }
     $stackPtr = $varInfo->firstDeclared ?? $varInfo->firstInitialized ?? null;
     if ($stackPtr) {
       Helpers::debug("variable {$varInfo->name} at end of scope looks undefined");
