@@ -228,16 +228,6 @@ class Helpers {
     return 0;
   }
 
-  public static function getStackPtrIfVariableIsUnused(VariableInfo $varInfo) {
-    if (isset($varInfo->firstDeclared)) {
-      return $varInfo->firstDeclared;
-    }
-    if (isset($varInfo->firstInitialized)) {
-      return $varInfo->firstInitialized;
-    }
-    return null;
-  }
-
   public static function debug($message) {
     if (! defined('PHP_CODESNIFFER_VERBOSITY')) {
       return;

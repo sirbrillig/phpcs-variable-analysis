@@ -13,9 +13,9 @@ class VariableInfo {
   public $scopeType;
   public $typeHint;
   public $passByReference = false;
-  public $firstDeclared;
-  public $firstInitialized;
-  public $firstRead;
+  public $firstDeclared; // stack pointer of first declaration
+  public $firstInitialized; // stack pointer of first initialization
+  public $firstRead; // stack pointer of first read
   public $ignoreUnused = false;
   public $ignoreUndefined = false;
   public $isForeachLoopVar = false;
