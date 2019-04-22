@@ -34,3 +34,7 @@ function updateGlobal($newVal) {
   global $myGlobal;
   $myGlobal = $newVal;
 }
+
+function unusedGlobal() {
+  global $myGlobal; // should warn that var is unused
+}
