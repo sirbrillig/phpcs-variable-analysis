@@ -517,6 +517,12 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
+    // Is this a variable variable? If so, it's not an assignment to the current variable.
+    if ($this->checkForVariableVariable($phpcsFile, $stackPtr, $varName, $currScope)) {
+      Helpers::debug('found variable variable');
+      return false;
+    }
+
     // Plain ol' assignment. Simpl(ish).
     $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
     if ($writtenPtr === false) {
@@ -524,6 +530,22 @@ class VariableAnalysisSniff implements Sniff {
     }
     $this->markVariableAssignment($varName, $writtenPtr, $currScope);
     return true;
+  }
+
+  protected function checkForVariableVariable(File $phpcsFile, $stackPtr, $varName, $currScope) {
+    $tokens = $phpcsFile->getTokens();
+    $token = $tokens[$stackPtr];
+
+    if (!isset($tokens[$stackPtr - 1]['code'])) {
+      return false;
+    }
+    if ($tokens[$stackPtr - 1]['code'] === T_DOLLAR) {
+      return true;
+    }
+    if ($tokens[$stackPtr - 1]['code'] === T_OPEN_CURLY_BRACKET && isset($tokens[$stackPtr - 2]['code']) && $tokens[$stackPtr - 2]['code'] === T_DOLLAR) {
+      return true;
+    }
+    return false;
   }
 
   protected function checkForListShorthandAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
