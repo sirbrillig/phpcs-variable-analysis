@@ -5,6 +5,5 @@ jobs:
       - image: circleci/php:5.6.40-zts-stretch-node-browsers-legacy
     steps:
       - checkout
-      - run: composer install --no-dev
-      - run: composer require phpunit
+      - run: COMPOSER=composer.circleci.json composer install
       - run: composer test
