@@ -1059,7 +1059,12 @@ class VariableAnalysisSniff implements Sniff {
       // the purposes of "unused variable" warnings.
       return;
     }
-    $stackPtr = $varInfo->firstDeclared ?? $varInfo->firstInitialized ?? null;
+    $stackPtr = null;
+    if (!empty($varInfo->firstDeclared)) {
+      $stackPtr = $varInfo->firstDeclared;
+    } elseif (!empty($varInfo->firstInitialized)) {
+      $stackPtr = $varInfo->firstInitialized;
+    }
     if ($stackPtr) {
       Helpers::debug("variable {$varInfo->name} at end of scope looks undefined");
       $phpcsFile->addWarning(
