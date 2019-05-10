@@ -1,0 +1,9 @@
+<phpunit
+	bootstrap="VariableAnalysis/Tests/bootstrap.php"
+	>
+	<testsuites>
+		<testsuite>
+			<directory>VariableAnalysis/Tests</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>
