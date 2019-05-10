@@ -540,6 +540,30 @@ class VariableAnalysisTest extends BaseTestCase {
     $this->assertEquals($expectedErrors, $lines);
   }
 
+  public function testVariableVariables() {
+    $fixtureFile = $this->getFixture('VariableVariablesFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      4,
+      10,
+      16,
+      22,
+      29,
+      35,
+      41,
+      47,
+      48,
+      52,
+      53,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+    $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
+    $expectedErrors = [];
+    $this->assertEquals($expectedErrors, $lines);
+  }
+
   public function testTraitsAllowPropertyDefinitions() {
     $fixtureFile = $this->getFixture('TraitWithPropertiesFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
