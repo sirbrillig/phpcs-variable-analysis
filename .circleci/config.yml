@@ -6,4 +6,4 @@ jobs:
     steps:
       - checkout
       - run: COMPOSER=composer.circleci.json composer install
-      - run: composer test
+      - run: COMPOSER=composer.circleci.json composer test
