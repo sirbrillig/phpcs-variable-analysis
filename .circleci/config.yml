@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/php:5.6.30-node-browsers
+      - image: circleci/php:5.6.40-zts-stretch-node-browsers-legacy
     steps:
       - checkout
       - run: composer install
