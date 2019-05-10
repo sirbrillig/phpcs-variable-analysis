@@ -29,8 +29,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "test": "./vendor/bin/phpunit --configuration phpunit.circleci.xml",
-        "lint": "./vendor/bin/phpcs -s -p VariableAnalysis/Sniffs VariableAnalysis/Lib"
+        "test": "./vendor/bin/phpunit --configuration phpunit.circleci.xml"
     },
     "require" : {
         "php" : ">=5.6.0"

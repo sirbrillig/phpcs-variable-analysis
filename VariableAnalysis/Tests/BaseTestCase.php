@@ -8,7 +8,7 @@ use PHP_CodeSniffer\Config;
 
 class BaseTestCase extends TestCase {
   public function prepareLocalFileForSniffs($sniffFiles, $fixtureFile) {
-    $config = new Config();
+    $config = new Config(['--standard=VariableAnalysis']);
     $ruleset = new Ruleset($config);
     if (! is_array($sniffFiles)) {
       $sniffFiles = [$sniffFiles];
