@@ -38,3 +38,15 @@ function updateGlobal($newVal) {
 function unusedGlobal() {
   global $myGlobal; // should warn that var is unused
 }
+
+function updateGlobalWithList($newVal) {
+  global $myGlobal;
+  list( $myGlobal, $otherVar ) = my_function($newVal);
+  echo $otherVar;
+}
+
+function updateGlobalWithListShorthand($newVal) {
+  global $myGlobal;
+  [ $myGlobal, $otherVar ] = my_function($newVal);
+  echo $otherVar;
+}
