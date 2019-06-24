@@ -3,7 +3,6 @@
 namespace VariableAnalysis\Lib;
 
 use PHP_CodeSniffer\Files\File;
-use VariableAnalysis\Lib\VariableInfo;
 
 class Helpers {
   public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr) {
