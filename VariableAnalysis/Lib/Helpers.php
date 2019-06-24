@@ -14,7 +14,7 @@ class Helpers {
   public static function findContainingClosingSquareBracket(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $endOfStatementPtr = $phpcsFile->findNext([T_SEMICOLON], $stackPtr + 1);
-    if (! $endOfStatementPtr) {
+    if (is_bool($endOfStatementPtr)) {
       return false;
     }
     return $phpcsFile->findNext(T_CLOSE_SHORT_ARRAY, $stackPtr + 1, $endOfStatementPtr);
@@ -87,7 +87,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return int|false
+   * @return int|bool
    */
   public static function findFunctionCall(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -103,6 +103,12 @@ class Helpers {
     return false;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return array[]|false
+   */
   public static function findFunctionCallArguments(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
@@ -246,5 +252,10 @@ class Helpers {
     if (PHP_CODESNIFFER_VERBOSITY > 3) {
       echo PHP_EOL . "VariableAnalysisSniff: DEBUG: $message" . PHP_EOL;
     }
+  }
+
+  public static function splitStringToArray($pattern, $value) {
+    $result = preg_split($pattern, $value);
+    return is_array($result) ? $result : [];
   }
 }
