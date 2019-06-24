@@ -7,6 +7,8 @@ class Constants {
    *  Array of known pass-by-reference functions and the argument(s) which are passed
    *  by reference, the arguments are numbered starting from 1 and an elipsis '...'
    *  means all argument numbers after the previous should be considered pass-by-reference.
+   *
+   *  @return array[]
    */
   public static function getPassByReferenceFunctions() {
     return [
@@ -236,6 +238,9 @@ class Constants {
     ];
   }
 
+  /**
+   * @return array[]
+   */
   public static function getWordPressPassByReferenceFunctions() {
     return [
       'wp_parse_str' => [2],
@@ -245,6 +250,8 @@ class Constants {
 
   /**
    * A regexp for matching variable names in double-quoted strings.
+   *
+   * @return string
    */
   public static function getDoubleQuotedVarRegexp() {
     return '|(?<!\\\\)(?:\\\\{2})*\${?([a-zA-Z0-9_]+)}?|';
