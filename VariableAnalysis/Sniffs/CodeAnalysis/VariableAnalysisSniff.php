@@ -777,7 +777,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we pass-by-reference to known pass-by-reference function?
     $functionPtr = Helpers::findFunctionCall($phpcsFile, $stackPtr);
-    if ($functionPtr === false) {
+    if ($functionPtr === false || ! isset($tokens[$functionPtr])) {
       return false;
     }
 
