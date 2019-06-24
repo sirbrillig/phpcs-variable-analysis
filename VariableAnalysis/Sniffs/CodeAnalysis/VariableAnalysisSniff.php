@@ -470,14 +470,16 @@ class VariableAnalysisSniff implements Sniff {
     // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
     // we need to do that as private or final, so we have to do it this hackish way.
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if ($openPtr === false) {
+    if (is_bool($openPtr)) {
       return false;
     }
 
     $functionPtr = Helpers::findPreviousFunctionPtr($phpcsFile, $openPtr);
-    if (($functionPtr !== false)
+    if (// phpcs:ignore PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace
+      (is_int($functionPtr))
       && (($tokens[$functionPtr]['code'] === T_FUNCTION)
-      || ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
+      || ($tokens[$functionPtr]['code'] === T_CLOSURE))
+    ) {
       $this->markVariableDeclaration($varName, 'param', null, $stackPtr, $functionPtr);
       // Are we pass-by-reference?
       $referencePtr = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true, null, true);
@@ -744,7 +746,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // Is the next non-whitespace an assignment?
     $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $stackPtr);
-    if ($assignPtr === false) {
+    if (! is_int($assignPtr)) {
       return false;
     }
 
@@ -756,9 +758,6 @@ class VariableAnalysisSniff implements Sniff {
 
     // Plain ol' assignment. Simpl(ish).
     $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
-    if ($writtenPtr === false) {
-      $writtenPtr = $stackPtr;  // I dunno
-    }
     $this->markVariableAssignment($varName, $writtenPtr, $currScope);
     return true;
   }
@@ -807,8 +806,11 @@ class VariableAnalysisSniff implements Sniff {
 
     // OK, we're a [ ... ] construct... are we being assigned to?
     $closePtr = Helpers::findContainingClosingSquareBracket($phpcsFile, $stackPtr);
+    if (! is_int($closePtr)) {
+      return false;
+    }
     $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $closePtr);
-    if ($assignPtr === false) {
+    if (! is_int($assignPtr)) {
       return false;
     }
 
@@ -844,7 +846,7 @@ class VariableAnalysisSniff implements Sniff {
     // OK, we're a list (...) construct... are we being assigned to?
     $closePtr = $tokens[$openPtr]['parenthesis_closer'];
     $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $closePtr);
-    if ($assignPtr === false) {
+    if (! is_int($assignPtr)) {
       return false;
     }
 
@@ -969,20 +971,20 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we a foreach loopvar?
     $openParenPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if ($openParenPtr === false) {
+    if (! is_int($openParenPtr)) {
       return false;
     }
     $foreachPtr = Helpers::findParenthesisOwner($phpcsFile, $openParenPtr);
-    if ($foreachPtr === false) {
+    if (! is_int($foreachPtr)) {
       return false;
     }
     if ($tokens[$foreachPtr]['code'] === T_LIST) {
       $openParenPtr = Helpers::findContainingOpeningBracket($phpcsFile, $foreachPtr);
-      if ($openParenPtr === false) {
+      if (! is_int($openParenPtr)) {
         return false;
       }
       $foreachPtr = Helpers::findParenthesisOwner($phpcsFile, $openParenPtr);
-      if ($foreachPtr === false) {
+      if (! is_int($foreachPtr)) {
         return false;
       }
     }
