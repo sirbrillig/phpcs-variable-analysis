@@ -123,9 +123,27 @@ class VariableAnalysisSniff implements Sniff {
     if (($token['code'] === T_STRING) && ($token['content'] === 'compact')) {
       return $this->processCompact($phpcsFile, $stackPtr);
     }
+    if ($this->isGetDefinedVars($phpcsFile, $stackPtr)) {
+      Helpers::debug('get_defined_vars is being called');
+      return $this->markAllVariablesRead($phpcsFile, $stackPtr);
+    }
     if (($token['code'] === T_CLOSE_CURLY_BRACKET) && isset($token['scope_condition'])) {
       return $this->processScopeClose($phpcsFile, $token['scope_condition']);
     }
+  }
+
+  protected function isGetDefinedVars(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $token = $tokens[$stackPtr];
+    if (! $token || $token['content'] !== 'get_defined_vars') {
+      return false;
+    }
+    // Make sure this is a function call
+    $parenPointer = $phpcsFile->findNext(T_OPEN_PARENTHESIS, $stackPtr, $stackPtr + 2);
+    if (! $parenPointer) {
+      return false;
+    }
+    return true;
   }
 
   protected function getScopeKey($currScope) {
@@ -135,11 +153,21 @@ class VariableAnalysisSniff implements Sniff {
     return ($this->currentFile ? $this->currentFile->getFilename() : 'unknown file') . ':' . $currScope;
   }
 
+  /**
+   * @param int $currScope
+   *
+   * @return ?ScopeInfo
+   */
   protected function getScopeInfo($currScope) {
     $scopeKey = $this->getScopeKey($currScope);
     return isset($this->scopes[$scopeKey]) ? $this->scopes[$scopeKey] : null;
   }
 
+  /**
+   * @param int $currScope
+   *
+   * @return ScopeInfo
+   */
   protected function getOrCreateScopeInfo($currScope) {
     $scopeKey = $this->getScopeKey($currScope);
     if (!isset($this->scopes[$scopeKey])) {
@@ -241,6 +269,13 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo->firstDeclared = $stackPtr;
   }
 
+  /**
+   * @param string $varName
+   * @param int $stackPtr
+   * @param int $currScope
+   *
+   * @return void
+   */
   protected function markVariableRead($varName, $stackPtr, $currScope) {
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (isset($varInfo->firstRead) && ($varInfo->firstRead <= $stackPtr)) {
@@ -281,6 +316,25 @@ class VariableAnalysisSniff implements Sniff {
         'UndefinedVariable',
         ["\${$varName}"]
       );
+    }
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return void
+   */
+  protected function markAllVariablesRead(File $phpcsFile, $stackPtr) {
+    $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
+    if (! $currScope) {
+      return false;
+    }
+    $scopeInfo = $this->getOrCreateScopeInfo($currScope);
+    $count = count($scopeInfo->variables);
+    Helpers::debug("marking all $count variables in scope as read");
+    foreach ($scopeInfo->variables as $varInfo) {
+      $this->markVariableRead($varInfo->name, $stackPtr, $scopeInfo->owner);
     }
   }
 
@@ -723,7 +777,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we pass-by-reference to known pass-by-reference function?
     $functionPtr = Helpers::findFunctionCall($phpcsFile, $stackPtr);
-    if ($functionPtr === false) {
+    if ($functionPtr === false || ! isset($tokens[$functionPtr])) {
       return false;
     }
 

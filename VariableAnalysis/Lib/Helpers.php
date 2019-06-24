@@ -3,7 +3,6 @@
 namespace VariableAnalysis\Lib;
 
 use PHP_CodeSniffer\Files\File;
-use VariableAnalysis\Lib\VariableInfo;
 
 class Helpers {
   public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr) {
@@ -84,6 +83,12 @@ class Helpers {
     return $phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true);
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int|false
+   */
   public static function findFunctionCall(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
@@ -198,6 +203,12 @@ class Helpers {
     return false;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int|false
+   */
   public static function findVariableScope(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];

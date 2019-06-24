@@ -895,4 +895,18 @@ class VariableAnalysisTest extends BaseTestCase {
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
+
+  public function testGetDefinedVarsCountsAsRead() {
+    $fixtureFile = $this->getFixture('GetDefinedVarsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+			6,
+			18,
+			22,
+			29,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }
