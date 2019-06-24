@@ -463,7 +463,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForFunctionPrototype(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a function or closure parameter?
     // It would be nice to get the list of function parameters from watching for
@@ -572,7 +571,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForCatchBlock(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a catch block parameter?
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
@@ -632,9 +630,6 @@ class VariableAnalysisSniff implements Sniff {
    * @return bool
    */
   protected function checkForSuperGlobal(File $phpcsFile, $stackPtr, $varName) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
     // Are we a superglobal variable?
     if (in_array($varName, [
       'GLOBALS',
@@ -665,7 +660,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForStaticMember(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     $doubleColonPtr = $stackPtr - 1;
     if ($tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
@@ -741,9 +735,6 @@ class VariableAnalysisSniff implements Sniff {
    * @return bool
    */
   protected function checkForAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
     // Is the next non-whitespace an assignment?
     $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $stackPtr);
     if (! is_int($assignPtr)) {
@@ -772,7 +763,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForVariableVariable(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token = $tokens[$stackPtr];
 
     if (!isset($tokens[$stackPtr - 1]['code'])) {
       return false;
@@ -795,9 +785,6 @@ class VariableAnalysisSniff implements Sniff {
    * @return bool
    */
   protected function checkForListShorthandAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
     // OK, are we within a [ ... ] construct?
     $openPtr = Helpers::findContainingOpeningSquareBracket($phpcsFile, $stackPtr);
     if ($openPtr === false) {
@@ -830,7 +817,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForListAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // OK, are we within a list (...) construct?
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
@@ -889,7 +875,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForStaticDeclaration(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a static declaration?
     // Static declarations are a bit more complicated than globals, since they
@@ -967,7 +952,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForForeachLoopVar(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a foreach loopvar?
     $openParenPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
@@ -1013,7 +997,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForPassByReferenceFunctionCall(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we pass-by-reference to known pass-by-reference function?
     $functionPtr = Helpers::findFunctionCall($phpcsFile, $stackPtr);
@@ -1084,7 +1067,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForSymbolicObjectProperty(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a symbolic object property/function derefeference?
     // Search backwards for first token that isn't whitespace, is it a "->" operator?
@@ -1290,7 +1272,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function processCompactArguments(File $phpcsFile, $stackPtr, $arguments, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     foreach ($arguments as $argumentPtrs) {
       $argumentPtrs = array_values(array_filter($argumentPtrs, function ($argumentPtr) use ($tokens) {
@@ -1345,9 +1326,6 @@ class VariableAnalysisSniff implements Sniff {
    * @return void
    */
   protected function processCompact(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
     if (! $currScope) {
       return;
