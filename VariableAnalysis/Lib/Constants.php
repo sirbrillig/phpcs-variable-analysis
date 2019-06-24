@@ -7,6 +7,8 @@ class Constants {
    *  Array of known pass-by-reference functions and the argument(s) which are passed
    *  by reference, the arguments are numbered starting from 1 and an elipsis '...'
    *  means all argument numbers after the previous should be considered pass-by-reference.
+   *
+   *  @return array[]
    */
   public static function getPassByReferenceFunctions() {
     return [
@@ -34,7 +36,6 @@ class Constants {
       'array_walk' => [1],
       'array_walk_recursive' => [1],
       'arsort' => [1],
-      'asort' => [1],
       'asort' => [1],
       'bindColumn' => [2],
       'bindParam' => [2],
@@ -202,7 +203,6 @@ class Constants {
       'sqlite_open' => [3],
       'sqlite_popen' => [3],
       'sqlite_query' => [4],
-      'sqlite_query' => [4],
       'sqlite_unbuffered_query' => [4],
       'sscanf' => [3, '...'],
       'str_ireplace' => [4],
@@ -238,6 +238,9 @@ class Constants {
     ];
   }
 
+  /**
+   * @return array[]
+   */
   public static function getWordPressPassByReferenceFunctions() {
     return [
       'wp_parse_str' => [2],
@@ -247,6 +250,8 @@ class Constants {
 
   /**
    * A regexp for matching variable names in double-quoted strings.
+   *
+   * @return string
    */
   public static function getDoubleQuotedVarRegexp() {
     return '|(?<!\\\\)(?:\\\\{2})*\${?([a-zA-Z0-9_]+)}?|';

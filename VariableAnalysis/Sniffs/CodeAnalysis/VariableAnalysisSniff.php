@@ -13,39 +13,51 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * The current phpcsFile being checked.
    *
-   * @var phpcsFile
+   * @var File|null phpcsFile
    */
   protected $currentFile = null;
 
   /**
    * A list of scopes encountered so far and the variables within them.
+   *
+   * @var ScopeInfo[]
    */
   private $scopes = [];
 
   /**
-   * An associative array of additional pass-by-reference functions. The keys
-   * are the function names, and the values are indexed arrays containing the
-   * argument numbers (starting from 1) of arguments which should be considered
-   * variable definitions. The special value `'...'` in the arguments array
-   * will cause all arguments after the last number to be considered variable
-   * definitions.
+   * A list of custom functions which pass in variables to be initialized by
+   * reference (eg `preg_match()`) and therefore should not require those
+   * variables to be defined ahead of time. The list is space separated and
+   * each entry is of the form `functionName:1,2`. The function name comes
+   * first followed by a colon and a comma-separated list of argument numbers
+   * (starting from 1) which should be considered variable definitions. The
+   * special value `...` in the arguments list will cause all arguments after
+   * the last number to be considered variable definitions.
+   *
+   * @var string|null
    */
   public $sitePassByRefFunctions = null;
 
   /**
    * If set, allows common WordPress pass-by-reference functions in addition to
    * the standard PHP ones.
+   *
+   * @var bool
    */
   public $allowWordPressPassByRefFunctions = false;
 
   /**
    *  Allow exceptions in a catch block to be unused without warning.
+   *
+   *  @var bool
    */
   public $allowUnusedCaughtExceptions = true;
 
   /**
    *  Allow function parameters to be unused without provoking unused-var warning.
    *  Set generic.codeanalysis.variableanalysis.allowUnusedFunctionParameters to a true value.
+   *
+   *  @var bool
    */
   public $allowUnusedFunctionParameters = false;
 
@@ -53,6 +65,8 @@ class VariableAnalysisSniff implements Sniff {
    *  A space-separated list of names of placeholder variables that you want to
    *  ignore from unused variable warnings. For example, to ignore the variables
    *  `$junk` and `$unused`, this could be set to `'junk unused'`.
+   *
+   *  @var string|null
    */
   public $validUnusedVariableNames = null;
 
@@ -60,6 +74,8 @@ class VariableAnalysisSniff implements Sniff {
    *  A PHP regexp string for variables that you want to ignore from unused
    *  variable warnings. For example, to ignore the variables `$_junk` and
    *  `$_unused`, this could be set to `'/^_/'`.
+   *
+   *  @var string|null
    */
   public $ignoreUnusedRegexp = null;
 
@@ -67,21 +83,30 @@ class VariableAnalysisSniff implements Sniff {
    *  A space-separated list of names of placeholder variables that you want to
    *  ignore from undefined variable warnings. For example, to ignore the variables
    *  `$post` and `$undefined`, this could be set to `'post undefined'`.
+   *
+   *  @var string|null
    */
   public $validUndefinedVariableNames = null;
 
   /**
    * Allows unused arguments in a function definition if they are
    * followed by an argument which is used.
+   *
+   *  @var bool
    */
   public $allowUnusedParametersBeforeUsed = true;
 
   /**
    * If set to true, unused keys or values created by the `as` statement
    * in a `foreach` loop will never be marked as unused.
+   *
+   *  @var bool
    */
   public $allowUnusedForeachVariables = true;
 
+  /**
+   * @return int[]
+   */
   public function register() {
     return [
       T_VARIABLE,
@@ -92,10 +117,16 @@ class VariableAnalysisSniff implements Sniff {
     ];
   }
 
+  /**
+   * @param string $functionName
+   *
+   * @return string[]
+   */
   private function getPassByReferenceFunction($functionName) {
     $passByRefFunctions = Constants::getPassByReferenceFunctions();
     if (!empty($this->sitePassByRefFunctions)) {
-      foreach (preg_split('/\s+/', trim($this->sitePassByRefFunctions)) as $line) {
+      $lines = Helpers::splitStringToArray('/\s+/', trim($this->sitePassByRefFunctions));
+      foreach ($lines as $line) {
         list ($function, $args) = explode(':', $line);
         $passByRefFunctions[$function] = explode(',', $args);
       }
@@ -103,9 +134,15 @@ class VariableAnalysisSniff implements Sniff {
     if ($this->allowWordPressPassByRefFunctions) {
       $passByRefFunctions = array_merge($passByRefFunctions, Constants::getWordPressPassByReferenceFunctions());
     }
-    return isset($passByRefFunctions[$functionName]) ? $passByRefFunctions[$functionName] : null;
+    return isset($passByRefFunctions[$functionName]) ? $passByRefFunctions[$functionName] : [];
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return void
+   */
   public function process(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
@@ -115,23 +152,34 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     if ($token['code'] === T_VARIABLE) {
-      return $this->processVariable($phpcsFile, $stackPtr);
+      $this->processVariable($phpcsFile, $stackPtr);
+      return;
     }
     if (($token['code'] === T_DOUBLE_QUOTED_STRING) || ($token['code'] === T_HEREDOC)) {
-      return $this->processVariableInString($phpcsFile, $stackPtr);
+      $this->processVariableInString($phpcsFile, $stackPtr);
+      return;
     }
     if (($token['code'] === T_STRING) && ($token['content'] === 'compact')) {
-      return $this->processCompact($phpcsFile, $stackPtr);
+      $this->processCompact($phpcsFile, $stackPtr);
+      return;
     }
     if ($this->isGetDefinedVars($phpcsFile, $stackPtr)) {
       Helpers::debug('get_defined_vars is being called');
-      return $this->markAllVariablesRead($phpcsFile, $stackPtr);
+      $this->markAllVariablesRead($phpcsFile, $stackPtr);
+      return;
     }
     if (($token['code'] === T_CLOSE_CURLY_BRACKET) && isset($token['scope_condition'])) {
-      return $this->processScopeClose($phpcsFile, $token['scope_condition']);
+      $this->processScopeClose($phpcsFile, $token['scope_condition']);
+      return;
     }
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
   protected function isGetDefinedVars(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token = $tokens[$stackPtr];
@@ -146,6 +194,11 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  /**
+   * @param int|bool $currScope
+   *
+   * @return string
+   */
   protected function getScopeKey($currScope) {
     if ($currScope === false) {
       $currScope = 'file';
@@ -156,7 +209,7 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * @param int $currScope
    *
-   * @return ?ScopeInfo
+   * @return ScopeInfo|null
    */
   protected function getScopeInfo($currScope) {
     $scopeKey = $this->getScopeKey($currScope);
@@ -176,21 +229,33 @@ class VariableAnalysisSniff implements Sniff {
     return $this->scopes[$scopeKey];
   }
 
+  /**
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return VariableInfo|null
+   */
   protected function getVariableInfo($varName, $currScope) {
     $scopeInfo = $this->getScopeInfo($currScope);
-    return isset($scopeInfo->variables[$varName]) ? $scopeInfo->variables[$varName] : null;
+    return ( $scopeInfo && isset($scopeInfo->variables[$varName]) ) ? $scopeInfo->variables[$varName] : null;
   }
 
+  /**
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return VariableInfo
+   */
   protected function getOrCreateVariableInfo($varName, $currScope) {
     $scopeInfo = $this->getOrCreateScopeInfo($currScope);
     if (!isset($scopeInfo->variables[$varName])) {
       $scopeInfo->variables[$varName] = new VariableInfo($varName);
       $validUnusedVariableNames = (empty($this->validUnusedVariableNames))
         ? []
-        : preg_split('/\s+/', trim($this->validUnusedVariableNames));
+        : Helpers::splitStringToArray('/\s+/', trim($this->validUnusedVariableNames));
       $validUndefinedVariableNames = (empty($this->validUndefinedVariableNames))
         ? []
-        : preg_split('/\s+/', trim($this->validUndefinedVariableNames));
+        : Helpers::splitStringToArray('/\s+/', trim($this->validUndefinedVariableNames));
       if (in_array($varName, $validUnusedVariableNames)) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
       }
@@ -204,6 +269,12 @@ class VariableAnalysisSniff implements Sniff {
     return $scopeInfo->variables[$varName];
   }
 
+  /**
+   * @param VariableInfo $varInfo
+   * @param ScopeInfo $scopeInfo
+   *
+   * @return bool
+   */
   protected function areFollowingArgumentsUsed($varInfo, $scopeInfo) {
     $foundVarPosition = false;
     foreach ($scopeInfo->variables as $variable) {
@@ -221,6 +292,13 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
+  /**
+   * @param string $varName
+   * @param int $stackPtr
+   * @param int $currScope
+   *
+   * @return void
+   */
   protected function markVariableAssignment($varName, $stackPtr, $currScope) {
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (!isset($varInfo->scopeType)) {
@@ -232,6 +310,16 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo->firstInitialized = $stackPtr;
   }
 
+  /**
+   * @param string $varName
+   * @param string $scopeType
+   * @param ?string $typeHint
+   * @param int $stackPtr
+   * @param int $currScope
+   * @param ?bool $permitMatchingRedeclaration
+   *
+   * @return void
+   */
   protected function markVariableDeclaration(
     $varName,
     $scopeType,
@@ -247,7 +335,7 @@ class VariableAnalysisSniff implements Sniff {
         //  Note: we check off scopeType not firstDeclared, this is so that
         //    we catch declarations that come after implicit declarations like
         //    use of a variable as a local.
-        $this->currentFile->addWarning(
+        $this->addWarning(
           "Redeclaration of %s %s as %s.",
           $stackPtr,
           'VariableRedeclaration',
@@ -270,6 +358,26 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   /**
+   * @param string $message
+   * @param int $stackPtr
+   * @param string $code
+   * @param string[] $data
+   *
+   * @return void
+   */
+  protected function addWarning($message, $stackPtr, $code, $data) {
+    if (! $this->currentFile) {
+      throw new \Exception('Cannot add warning; current file is not set.');
+    }
+    $this->currentFile->addWarning(
+      $message,
+      $stackPtr,
+      $code,
+      $data
+    );
+  }
+
+  /**
    * @param string $varName
    * @param int $stackPtr
    * @param int $currScope
@@ -284,16 +392,15 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo->firstRead = $stackPtr;
   }
 
-  protected function isVariableInitialized($varName, $stackPtr, $currScope) {
-    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
-    if (isset($varInfo->firstInitialized) && $varInfo->firstInitialized <= $stackPtr) {
-      return true;
-    }
-    return false;
-  }
-
+  /**
+   * @param string $varName
+   * @param int $stackPtr
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function isVariableUndefined($varName, $stackPtr, $currScope) {
-    $varInfo = $this->getVariableInfo($varName, $currScope);
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if ($varInfo->ignoreUndefined) {
       return false;
     }
@@ -306,6 +413,14 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param string $varName
+   * @param int $stackPtr
+   * @param int $currScope
+   *
+   * @return void
+   */
   protected function markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope) {
     $this->markVariableRead($varName, $stackPtr, $currScope);
     if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
@@ -328,7 +443,7 @@ class VariableAnalysisSniff implements Sniff {
   protected function markAllVariablesRead(File $phpcsFile, $stackPtr) {
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
     if (! $currScope) {
-      return false;
+      return;
     }
     $scopeInfo = $this->getOrCreateScopeInfo($currScope);
     $count = count($scopeInfo->variables);
@@ -338,23 +453,32 @@ class VariableAnalysisSniff implements Sniff {
     }
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForFunctionPrototype(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a function or closure parameter?
     // It would be nice to get the list of function parameters from watching for
     // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
     // we need to do that as private or final, so we have to do it this hackish way.
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if ($openPtr === false) {
+    if (is_bool($openPtr)) {
       return false;
     }
 
     $functionPtr = Helpers::findPreviousFunctionPtr($phpcsFile, $openPtr);
-    if (($functionPtr !== false)
+    if (// phpcs:ignore PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace
+      (is_int($functionPtr))
       && (($tokens[$functionPtr]['code'] === T_FUNCTION)
-      || ($tokens[$functionPtr]['code'] === T_CLOSURE))) {
+      || ($tokens[$functionPtr]['code'] === T_CLOSURE))
+    ) {
       $this->markVariableDeclaration($varName, 'param', null, $stackPtr, $functionPtr);
       // Are we pass-by-reference?
       $referencePtr = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true, null, true);
@@ -380,13 +504,13 @@ class VariableAnalysisSniff implements Sniff {
       }
       // $functionPtr is at the use, we need the function keyword for start of scope.
       $functionPtr = $phpcsFile->findPrevious(T_CLOSURE, $functionPtr - 1, $currScope + 1, false, null, true);
-      if ($functionPtr !== false) {
+      if (! is_bool($functionPtr)) {
         $this->markVariableDeclaration($varName, 'bound', null, $stackPtr, $functionPtr);
         $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
 
         // Are we pass-by-reference?
         $referencePtr = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true, null, true);
-        if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
+        if ((! is_bool($referencePtr)) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
           $varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
           $varInfo->passByReference = true;
         }
@@ -397,6 +521,14 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForClassProperty(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $propertyDeclarationKeywords = [
       T_PUBLIC,
@@ -429,9 +561,16 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForCatchBlock(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a catch block parameter?
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
@@ -453,7 +592,14 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  protected function checkForThisWithinClass(File $phpcsFile, $stackPtr, $varName, $currScope) {
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   *
+   * @return bool
+   */
+  protected function checkForThisWithinClass(File $phpcsFile, $stackPtr, $varName) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
@@ -476,10 +622,14 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
-  protected function checkForSuperGlobal(File $phpcsFile, $stackPtr, $varName, $currScope) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   *
+   * @return bool
+   */
+  protected function checkForSuperGlobal(File $phpcsFile, $stackPtr, $varName) {
     // Are we a superglobal variable?
     if (in_array($varName, [
       'GLOBALS',
@@ -500,9 +650,16 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForStaticMember(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     $doubleColonPtr = $stackPtr - 1;
     if ($tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
@@ -528,6 +685,14 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForStaticOutsideClass(File $phpcsFile, $stackPtr, $varName, $currScope) {
     // Are we refering to self:: outside a class?
 
@@ -561,13 +726,18 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
     // Is the next non-whitespace an assignment?
     $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $stackPtr);
-    if ($assignPtr === false) {
+    if (! is_int($assignPtr)) {
       return false;
     }
 
@@ -579,16 +749,20 @@ class VariableAnalysisSniff implements Sniff {
 
     // Plain ol' assignment. Simpl(ish).
     $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
-    if ($writtenPtr === false) {
-      $writtenPtr = $stackPtr;  // I dunno
-    }
     $this->markVariableAssignment($varName, $writtenPtr, $currScope);
     return true;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForVariableVariable(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token = $tokens[$stackPtr];
 
     if (!isset($tokens[$stackPtr - 1]['code'])) {
       return false;
@@ -602,10 +776,15 @@ class VariableAnalysisSniff implements Sniff {
     return false;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForListShorthandAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
     // OK, are we within a [ ... ] construct?
     $openPtr = Helpers::findContainingOpeningSquareBracket($phpcsFile, $stackPtr);
     if ($openPtr === false) {
@@ -614,8 +793,11 @@ class VariableAnalysisSniff implements Sniff {
 
     // OK, we're a [ ... ] construct... are we being assigned to?
     $closePtr = Helpers::findContainingClosingSquareBracket($phpcsFile, $stackPtr);
+    if (! is_int($closePtr)) {
+      return false;
+    }
     $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $closePtr);
-    if ($assignPtr === false) {
+    if (! is_int($assignPtr)) {
       return false;
     }
 
@@ -625,9 +807,16 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForListAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // OK, are we within a list (...) construct?
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
@@ -643,7 +832,7 @@ class VariableAnalysisSniff implements Sniff {
     // OK, we're a list (...) construct... are we being assigned to?
     $closePtr = $tokens[$openPtr]['parenthesis_closer'];
     $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $closePtr);
-    if ($assignPtr === false) {
+    if (! is_int($assignPtr)) {
       return false;
     }
 
@@ -653,6 +842,14 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForGlobalDeclaration(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
 
@@ -668,9 +865,16 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForStaticDeclaration(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a static declaration?
     // Static declarations are a bit more complicated than globals, since they
@@ -729,30 +933,42 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  /**
+   * @param string $varName
+   *
+   * @return bool
+   */
   protected function checkForNumericVariable($varName) {
     return is_numeric(substr($varName, 0, 1));
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForForeachLoopVar(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a foreach loopvar?
     $openParenPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if ($openParenPtr === false) {
+    if (! is_int($openParenPtr)) {
       return false;
     }
     $foreachPtr = Helpers::findParenthesisOwner($phpcsFile, $openParenPtr);
-    if ($foreachPtr === false) {
+    if (! is_int($foreachPtr)) {
       return false;
     }
     if ($tokens[$foreachPtr]['code'] === T_LIST) {
       $openParenPtr = Helpers::findContainingOpeningBracket($phpcsFile, $foreachPtr);
-      if ($openParenPtr === false) {
+      if (! is_int($openParenPtr)) {
         return false;
       }
       $foreachPtr = Helpers::findParenthesisOwner($phpcsFile, $openParenPtr);
-      if ($foreachPtr === false) {
+      if (! is_int($foreachPtr)) {
         return false;
       }
     }
@@ -771,9 +987,16 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForPassByReferenceFunctionCall(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we pass-by-reference to known pass-by-reference function?
     $functionPtr = Helpers::findFunctionCall($phpcsFile, $stackPtr);
@@ -810,6 +1033,7 @@ class VariableAnalysisSniff implements Sniff {
       if ($elipsis === false) {
         return false;
       }
+      $elipsis = (int)$elipsis;
       if ($argPos < $refArgs[$elipsis - 1]) {
         return false;
       }
@@ -833,9 +1057,16 @@ class VariableAnalysisSniff implements Sniff {
     return true;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return bool
+   */
   protected function checkForSymbolicObjectProperty(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     // Are we a symbolic object property/function derefeference?
     // Search backwards for first token that isn't whitespace, is it a "->" operator?
@@ -853,6 +1084,8 @@ class VariableAnalysisSniff implements Sniff {
    *
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
    * @param int $stackPtr  The position where the token was found.
+   *
+   * @return void
    */
   protected function processVariable(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -905,13 +1138,13 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // Are we $this within a class?
-    if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
+    if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName)) {
       Helpers::debug('found this usage within a class');
       return;
     }
 
     // Are we a $GLOBALS, $_REQUEST, etc superglobal?
-    if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName, $currScope)) {
+    if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName)) {
       Helpers::debug('found superglobal');
       return;
     }
@@ -994,6 +1227,8 @@ class VariableAnalysisSniff implements Sniff {
    *
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
    * @param int $stackPtr  The position where the double quoted string was found.
+   *
+   * @return void
    */
   protected function processVariableInString(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -1004,14 +1239,17 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
+    if (! $currScope) {
+      return;
+    }
     foreach ($matches[1] as $varName) {
       $varName = Helpers::normalizeVarName($varName);
       // Are we $this within a class?
-      if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName, $currScope)) {
+      if ($this->checkForThisWithinClass($phpcsFile, $stackPtr, $varName)) {
         continue;
       }
 
-      if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName, $currScope)) {
+      if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName)) {
         continue;
       }
 
@@ -1024,9 +1262,16 @@ class VariableAnalysisSniff implements Sniff {
     }
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param array[] $arguments The stack pointers of each argument
+   * @param int $currScope
+   *
+   * @return void
+   */
   protected function processCompactArguments(File $phpcsFile, $stackPtr, $arguments, $currScope) {
     $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
 
     foreach ($arguments as $argumentPtrs) {
       $argumentPtrs = array_values(array_filter($argumentPtrs, function ($argumentPtr) use ($tokens) {
@@ -1077,12 +1322,14 @@ class VariableAnalysisSniff implements Sniff {
    *
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
    * @param int $stackPtr  The position where the call to compact() was found.
+   *
+   * @return void
    */
   protected function processCompact(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
+    if (! $currScope) {
+      return;
+    }
 
     $arguments = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);
     if ($arguments !== false) {
@@ -1098,6 +1345,8 @@ class VariableAnalysisSniff implements Sniff {
    *
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
    * @param int $stackPtr  The position of the scope conditional.
+   *
+   * @return void
    */
   protected function processScopeClose(File $phpcsFile, $stackPtr) {
     $scopeInfo = $this->getScopeInfo($stackPtr);
@@ -1109,7 +1358,14 @@ class VariableAnalysisSniff implements Sniff {
     }
   }
 
-  protected function processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo) {
+  /**
+   * @param File $phpcsFile
+   * @param VariableInfo $varInfo
+   * @param ScopeInfo $scopeInfo
+   *
+   * @return void
+   */
+  protected function processScopeCloseForVariable(File $phpcsFile, VariableInfo $varInfo, ScopeInfo $scopeInfo) {
     if ($varInfo->ignoreUnused || isset($varInfo->firstRead)) {
       return;
     }
