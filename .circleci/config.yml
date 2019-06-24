@@ -8,6 +8,8 @@ jobs:
       - run: COMPOSER=composer.json composer install
       - run: COMPOSER=composer.json composer test
       - run: COMPOSER=composer.json composer phpstan
+      - run: COMPOSER=composer.json composer lint
+      - run: COMPOSER=composer.json composer lint-self
   build_php5:
     docker:
       - image: circleci/php:5.6.40-zts-stretch-node-browsers-legacy
