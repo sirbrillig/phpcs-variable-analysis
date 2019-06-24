@@ -23,3 +23,9 @@ function send_vars_to_method_with_scope_import( $object, $data ) {
         $object->continue_things( get_defined_vars() );
     }, $data );
 }
+
+function send_var_with_var_named_get_defined_vars( $object, $data ) {
+    $get_defined_vars = 'hi';
+    $new_data = $object->transform_data( $data ); // should be a warning
+    $object->continue_things( $get_defined_vars );
+}
