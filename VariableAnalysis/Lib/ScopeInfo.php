@@ -6,9 +6,14 @@ namespace VariableAnalysis\Lib;
  * Holds details of a scope.
  */
 class ScopeInfo {
+  /**
+   * @var int
+   */
   public $owner;
-  public $opener;
-  public $closer;
+
+  /**
+   * @var VariableInfo[]
+   */
   public $variables = [];
 
   public function __construct($currScope) {
