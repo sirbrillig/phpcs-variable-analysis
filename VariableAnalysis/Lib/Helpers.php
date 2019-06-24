@@ -5,12 +5,24 @@ namespace VariableAnalysis\Lib;
 use PHP_CodeSniffer\Files\File;
 
 class Helpers {
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int|bool
+   */
   public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
     return $phpcsFile->findPrevious(T_OPEN_SHORT_ARRAY, $stackPtr - 1, $previousStatementPtr);
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int|bool
+   */
   public static function findContainingClosingSquareBracket(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $endOfStatementPtr = $phpcsFile->findNext([T_SEMICOLON], $stackPtr + 1);
@@ -20,10 +32,22 @@ class Helpers {
     return $phpcsFile->findNext(T_CLOSE_SHORT_ARRAY, $stackPtr + 1, $endOfStatementPtr);
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int|bool
+   */
   public static function getPreviousStatementPtr(File $phpcsFile, $stackPtr) {
     return $phpcsFile->findPrevious([T_SEMICOLON, T_CLOSE_CURLY_BRACKET], $stackPtr - 1) ?: 1;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int|bool
+   */
   public static function findContainingOpeningBracket(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
@@ -33,11 +57,23 @@ class Helpers {
     return false;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int|bool
+   */
   public static function findParenthesisOwner(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     return $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param array[int]int $conditions
+   *
+   * @return bool
+   */
   public static function areAnyConditionsAClosure(File $phpcsFile, array $conditions) {
     // self within a closure is invalid
     $tokens = $phpcsFile->getTokens();
@@ -50,6 +86,12 @@ class Helpers {
     return false;
   }
 
+
+  /**
+   * @param array[int]int $conditions
+   *
+   * @return bool
+   */
   public static function areAnyConditionsAClass(array $conditions) {
     foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
       if ($scopeCode === T_CLASS || $scopeCode === T_TRAIT) {
@@ -59,6 +101,11 @@ class Helpers {
     return false;
   }
 
+  /**
+   * @param array[int]int $conditions
+   *
+   * @return bool
+   */
   public static function areConditionsWithinFunctionBeforeClass(array $conditions) {
     // Return true if the token conditions are within a function before
     // they are within a class.
@@ -74,6 +121,12 @@ class Helpers {
     return false;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $openPtr
+   *
+   * @return bool
+   */
   public static function findPreviousFunctionPtr(File $phpcsFile, $openPtr) {
     // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
     // so we look backwards from the opening bracket for the first thing that
@@ -148,6 +201,12 @@ class Helpers {
     return $argPtrs;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int
+   */
   public static function findWhereAssignExecuted(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
@@ -177,6 +236,12 @@ class Helpers {
     return $assignEndTokens[0];
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int|bool
+   */
   public static function isNextThingAnAssign(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
@@ -190,10 +255,22 @@ class Helpers {
     return false;
   }
 
+  /**
+   * @param string $varName
+   *
+   * @return string
+   */
   public static function normalizeVarName($varName) {
-    return preg_replace('/[{}$]/', '', $varName);
+    $result = preg_replace('/[{}$]/', '', $varName);
+    return $result ? $result : $varName;
   }
 
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int|bool
+   */
   public static function findFunctionPrototype(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
@@ -245,6 +322,11 @@ class Helpers {
     return 0;
   }
 
+  /**
+   * @param string $message
+   *
+   * @return void
+   */
   public static function debug($message) {
     if (! defined('PHP_CODESNIFFER_VERBOSITY')) {
       return;
@@ -254,6 +336,12 @@ class Helpers {
     }
   }
 
+  /**
+   * @param string $pattern
+   * @param string $value
+   *
+   * @return string[]
+   */
   public static function splitStringToArray($pattern, $value) {
     $result = preg_split($pattern, $value);
     return is_array($result) ? $result : [];
