@@ -135,11 +135,21 @@ class VariableAnalysisSniff implements Sniff {
     return ($this->currentFile ? $this->currentFile->getFilename() : 'unknown file') . ':' . $currScope;
   }
 
+  /**
+   * @param int $currScope
+   *
+   * @return ?ScopeInfo
+   */
   protected function getScopeInfo($currScope) {
     $scopeKey = $this->getScopeKey($currScope);
     return isset($this->scopes[$scopeKey]) ? $this->scopes[$scopeKey] : null;
   }
 
+  /**
+   * @param int $currScope
+   *
+   * @return ScopeInfo
+   */
   protected function getOrCreateScopeInfo($currScope) {
     $scopeKey = $this->getScopeKey($currScope);
     if (!isset($this->scopes[$scopeKey])) {
@@ -241,6 +251,13 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo->firstDeclared = $stackPtr;
   }
 
+  /**
+   * @param string $varName
+   * @param int $stackPtr
+   * @param int $currScope
+   *
+   * @return void
+   */
   protected function markVariableRead($varName, $stackPtr, $currScope) {
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (isset($varInfo->firstRead) && ($varInfo->firstRead <= $stackPtr)) {
