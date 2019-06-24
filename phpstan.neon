@@ -1,0 +1,7 @@
+parameters:
+  autoload_files:
+    - %rootDir%/../../../vendor/squizlabs/php_codesniffer/autoload.php
+  excludes_analyse:
+    - */Tests/*
+  ignoreErrors:
+    - '~^Constant T_\w+ not found.$~'
