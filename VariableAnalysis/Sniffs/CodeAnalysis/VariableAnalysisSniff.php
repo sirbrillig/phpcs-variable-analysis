@@ -195,14 +195,11 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   /**
-   * @param int|bool $currScope
+   * @param int $currScope
    *
    * @return string
    */
   protected function getScopeKey($currScope) {
-    if ($currScope === false) {
-      $currScope = 'file';
-    }
     return ($this->currentFile ? $this->currentFile->getFilename() : 'unknown file') . ':' . $currScope;
   }
 
