@@ -251,7 +251,7 @@ class Helpers {
    *
    * @return ?int
    */
-  public static function isNextThingAnAssign(File $phpcsFile, $stackPtr) {
+  public static function getNextAssignPointer(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     // Is the next non-whitespace an assignment?

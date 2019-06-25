@@ -487,7 +487,7 @@ class VariableAnalysisSniff implements Sniff {
         $varInfo->passByReference = true;
       }
       //  Are we optional with a default?
-      if (Helpers::isNextThingAnAssign($phpcsFile, $stackPtr) !== null) {
+      if (Helpers::getNextAssignPointer($phpcsFile, $stackPtr) !== null) {
         $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
       }
       return true;
@@ -736,7 +736,7 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
     // Is the next non-whitespace an assignment?
-    $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $stackPtr);
+    $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $stackPtr);
     if (! is_int($assignPtr)) {
       return false;
     }
@@ -796,7 +796,7 @@ class VariableAnalysisSniff implements Sniff {
     if (! is_int($closePtr)) {
       return false;
     }
-    $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $closePtr);
+    $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $closePtr);
     if (! is_int($assignPtr)) {
       return false;
     }
@@ -831,7 +831,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // OK, we're a list (...) construct... are we being assigned to?
     $closePtr = $tokens[$openPtr]['parenthesis_closer'];
-    $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $closePtr);
+    $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $closePtr);
     if (! is_int($assignPtr)) {
       return false;
     }
@@ -927,7 +927,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // It's a static declaration.
     $this->markVariableDeclaration($varName, 'static', null, $stackPtr, $currScope);
-    if (Helpers::isNextThingAnAssign($phpcsFile, $stackPtr) !== null) {
+    if (Helpers::getNextAssignPointer($phpcsFile, $stackPtr) !== null) {
       $this->markVariableAssignment($varName, $stackPtr, $currScope);
     }
     return true;
