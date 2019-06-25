@@ -296,7 +296,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return int|false
+   * @return ?int
    */
   public static function findVariableScope(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -321,7 +321,7 @@ class Helpers {
 
     if ($in_class) {
       // Member var of a class, we don't care.
-      return false;
+      return null;
     }
 
     // File scope, hmm, lets use first token of file?

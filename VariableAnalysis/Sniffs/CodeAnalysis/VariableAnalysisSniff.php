@@ -442,7 +442,7 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function markAllVariablesRead(File $phpcsFile, $stackPtr) {
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-    if (! $currScope) {
+    if ($currScope === null) {
       return;
     }
     $scopeInfo = $this->getOrCreateScopeInfo($currScope);
@@ -1091,7 +1091,7 @@ class VariableAnalysisSniff implements Sniff {
     $varName = Helpers::normalizeVarName($token['content']);
     Helpers::debug('examining token ' . $varName);
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-    if ($currScope === false) {
+    if ($currScope === null) {
       Helpers::debug('no scope found');
       return;
     }
@@ -1236,7 +1236,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-    if (! $currScope) {
+    if ($currScope === null) {
       return;
     }
     foreach ($matches[1] as $varName) {
@@ -1322,7 +1322,7 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function processCompact(File $phpcsFile, $stackPtr) {
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-    if (! $currScope) {
+    if ($currScope === null) {
       return;
     }
 
