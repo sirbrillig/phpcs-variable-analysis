@@ -4,17 +4,15 @@
 
 Plugin for PHP_CodeSniffer static analysis tool that adds analysis of problematic variable use.
 
- * Performs static analysis of variable use.
- * Warns on use of undefined variables.
- * Warns if variables are set or declared but never used within that scope.
- * Warns if variables are redeclared within same scope.
+ * Warns if variables are used without being defined.
+ * Warns if variables are set or declared but never used.
  * Warns if $this, self::$static_member, static::$static_member is used outside class scope.
 
 ## Installation
 
 ### Requirements
 
-VariableAnalysis requires PHP 5.4 or higher and [PHP CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) version **3.0.2** or higher.
+VariableAnalysis requires PHP 5.6 or higher and [PHP CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) version **3.0.2** or higher.
 
 ### With PHPCS Composer Installer
 
@@ -95,9 +93,24 @@ This was forked from the excellent work in https://github.com/illusori/PHP_Codes
 
 Please open issues or PRs on this repository.
 
+Any changes should be accompanied by tests and should pass linting and static analysis. Please use phpdoc (rather than actual types) for declaring types since this must run in PHP 5.6.
+
 To run tests, make sure composer is installed, then run:
 
 ```
 composer install # you only need to do this once
 composer test
+```
+
+To run linting, use:
+
+```
+composer lint
+composer lint-self
+```
+
+To run static analysis, use:
+
+```
+composer phpstan
 ```
