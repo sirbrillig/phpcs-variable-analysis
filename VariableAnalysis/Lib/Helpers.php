@@ -276,20 +276,20 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return int|bool
+   * @return ?int
    */
   public static function findFunctionPrototype(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if (! is_int($openPtr)) {
-      return false;
+      return null;
     }
     $functionPtr = Helpers::findPreviousFunctionPtr($phpcsFile, $openPtr);
     if (($functionPtr !== null) && ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
       return $functionPtr;
     }
-    return false;
+    return null;
   }
 
   /**
