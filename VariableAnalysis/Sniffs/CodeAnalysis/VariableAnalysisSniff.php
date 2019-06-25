@@ -487,7 +487,7 @@ class VariableAnalysisSniff implements Sniff {
         $varInfo->passByReference = true;
       }
       //  Are we optional with a default?
-      if (Helpers::isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
+      if (Helpers::isNextThingAnAssign($phpcsFile, $stackPtr) !== null) {
         $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
       }
       return true;
@@ -927,7 +927,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // It's a static declaration.
     $this->markVariableDeclaration($varName, 'static', null, $stackPtr, $currScope);
-    if (Helpers::isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
+    if (Helpers::isNextThingAnAssign($phpcsFile, $stackPtr) !== null) {
       $this->markVariableAssignment($varName, $stackPtr, $currScope);
     }
     return true;

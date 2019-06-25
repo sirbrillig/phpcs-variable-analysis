@@ -249,19 +249,17 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return int|bool
+   * @return ?int
    */
   public static function isNextThingAnAssign(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     // Is the next non-whitespace an assignment?
     $nextPtr = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true, null, true);
-    if ($nextPtr !== false) {
-      if ($tokens[$nextPtr]['code'] === T_EQUAL) {
-        return $nextPtr;
-      }
+    if (is_int($nextPtr) && $tokens[$nextPtr]['code'] === T_EQUAL) {
+      return $nextPtr;
     }
-    return false;
+    return null;
   }
 
   /**
