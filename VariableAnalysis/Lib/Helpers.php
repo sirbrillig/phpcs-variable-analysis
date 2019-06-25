@@ -167,7 +167,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return array[]|false
+   * @return array[]
    */
   public static function findFunctionCallArguments(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -177,18 +177,18 @@ class Helpers {
       // Assume $stackPtr is something within the brackets, find our function call
       $stackPtr = Helpers::findFunctionCall($phpcsFile, $stackPtr);
       if ($stackPtr === null) {
-        return false;
+        return [];
       }
     }
 
     // $stackPtr is the function name, find our brackets after it
     $openPtr = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true, null, true);
     if (($openPtr === false) || ($tokens[$openPtr]['code'] !== T_OPEN_PARENTHESIS)) {
-      return false;
+        return [];
     }
 
     if (!isset($tokens[$openPtr]['parenthesis_closer'])) {
-      return false;
+        return [];
     }
     $closePtr = $tokens[$openPtr]['parenthesis_closer'];
 

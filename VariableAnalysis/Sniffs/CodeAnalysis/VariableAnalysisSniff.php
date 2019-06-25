@@ -1012,9 +1012,6 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $argPtrs = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);
-    if ($argPtrs === false) {
-      return false;
-    }
 
     // We're within a function call arguments list, find which arg we are.
     $argPos = false;
@@ -1287,9 +1284,7 @@ class VariableAnalysisSniff implements Sniff {
       if ($argument_first_token['code'] === T_ARRAY) {
         // It's an array argument, recurse.
         $array_arguments = Helpers::findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
-        if ($array_arguments !== false) {
-          $this->processCompactArguments($phpcsFile, $stackPtr, $array_arguments, $currScope);
-        }
+        $this->processCompactArguments($phpcsFile, $stackPtr, $array_arguments, $currScope);
         continue;
       }
       if (count($argumentPtrs) > 1) {
@@ -1332,9 +1327,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $arguments = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);
-    if ($arguments !== false) {
-      $this->processCompactArguments($phpcsFile, $stackPtr, $arguments, $currScope);
-    }
+    $this->processCompactArguments($phpcsFile, $stackPtr, $arguments, $currScope);
   }
 
   /**
