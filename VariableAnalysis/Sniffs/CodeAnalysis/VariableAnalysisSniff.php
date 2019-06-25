@@ -195,14 +195,11 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   /**
-   * @param int|bool $currScope
+   * @param int $currScope
    *
    * @return string
    */
   protected function getScopeKey($currScope) {
-    if ($currScope === false) {
-      $currScope = 'file';
-    }
     return ($this->currentFile ? $this->currentFile->getFilename() : 'unknown file') . ':' . $currScope;
   }
 
@@ -442,7 +439,7 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function markAllVariablesRead(File $phpcsFile, $stackPtr) {
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-    if (! $currScope) {
+    if ($currScope === null) {
       return;
     }
     $scopeInfo = $this->getOrCreateScopeInfo($currScope);
@@ -469,7 +466,7 @@ class VariableAnalysisSniff implements Sniff {
     // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
     // we need to do that as private or final, so we have to do it this hackish way.
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if (is_bool($openPtr)) {
+    if (! is_int($openPtr)) {
       return false;
     }
 
@@ -487,7 +484,7 @@ class VariableAnalysisSniff implements Sniff {
         $varInfo->passByReference = true;
       }
       //  Are we optional with a default?
-      if (Helpers::isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
+      if (Helpers::getNextAssignPointer($phpcsFile, $stackPtr) !== null) {
         $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
       }
       return true;
@@ -574,7 +571,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we a catch block parameter?
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if ($openPtr === false) {
+    if ($openPtr === null) {
       return false;
     }
 
@@ -736,7 +733,7 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function checkForAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
     // Is the next non-whitespace an assignment?
-    $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $stackPtr);
+    $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $stackPtr);
     if (! is_int($assignPtr)) {
       return false;
     }
@@ -787,7 +784,7 @@ class VariableAnalysisSniff implements Sniff {
   protected function checkForListShorthandAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
     // OK, are we within a [ ... ] construct?
     $openPtr = Helpers::findContainingOpeningSquareBracket($phpcsFile, $stackPtr);
-    if ($openPtr === false) {
+    if (! is_int($openPtr)) {
       return false;
     }
 
@@ -796,7 +793,7 @@ class VariableAnalysisSniff implements Sniff {
     if (! is_int($closePtr)) {
       return false;
     }
-    $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $closePtr);
+    $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $closePtr);
     if (! is_int($assignPtr)) {
       return false;
     }
@@ -820,7 +817,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // OK, are we within a list (...) construct?
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if ($openPtr === false) {
+    if ($openPtr === null) {
       return false;
     }
 
@@ -831,7 +828,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // OK, we're a list (...) construct... are we being assigned to?
     $closePtr = $tokens[$openPtr]['parenthesis_closer'];
-    $assignPtr = Helpers::isNextThingAnAssign($phpcsFile, $closePtr);
+    $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $closePtr);
     if (! is_int($assignPtr)) {
       return false;
     }
@@ -927,7 +924,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // It's a static declaration.
     $this->markVariableDeclaration($varName, 'static', null, $stackPtr, $currScope);
-    if (Helpers::isNextThingAnAssign($phpcsFile, $stackPtr) !== false) {
+    if (Helpers::getNextAssignPointer($phpcsFile, $stackPtr) !== null) {
       $this->markVariableAssignment($varName, $stackPtr, $currScope);
     }
     return true;
@@ -1000,7 +997,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we pass-by-reference to known pass-by-reference function?
     $functionPtr = Helpers::findFunctionCall($phpcsFile, $stackPtr);
-    if ($functionPtr === false || ! isset($tokens[$functionPtr])) {
+    if ($functionPtr === null || ! isset($tokens[$functionPtr])) {
       return false;
     }
 
@@ -1012,9 +1009,6 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $argPtrs = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);
-    if ($argPtrs === false) {
-      return false;
-    }
 
     // We're within a function call arguments list, find which arg we are.
     $argPos = false;
@@ -1094,7 +1088,7 @@ class VariableAnalysisSniff implements Sniff {
     $varName = Helpers::normalizeVarName($token['content']);
     Helpers::debug('examining token ' . $varName);
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-    if ($currScope === false) {
+    if ($currScope === null) {
       Helpers::debug('no scope found');
       return;
     }
@@ -1239,7 +1233,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-    if (! $currScope) {
+    if ($currScope === null) {
       return;
     }
     foreach ($matches[1] as $varName) {
@@ -1287,9 +1281,7 @@ class VariableAnalysisSniff implements Sniff {
       if ($argument_first_token['code'] === T_ARRAY) {
         // It's an array argument, recurse.
         $array_arguments = Helpers::findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
-        if ($array_arguments !== false) {
-          $this->processCompactArguments($phpcsFile, $stackPtr, $array_arguments, $currScope);
-        }
+        $this->processCompactArguments($phpcsFile, $stackPtr, $array_arguments, $currScope);
         continue;
       }
       if (count($argumentPtrs) > 1) {
@@ -1327,14 +1319,12 @@ class VariableAnalysisSniff implements Sniff {
    */
   protected function processCompact(File $phpcsFile, $stackPtr) {
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-    if (! $currScope) {
+    if ($currScope === null) {
       return;
     }
 
     $arguments = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);
-    if ($arguments !== false) {
-      $this->processCompactArguments($phpcsFile, $stackPtr, $arguments, $currScope);
-    }
+    $this->processCompactArguments($phpcsFile, $stackPtr, $arguments, $currScope);
   }
 
   /**
