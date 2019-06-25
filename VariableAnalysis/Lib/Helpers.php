@@ -6,28 +6,37 @@ use PHP_CodeSniffer\Files\File;
 
 class Helpers {
   /**
-   * @param File $phpcsFile
-   * @param int $stackPtr
+   * @param int|bool $value
    *
-   * @return int|bool
+   * @return ?int
    */
-  public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr) {
-    $previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
-    return $phpcsFile->findPrevious(T_OPEN_SHORT_ARRAY, $stackPtr - 1, $previousStatementPtr);
+  public static function getIntOrNull($value) {
+    return is_int($value) ? $value: null;
   }
 
   /**
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return int|bool
+   * @return ?int
+   */
+  public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr) {
+    $previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
+    return self::getIntOrNull($phpcsFile->findPrevious(T_OPEN_SHORT_ARRAY, $stackPtr - 1, $previousStatementPtr));
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return ?int
    */
   public static function findContainingClosingSquareBracket(File $phpcsFile, $stackPtr) {
-    $endOfStatementPtr = $phpcsFile->findNext([T_SEMICOLON], $stackPtr + 1);
-    if (is_bool($endOfStatementPtr)) {
-      return false;
+    $endOfStatementPtr = self::getIntOrNull($phpcsFile->findNext([T_SEMICOLON], $stackPtr + 1));
+    if (! $endOfStatementPtr) {
+      return null;
     }
-    return $phpcsFile->findNext(T_CLOSE_SHORT_ARRAY, $stackPtr + 1, $endOfStatementPtr);
+    return self::getIntOrNull($phpcsFile->findNext(T_CLOSE_SHORT_ARRAY, $stackPtr + 1, $endOfStatementPtr));
   }
 
   /**
@@ -45,7 +54,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return int|bool
+   * @return ?int
    */
   public static function findContainingOpeningBracket(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -53,17 +62,17 @@ class Helpers {
       $openPtrs = array_keys($tokens[$stackPtr]['nested_parenthesis']);
       return (int)end($openPtrs);
     }
-    return false;
+    return null;
   }
 
   /**
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return int|bool
+   * @return ?int
    */
   public static function findParenthesisOwner(File $phpcsFile, $stackPtr) {
-    return $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
+    return self::getIntOrNull($phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true));
   }
 
   /**
@@ -123,7 +132,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $openPtr
    *
-   * @return int|bool
+   * @return ?int
    */
   public static function findPreviousFunctionPtr(File $phpcsFile, $openPtr) {
     // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
@@ -131,14 +140,14 @@ class Helpers {
     // isn't a function name, reference sigil or whitespace and check if it's a
     // function keyword.
     $functionPtrTypes = [T_STRING, T_WHITESPACE, T_BITWISE_AND];
-    return $phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true);
+    return self::getIntOrNull($phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true));
   }
 
   /**
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return int|bool
+   * @return ?int
    */
   public static function findFunctionCall(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -147,11 +156,11 @@ class Helpers {
     if (is_int($openPtr)) {
       // First non-whitespace thing and see if it's a T_STRING function name
       $functionPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
-      if ($tokens[$functionPtr]['code'] === T_STRING) {
+      if (is_int($functionPtr) && $tokens[$functionPtr]['code'] === T_STRING) {
         return $functionPtr;
       }
     }
-    return false;
+    return null;
   }
 
   /**
@@ -167,7 +176,7 @@ class Helpers {
     if (($tokens[$stackPtr]['code'] !== T_STRING) && ($tokens[$stackPtr]['code'] !== T_ARRAY)) {
       // Assume $stackPtr is something within the brackets, find our function call
       $stackPtr = Helpers::findFunctionCall($phpcsFile, $stackPtr);
-      if ($stackPtr === false) {
+      if ($stackPtr === null) {
         return false;
       }
     }
@@ -220,7 +229,7 @@ class Helpers {
     $commaPtr = $phpcsFile->findNext(T_COMMA, $stackPtr + 1, null, false, null, true);
     $closePtr = false;
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if ($openPtr !== false) {
+    if ($openPtr !== null) {
       if (isset($tokens[$openPtr]['parenthesis_closer'])) {
         $closePtr = $tokens[$openPtr]['parenthesis_closer'];
       }
@@ -279,7 +288,7 @@ class Helpers {
       return false;
     }
     $functionPtr = Helpers::findPreviousFunctionPtr($phpcsFile, $openPtr);
-    if (($functionPtr !== false) && ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
+    if (($functionPtr !== null) && ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
       return $functionPtr;
     }
     return false;

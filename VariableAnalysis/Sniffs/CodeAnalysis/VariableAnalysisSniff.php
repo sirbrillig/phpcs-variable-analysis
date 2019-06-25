@@ -469,7 +469,7 @@ class VariableAnalysisSniff implements Sniff {
     // T_FUNCTION, but AbstractVariableSniff and AbstractScopeSniff define everything
     // we need to do that as private or final, so we have to do it this hackish way.
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if (is_bool($openPtr)) {
+    if (! is_int($openPtr)) {
       return false;
     }
 
@@ -574,7 +574,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we a catch block parameter?
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if ($openPtr === false) {
+    if ($openPtr === null) {
       return false;
     }
 
@@ -787,7 +787,7 @@ class VariableAnalysisSniff implements Sniff {
   protected function checkForListShorthandAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
     // OK, are we within a [ ... ] construct?
     $openPtr = Helpers::findContainingOpeningSquareBracket($phpcsFile, $stackPtr);
-    if ($openPtr === false) {
+    if (! is_int($openPtr)) {
       return false;
     }
 
@@ -820,7 +820,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // OK, are we within a list (...) construct?
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if ($openPtr === false) {
+    if ($openPtr === null) {
       return false;
     }
 
@@ -1000,7 +1000,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we pass-by-reference to known pass-by-reference function?
     $functionPtr = Helpers::findFunctionCall($phpcsFile, $stackPtr);
-    if ($functionPtr === false || ! isset($tokens[$functionPtr])) {
+    if ($functionPtr === null || ! isset($tokens[$functionPtr])) {
       return false;
     }
 
