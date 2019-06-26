@@ -83,6 +83,7 @@ To set these these options, you must use XML in your ruleset. For details, see t
 ## See Also
 
 - [ImportDetection](https://github.com/sirbrillig/phpcs-import-detection): A set of phpcs sniffs to look for unused or unimported symbols.
+- [phpcs-changed](https://github.com/sirbrillig/phpcs-changed): Run phpcs on files, but only report warnings/errors from lines which were changed.
 
 
 ## Original
