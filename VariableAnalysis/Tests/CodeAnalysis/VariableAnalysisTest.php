@@ -190,10 +190,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
-    $expectedErrors = [
-      8,
-      12,
-    ];
+    $expectedErrors = [];
     $this->assertEquals($expectedErrors, $lines);
   }
 
