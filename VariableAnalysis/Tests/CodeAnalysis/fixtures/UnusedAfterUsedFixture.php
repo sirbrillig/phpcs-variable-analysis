@@ -20,6 +20,6 @@ function inner_function() {
     ) {
         echo $post_id;
         echo $meta_key;
-    }
+    };
     $foo();
 }
