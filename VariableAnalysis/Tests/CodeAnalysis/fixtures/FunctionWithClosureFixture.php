@@ -56,19 +56,19 @@ class ClassWithSelfInsideClosure {
 function function_with_self_in_closure() {
     return function() {
         return self::$foobar; // should be an error
-    }
+    };
 }
 
 function function_with_this_in_closure() {
     return function() {
         return $this->$foobar; // should be an error
-    }
+    };
 }
 
 function function_with_static_in_closure() {
     return function() {
         return static::$foobar; // should be an error
-    }
+    };
 }
 
 class ClassWithStaticInsideClosure {
