@@ -907,4 +907,20 @@ class VariableAnalysisTest extends BaseTestCase {
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
+
+  public function testThisWithinNestedClosedScope() {
+    $fixtureFile = $this->getFixture('ThisWithinNestedClosedScopeFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+            5,
+            8,
+            20,
+            33,
+            47,
+            61,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }
