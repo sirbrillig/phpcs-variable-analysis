@@ -101,7 +101,7 @@ class Helpers {
    */
   public static function areAnyConditionsAClass(array $conditions) {
     foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
-      if ($scopeCode === T_CLASS || $scopeCode === T_TRAIT) {
+      if ($scopeCode === T_CLASS || $scopeCode === T_ANON_CLASS || $scopeCode === T_TRAIT) {
         return true;
       }
     }

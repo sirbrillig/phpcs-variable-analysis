@@ -15,7 +15,29 @@ class ClassWithAnonymousClass {
 
             public function methodWithStaticVar() {
                 static $myStaticVar; // should trigger unused warning
+
+                echo self::$storedHello;
+                echo static::$storedHello;
             }
         };
     }
 }
+
+$anonClass = new class() {
+    protected $storedHello;
+    private static $storedHello2;
+    private $storedHello3;
+    public $helloOptions = [];
+    static $aStaticOne;
+    var $aVarOne;
+    public function sayHelloWorld() {
+        echo "hello world";
+    }
+
+    public function methodWithStaticVar() {
+        static $myStaticVar; // should trigger unused warning
+
+        echo self::$storedHello;
+        echo static::$storedHello;
+    }
+};
