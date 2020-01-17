@@ -2,7 +2,7 @@
 	bootstrap="VariableAnalysis/Tests/bootstrap.php"
 	>
 	<testsuites>
-		<testsuite>
+		<testsuite name="VariableAnalysis">
 			<directory>VariableAnalysis/Tests</directory>
 		</testsuite>
 	</testsuites>
