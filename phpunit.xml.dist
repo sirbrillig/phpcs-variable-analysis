@@ -3,7 +3,7 @@
 	printerClass="LimeDeck\Testing\Printer"
 	>
 	<testsuites>
-		<testsuite>
+		<testsuite name="VariableAnalysis">
 			<directory>VariableAnalysis/Tests</directory>
 		</testsuite>
 	</testsuites>
