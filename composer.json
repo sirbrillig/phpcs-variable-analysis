@@ -35,13 +35,13 @@
         "phpstan": "./vendor/bin/phpstan analyse -l 7 VariableAnalysis"
     },
     "require" : {
-        "php" : ">=5.6.0"
+        "php" : ">=5.6.0",
+        "squizlabs/php_codesniffer": "^3.1"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
         "phpunit/phpunit": "^6.5",
         "sirbrillig/phpcs-import-detection": "^1.1",
-        "squizlabs/php_codesniffer": "^3.1",
         "limedeck/phpunit-detailed-printer": "^3.1",
         "phpstan/phpstan": "^0.11.8"
     }
