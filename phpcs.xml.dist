@@ -6,6 +6,23 @@
             - bracers on end of line instead new line
             - two space indentation
     </description>
+
+    <file>./VariableAnalysis/</file>
+    <exclude-pattern>./VariableAnalysis/Tests/CodeAnalysis/fixtures/</exclude-pattern>
+
+    <!-- Only check PHP files. -->
+    <arg name="extensions" value="php"/>
+
+    <!-- Show progress, show the error codes for each message (source). -->
+    <arg value="sp"/>
+
+    <!-- Strip the filepaths down to the relevant bit. -->
+    <arg name="basepath" value="./"/>
+
+    <!-- Check up to 8 files simultaneously. -->
+    <arg name="parallel" value="8"/>
+
+    <!-- Rules -->
     <rule ref="PSR2">
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine" />
         <exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine" />
@@ -31,4 +48,5 @@
     <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie" />
     <rule ref="Generic.Classes.OpeningBraceSameLine"/>
     <rule ref="ImportDetection" />
+    <rule ref="VariableAnalysis"/>
 </ruleset>
