@@ -31,7 +31,6 @@
     "scripts": {
         "test": "./vendor/bin/phpunit",
         "lint": "./vendor/bin/phpcs",
-        "lint-self": "./vendor/bin/phpcs --standard=./VariableAnalysis",
         "phpstan": "./vendor/bin/phpstan analyse -l 7 VariableAnalysis"
     },
     "require" : {
