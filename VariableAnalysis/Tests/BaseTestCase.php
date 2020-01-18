@@ -7,12 +7,17 @@ use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Config;
 
 class BaseTestCase extends TestCase {
-  public function prepareLocalFileForSniffs($sniffFiles, $fixtureFile) {
-    $config = new Config(['--standard=VariableAnalysis']);
-    $ruleset = new Ruleset($config);
-    if (! is_array($sniffFiles)) {
-      $sniffFiles = [$sniffFiles];
-    }
+  const STANDARD_NAME = 'VariableAnalysis';
+  const SNIFF_FILE = __DIR__ . '/../Sniffs/CodeAnalysis/VariableAnalysisSniff.php';
+
+  public function prepareLocalFileForSniffs($fixtureFile) {
+    $config            = new Config();
+    $config->cache     = false;
+    $config->standards = [self::STANDARD_NAME];
+    $config->ignored   = [];
+
+    $sniffFiles = [realpath(self::SNIFF_FILE)];
+    $ruleset    = new Ruleset($config);
     $ruleset->registerSniffs($sniffFiles, [], []);
     $ruleset->populateTokenListeners();
     if (! file_exists($fixtureFile)) {
@@ -33,10 +38,6 @@ class BaseTestCase extends TestCase {
 
   public function getErrorLineNumbersFromFile(LocalFile $phpcsFile) {
     return $this->getLineNumbersFromMessages($phpcsFile->getErrors());
-  }
-
-  public function getSniffFiles() {
-    return [realpath(__DIR__ . '/../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php')];
   }
 
   public function getFixture($fixtureFilename) {
