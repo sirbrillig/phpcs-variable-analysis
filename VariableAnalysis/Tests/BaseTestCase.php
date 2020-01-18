@@ -36,10 +36,10 @@ class BaseTestCase extends TestCase {
   }
 
   public function getSniffFiles() {
-    return [__DIR__ . '/../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php'];
+    return [realpath(__DIR__ . '/../../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php')];
   }
 
   public function getFixture($fixtureFilename) {
-    return __DIR__ . '/CodeAnalysis/fixtures/' . $fixtureFilename;
+    return realpath(__DIR__ . '/CodeAnalysis/fixtures/' . $fixtureFilename);
   }
 }
