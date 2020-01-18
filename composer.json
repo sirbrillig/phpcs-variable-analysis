@@ -39,7 +39,7 @@
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4 || ^0.5",
-        "phpunit/phpunit": "^6.5",
+        "phpunit/phpunit": "^5.0 || ^6.5",
         "sirbrillig/phpcs-import-detection": "^1.1",
         "limedeck/phpunit-detailed-printer": "^3.1",
         "phpstan/phpstan": "^0.11.8"
