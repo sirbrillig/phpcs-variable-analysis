@@ -38,7 +38,7 @@
         "squizlabs/php_codesniffer": "^3.1"
     },
     "require-dev": {
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4 || ^0.5",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4 || ^0.5 || ^0.6",
         "phpunit/phpunit": "^5.0 || ^6.5",
         "sirbrillig/phpcs-import-detection": "^1.1",
         "limedeck/phpunit-detailed-printer": "^3.1",
