@@ -1,0 +1,10 @@
+parameters:
+  level: 7
+  autoload_files:
+    - %currentWorkingDirectory%/vendor/squizlabs/php_codesniffer/autoload.php
+  paths:
+    - %currentWorkingDirectory%/VariableAnalysis/
+  excludes_analyse:
+    - %currentWorkingDirectory%/VariableAnalysis/Tests/
+  ignoreErrors:
+    - '~^Constant T_\w+ not found.$~'
