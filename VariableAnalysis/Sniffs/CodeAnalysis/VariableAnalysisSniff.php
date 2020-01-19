@@ -105,7 +105,7 @@ class VariableAnalysisSniff implements Sniff {
   public $allowUnusedForeachVariables = true;
 
   /**
-   * @return int[]
+   * @return (int|string)[]
    */
   public function register() {
     return [
