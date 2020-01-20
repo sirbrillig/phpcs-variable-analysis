@@ -77,7 +77,7 @@ class Helpers {
 
   /**
    * @param File $phpcsFile
-   * @param int[] $conditions
+   * @param (int|string)[] $conditions
    *
    * @return bool
    */
@@ -95,7 +95,7 @@ class Helpers {
 
 
   /**
-   * @param int[] $conditions
+   * @param (int|string)[] $conditions
    *
    * @return bool
    */
@@ -109,7 +109,7 @@ class Helpers {
   }
 
   /**
-   * @param int[] $conditions
+   * @param (int|string)[] $conditions
    *
    * @return bool
    */
