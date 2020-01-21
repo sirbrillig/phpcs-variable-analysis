@@ -923,4 +923,17 @@ class VariableAnalysisTest extends BaseTestCase {
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
+
+  public function testUnusedVarWithValueChange() {
+    $fixtureFile = $this->getFixture('UnusedVarWithValueChangeFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+            5,
+            8,
+            11,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }

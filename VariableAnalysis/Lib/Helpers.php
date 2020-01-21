@@ -3,6 +3,7 @@
 namespace VariableAnalysis\Lib;
 
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Util\Tokens;
 
 class Helpers {
   /**
@@ -256,7 +257,11 @@ class Helpers {
 
     // Is the next non-whitespace an assignment?
     $nextPtr = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true, null, true);
-    if (is_int($nextPtr) && $tokens[$nextPtr]['code'] === T_EQUAL) {
+    if (is_int($nextPtr)
+      && isset(Tokens::$assignmentTokens[$tokens[$nextPtr]['code']])
+      // Ignore double arrow to prevent triggering on `foreach ( $array as $k => $v )`.
+      && $tokens[$nextPtr]['code'] !== T_DOUBLE_ARROW
+    ) {
       return $nextPtr;
     }
     return null;
