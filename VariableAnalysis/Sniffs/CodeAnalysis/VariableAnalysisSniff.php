@@ -187,7 +187,7 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
     // Make sure this is a function call
-    $parenPointer = $phpcsFile->findNext(T_OPEN_PARENTHESIS, $stackPtr, $stackPtr + 2);
+    $parenPointer = $phpcsFile->findNext([T_OPEN_PARENTHESIS], $stackPtr, $stackPtr + 2);
     if (! $parenPointer) {
       return false;
     }
@@ -500,7 +500,7 @@ class VariableAnalysisSniff implements Sniff {
         return true;
       }
       // $functionPtr is at the use, we need the function keyword for start of scope.
-      $functionPtr = $phpcsFile->findPrevious(T_CLOSURE, $functionPtr - 1, $currScope + 1, false, null, true);
+      $functionPtr = $phpcsFile->findPrevious([T_CLOSURE], $functionPtr - 1, $currScope + 1, false, null, true);
       if (! is_bool($functionPtr)) {
         $this->markVariableDeclaration($varName, 'bound', null, $stackPtr, $functionPtr);
         $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
@@ -684,7 +684,7 @@ class VariableAnalysisSniff implements Sniff {
     }
     // "When calling static methods, the function call is stronger than the
     // static property operator" so look for a function call.
-    $parenPointer = $phpcsFile->findNext(T_OPEN_PARENTHESIS, $stackPtr, $stackPtr + 2);
+    $parenPointer = $phpcsFile->findNext([T_OPEN_PARENTHESIS], $stackPtr, $stackPtr + 2);
     if ($parenPointer) {
       return false;
     }
