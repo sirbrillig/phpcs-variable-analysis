@@ -936,4 +936,16 @@ class VariableAnalysisTest extends BaseTestCase {
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
+
+  public function testAssignmentByReference() {
+    $fixtureFile = $this->getFixture('AssignmentByReferenceFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      26,
+      33,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }

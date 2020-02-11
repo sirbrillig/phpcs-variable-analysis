@@ -756,6 +756,19 @@ class VariableAnalysisSniff implements Sniff {
     // Plain ol' assignment. Simpl(ish).
     $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
     $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+
+    // Are we are reference variable?
+    $tokens = $tokens = $phpcsFile->getTokens();
+    $referencePtr = $phpcsFile->findNext(T_WHITESPACE, $assignPtr + 1, null, true, null, true);
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+    if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
+      $varInfo->isReference = true;
+    } elseif ($varInfo->isReference) {
+      // If this is an assigment to a reference variable then that variable is
+      // used.
+      $this->markVariableRead($varName, $stackPtr, $currScope);
+    }
+
     return true;
   }
 
