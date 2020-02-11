@@ -29,6 +29,11 @@ class VariableInfo {
   public $passByReference = false;
 
   /**
+   * @var bool
+   */
+  public $isReference = false;
+
+  /**
    * Stack pointer of first declaration
    *
    * @var int

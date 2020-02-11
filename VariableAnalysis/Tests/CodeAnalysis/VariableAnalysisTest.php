@@ -942,7 +942,10 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
-    $expectedWarnings = [];
+    $expectedWarnings = [
+      26,
+      33,
+    ];
     $this->assertEquals($expectedWarnings, $lines);
   }
 }
