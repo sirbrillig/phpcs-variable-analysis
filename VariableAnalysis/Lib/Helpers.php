@@ -23,7 +23,7 @@ class Helpers {
    */
   public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr) {
     $previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
-    return self::getIntOrNull($phpcsFile->findPrevious(T_OPEN_SHORT_ARRAY, $stackPtr - 1, $previousStatementPtr));
+    return self::getIntOrNull($phpcsFile->findPrevious([T_OPEN_SHORT_ARRAY], $stackPtr - 1, $previousStatementPtr));
   }
 
   /**
@@ -37,7 +37,7 @@ class Helpers {
     if (! $endOfStatementPtr) {
       return null;
     }
-    return self::getIntOrNull($phpcsFile->findNext(T_CLOSE_SHORT_ARRAY, $stackPtr + 1, $endOfStatementPtr));
+    return self::getIntOrNull($phpcsFile->findNext([T_CLOSE_SHORT_ARRAY], $stackPtr + 1, $endOfStatementPtr));
   }
 
   /**
@@ -196,7 +196,7 @@ class Helpers {
     $argPtrs = [];
     $lastPtr = $openPtr;
     $lastArgComma = $openPtr;
-    $nextPtr = $phpcsFile->findNext(T_COMMA, $lastPtr + 1, $closePtr);
+    $nextPtr = $phpcsFile->findNext([T_COMMA], $lastPtr + 1, $closePtr);
     while (is_int($nextPtr)) {
       if (Helpers::findContainingOpeningBracket($phpcsFile, $nextPtr) == $openPtr) {
         // Comma is at our level of brackets, it's an argument delimiter.
@@ -204,7 +204,7 @@ class Helpers {
         $lastArgComma = $nextPtr;
       }
       $lastPtr = $nextPtr;
-      $nextPtr = $phpcsFile->findNext(T_COMMA, $lastPtr + 1, $closePtr);
+      $nextPtr = $phpcsFile->findNext([T_COMMA], $lastPtr + 1, $closePtr);
     }
     array_push($argPtrs, range($lastArgComma + 1, $closePtr - 1));
 
@@ -226,8 +226,8 @@ class Helpers {
     //  However, if we're within a bracketed expression, we take place at the
     //  closing bracket, if that's first.
     //  eg: echo (($var = 12) && ($var == 12));
-    $semicolonPtr = $phpcsFile->findNext(T_SEMICOLON, $stackPtr + 1, null, false, null, true);
-    $commaPtr = $phpcsFile->findNext(T_COMMA, $stackPtr + 1, null, false, null, true);
+    $semicolonPtr = $phpcsFile->findNext([T_SEMICOLON], $stackPtr + 1, null, false, null, true);
+    $commaPtr = $phpcsFile->findNext([T_COMMA], $stackPtr + 1, null, false, null, true);
     $closePtr = false;
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if ($openPtr !== null) {
