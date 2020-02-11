@@ -763,10 +763,9 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
       $varInfo->isReference = true;
-    }
-    // If this is an assigment to a reference variable then that variable is
-    // used.
-    elseif ($varInfo->isReference) {
+    } elseif ($varInfo->isReference) {
+      // If this is an assigment to a reference variable then that variable is
+      // used.
       $this->markVariableRead($varName, $stackPtr, $currScope);
     }
 
