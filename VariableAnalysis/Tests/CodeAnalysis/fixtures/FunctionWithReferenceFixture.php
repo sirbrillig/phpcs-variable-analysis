@@ -1,5 +1,5 @@
 <?php
-function &function_with_return_by_reference_and_param($param) {
+function /*comment*/ &function_with_return_by_reference_and_param($param) {
     echo $param;
     return $param;
 }
