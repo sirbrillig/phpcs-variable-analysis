@@ -159,7 +159,7 @@ class Helpers {
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if (is_int($openPtr)) {
       // First non-whitespace thing and see if it's a T_STRING function name
-      $functionPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
+      $functionPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $openPtr - 1, null, true, null, true);
       if (is_int($functionPtr) && $tokens[$functionPtr]['code'] === T_STRING) {
         return $functionPtr;
       }
@@ -186,7 +186,7 @@ class Helpers {
     }
 
     // $stackPtr is the function name, find our brackets after it
-    $openPtr = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true, null, true);
+    $openPtr = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true, null, true);
     if (($openPtr === false) || ($tokens[$openPtr]['code'] !== T_OPEN_PARENTHESIS)) {
         return [];
     }
