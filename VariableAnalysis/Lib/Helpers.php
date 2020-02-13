@@ -313,7 +313,7 @@ class Helpers {
         if (($scopeCode === T_FUNCTION) || ($scopeCode === T_CLOSURE)) {
           return $scopePtr;
         }
-        if (in_array($scopeCode, [T_CLASS, T_ANON_CLASS, T_INTERFACE, T_TRAIT])) {
+        if (isset(Tokens::$ooScopeTokens[$scopeCode]) === true) {
           $in_class = true;
         }
       }
