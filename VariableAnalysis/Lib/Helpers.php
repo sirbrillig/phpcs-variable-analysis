@@ -140,7 +140,10 @@ class Helpers {
     // so we look backwards from the opening bracket for the first thing that
     // isn't a function name, reference sigil or whitespace and check if it's a
     // function keyword.
-    $functionPtrTypes = [T_STRING, T_WHITESPACE, T_BITWISE_AND];
+    $functionPtrTypes                = Tokens::$emptyTokens;
+    $functionPtrTypes[T_STRING]      = T_STRING;
+    $functionPtrTypes[T_BITWISE_AND] = T_BITWISE_AND;
+
     return self::getIntOrNull($phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true));
   }
 
