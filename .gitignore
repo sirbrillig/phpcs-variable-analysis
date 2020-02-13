@@ -1,6 +1,7 @@
 /composer.lock
 /vendor/
 phpunit.xml
+.phpunit.result.cache
 .phpcs.xml
 phpcs.xml
 tags
