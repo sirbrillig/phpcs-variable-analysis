@@ -73,7 +73,7 @@ class Helpers {
    * @return ?int
    */
   public static function findParenthesisOwner(File $phpcsFile, $stackPtr) {
-    return self::getIntOrNull($phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true));
+    return self::getIntOrNull($phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true));
   }
 
   /**
