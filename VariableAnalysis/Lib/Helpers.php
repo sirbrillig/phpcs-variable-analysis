@@ -256,7 +256,7 @@ class Helpers {
     $tokens = $phpcsFile->getTokens();
 
     // Is the next non-whitespace an assignment?
-    $nextPtr = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true, null, true);
+    $nextPtr = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true, null, true);
     if (is_int($nextPtr)
       && isset(Tokens::$assignmentTokens[$tokens[$nextPtr]['code']])
       // Ignore double arrow to prevent triggering on `foreach ( $array as $k => $v )`.

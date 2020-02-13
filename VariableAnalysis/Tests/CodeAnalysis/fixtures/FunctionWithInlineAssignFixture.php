@@ -4,7 +4,7 @@ function function_with_inline_assigns() {
     ($var = 12) && $var;
     echo $var;
     echo $var2;
-    while ($var2 = whatever()) {
+    while ($var2 /*comment*/ = whatever()) {
         echo $var2;
     }
     echo $var2;
