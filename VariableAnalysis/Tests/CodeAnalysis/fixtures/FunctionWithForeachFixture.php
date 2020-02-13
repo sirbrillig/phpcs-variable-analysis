@@ -45,7 +45,7 @@ function function_with_defined_foreach() {
         echo "$key2 => $value2\n";
     }
     echo "$key2 => $value2\n";
-    foreach ($array as $element3) {
+    foreach /*comment*/ ($array as $element3) {
     }
     foreach ($array as &$element4) {
     }
