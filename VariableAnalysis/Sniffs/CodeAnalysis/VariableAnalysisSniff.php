@@ -8,6 +8,7 @@ use VariableAnalysis\Lib\Constants;
 use VariableAnalysis\Lib\Helpers;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Util\Tokens;
 
 class VariableAnalysisSniff implements Sniff {
   /**
@@ -1291,7 +1292,7 @@ class VariableAnalysisSniff implements Sniff {
 
     foreach ($arguments as $argumentPtrs) {
       $argumentPtrs = array_values(array_filter($argumentPtrs, function ($argumentPtr) use ($tokens) {
-        return $tokens[$argumentPtr]['code'] !== T_WHITESPACE;
+        return isset(Tokens::$emptyTokens[$tokens[$argumentPtr]['code']]) === false;
       }));
       if (empty($argumentPtrs)) {
         continue;
