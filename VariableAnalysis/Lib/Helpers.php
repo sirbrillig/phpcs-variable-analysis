@@ -77,25 +77,6 @@ class Helpers {
   }
 
   /**
-   * @param File $phpcsFile
-   * @param (int|string)[] $conditions
-   *
-   * @return bool
-   */
-  public static function areAnyConditionsAClosure(File $phpcsFile, array $conditions) {
-    // self within a closure is invalid
-    $tokens = $phpcsFile->getTokens();
-    foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
-      //  Note: have to fetch code from $tokens, T_CLOSURE isn't set for conditions codes.
-      if ($tokens[$scopePtr]['code'] === T_CLOSURE) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-
-  /**
    * @param (int|string)[] $conditions
    *
    * @return bool
