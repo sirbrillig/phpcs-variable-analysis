@@ -479,7 +479,7 @@ class VariableAnalysisSniff implements Sniff {
     ) {
       $this->markVariableDeclaration($varName, 'param', null, $stackPtr, $functionPtr);
       // Are we pass-by-reference?
-      $referencePtr = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true, null, true);
+      $referencePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
       if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
         $varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
         $varInfo->passByReference = true;

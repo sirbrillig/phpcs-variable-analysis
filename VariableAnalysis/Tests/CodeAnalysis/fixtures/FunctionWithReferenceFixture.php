@@ -50,7 +50,7 @@ function function_with_pass_by_reference_calls() {
     echo $var3;
 }
 
-function function_with_pass_by_ref_assign_only_arg(&$return_value) {
+function function_with_pass_by_ref_assign_only_arg(&  /*comment*/  $return_value) {
     $return_value = 42;
 }
 
