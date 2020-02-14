@@ -576,7 +576,7 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    $catchPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
+    $catchPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $openPtr - 1, null, true, null, true);
     if (($catchPtr !== false) && ($tokens[$catchPtr]['code'] === T_CATCH)) {
       // Scope of the exception var is actually the function, not just the catch block.
       $this->markVariableDeclaration($varName, 'local', null, $stackPtr, $currScope, true);
