@@ -1,7 +1,7 @@
 <?php
 
 function function_with_global_var() {
-    global $var, $var2, $unused; // should warn that `unused` is unused
+    global $var, /*comment*/ $var2, $unused; // should warn that `unused` is unused
 
     echo $var;
     echo $var3; // should warn that var is undefined
