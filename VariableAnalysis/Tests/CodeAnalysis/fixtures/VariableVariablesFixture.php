@@ -15,7 +15,7 @@ function usedVariableVariableInEcho() {
 function usedVariableVariableInLeftAssignment() {
     $foo = true; // the below is assignment, not a read, so this should be a warning
     $marName = 'foo';
-    $$marName = false;
+    $ /* comment */ $marName = false;
 }
 
 function usedVariableVariableInRightAssignment() {

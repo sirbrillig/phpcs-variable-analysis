@@ -8,6 +8,7 @@ use VariableAnalysis\Lib\Constants;
 use VariableAnalysis\Lib\Helpers;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Util\Tokens;
 
 class VariableAnalysisSniff implements Sniff {
   /**
@@ -783,13 +784,19 @@ class VariableAnalysisSniff implements Sniff {
   protected function checkForVariableVariable(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
 
-    if (!isset($tokens[$stackPtr - 1]['code'])) {
+    $prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), null, true);
+    if ($prev === false) {
       return false;
     }
-    if ($tokens[$stackPtr - 1]['code'] === T_DOLLAR) {
+    if ($tokens[$prev]['code'] === T_DOLLAR) {
       return true;
     }
-    if ($tokens[$stackPtr - 1]['code'] === T_OPEN_CURLY_BRACKET && isset($tokens[$stackPtr - 2]['code']) && $tokens[$stackPtr - 2]['code'] === T_DOLLAR) {
+    if ($tokens[$prev]['code'] !== T_OPEN_CURLY_BRACKET) {
+      return false;
+    }
+
+    $prevPrev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prev - 1), null, true);
+    if ($prevPrev !== false && $tokens[$prevPrev]['code'] === T_DOLLAR) {
       return true;
     }
     return false;
