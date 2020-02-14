@@ -8,6 +8,7 @@ use VariableAnalysis\Lib\Constants;
 use VariableAnalysis\Lib\Helpers;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Util\Tokens;
 
 class VariableAnalysisSniff implements Sniff {
   /**
@@ -843,7 +844,7 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    $prevPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
+    $prevPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $openPtr - 1, null, true, null, true);
     if (($prevPtr === false) || ($tokens[$prevPtr]['code'] !== T_LIST)) {
       return false;
     }
