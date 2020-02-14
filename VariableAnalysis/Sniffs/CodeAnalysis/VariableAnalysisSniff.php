@@ -668,11 +668,11 @@ class VariableAnalysisSniff implements Sniff {
   protected function checkForStaticMember(File $phpcsFile, $stackPtr, $varName, $currScope) {
     $tokens = $phpcsFile->getTokens();
 
-    $doubleColonPtr = $stackPtr - 1;
-    if ($tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
+    $doubleColonPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
+    if ($doubleColonPtr === false || $tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
       return false;
     }
-    $classNamePtr = $stackPtr - 2;
+    $classNamePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $doubleColonPtr - 1, null, true);
     $staticReferences = [
       T_STRING,
       T_SELF,
@@ -680,7 +680,7 @@ class VariableAnalysisSniff implements Sniff {
       T_STATIC,
       T_VARIABLE,
     ];
-    if (! in_array($tokens[$classNamePtr]['code'], $staticReferences, true)) {
+    if ($classNamePtr === false || ! in_array($tokens[$classNamePtr]['code'], $staticReferences, true)) {
       return false;
     }
     // "When calling static methods, the function call is stronger than the

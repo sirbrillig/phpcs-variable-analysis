@@ -52,7 +52,7 @@ class ClassWithMembers {
     function method_with_member_var() {
         echo $this->member_var;
         echo $this->no_such_member_var;
-        echo self::$static_member_var;
+        echo self :: $static_member_var;
         echo self::$no_such_static_member_var;
         echo SomeOtherClass::$external_static_member_var;
     }
@@ -73,7 +73,7 @@ class ClassWithLateStaticBinding {
 class ChildClassWithMembers extends ClassWithMembers {
     function method_with_parent_reference() {
         echo self::$static_member_var;
-        echo parent::$no_such_static_member_var;
+        echo parent /*comment*/ :: $no_such_static_member_var;
     }
 }
 
@@ -87,7 +87,7 @@ class ClassWithAssignedMembers {
         echo $this->member_var;
         echo $this->no_such_member_var;
         echo self::$static_member_var;
-        echo self::$no_such_static_member_var;
+        echo self::  /*comment*/  $no_such_static_member_var;
         echo SomeOtherClass::$external_static_member_var;
     }
 
