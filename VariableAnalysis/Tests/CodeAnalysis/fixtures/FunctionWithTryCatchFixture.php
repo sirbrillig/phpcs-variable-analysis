@@ -6,7 +6,7 @@ function function_with_try_catch() {
     try {
         echo $e;
         echo $var;
-    } catch (Exception $e) {
+    } catch /* comment */ (Exception $e) {
         echo $e;
         echo $var;
     }
