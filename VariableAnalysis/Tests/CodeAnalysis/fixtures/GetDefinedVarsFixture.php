@@ -20,7 +20,7 @@ function send_vars_to_method_with_scope_import( $object, $data ) {
     return array_map( function( $datum ) use ( $object, $imported_data ) {
         $new_data = $object->transform_data( $datum );
         echo $undefined_data; // should be a warning
-        $object->continue_things( get_defined_vars() );
+        $object->continue_things( get_defined_vars /* comment */ () );
     }, $data );
 }
 
