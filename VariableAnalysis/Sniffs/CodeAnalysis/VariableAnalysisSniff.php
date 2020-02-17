@@ -883,8 +883,12 @@ class VariableAnalysisSniff implements Sniff {
     $tokens = $phpcsFile->getTokens();
 
     // Are we a global declaration?
-    // Search backwards for first token that isn't whitespace, comma or variable.
-    $globalPtr = $phpcsFile->findPrevious([T_WHITESPACE, T_VARIABLE, T_COMMA], $stackPtr - 1, null, true, null, true);
+    // Search backwards for first token that isn't whitespace/comment, comma or variable.
+    $ignore             = Tokens::$emptyTokens;
+    $ignore[T_VARIABLE] = T_VARIABLE;
+    $ignore[T_COMMA]    = T_COMMA;
+
+    $globalPtr = $phpcsFile->findPrevious($ignore, $stackPtr - 1, null, true, null, true);
     if (($globalPtr === false) || ($tokens[$globalPtr]['code'] !== T_GLOBAL)) {
       return false;
     }
