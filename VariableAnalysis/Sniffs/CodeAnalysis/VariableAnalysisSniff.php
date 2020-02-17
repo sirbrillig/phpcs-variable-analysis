@@ -1305,7 +1305,7 @@ class VariableAnalysisSniff implements Sniff {
 
     foreach ($arguments as $argumentPtrs) {
       $argumentPtrs = array_values(array_filter($argumentPtrs, function ($argumentPtr) use ($tokens) {
-        return $tokens[$argumentPtr]['code'] !== T_WHITESPACE;
+        return isset(Tokens::$emptyTokens[$tokens[$argumentPtr]['code']]) === false;
       }));
       if (empty($argumentPtrs)) {
         continue;
