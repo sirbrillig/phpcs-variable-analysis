@@ -685,8 +685,8 @@ class VariableAnalysisSniff implements Sniff {
     }
     // "When calling static methods, the function call is stronger than the
     // static property operator" so look for a function call.
-    $parenPointer = $phpcsFile->findNext([T_OPEN_PARENTHESIS], $stackPtr, $stackPtr + 2);
-    if ($parenPointer) {
+    $parenPointer = $phpcsFile->findNext(Tokens::$emptyTokens, ($stackPtr + 1), null, true);
+    if ($parenPointer !== false && $tokens[$parenPointer]['code'] === T_OPEN_PARENTHESIS) {
       return false;
     }
     return true;
