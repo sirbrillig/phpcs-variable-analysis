@@ -8,7 +8,7 @@ class ClassWithSymbolicRefProperty {
             $this->$property = 'some value';
             $this -> $property = 'some value';
             $this->$undefined_property = 'some value';
-            $this -> $undefined_property = 'some value';
+            $this -> /* comment*/ $undefined_property = 'some value';
             $this->$ignored_property = 'some value';
             $this -> $ignored_property = 'some value';
         }

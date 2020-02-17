@@ -1100,7 +1100,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we a symbolic object property/function derefeference?
     // Search backwards for first token that isn't whitespace, is it a "->" operator?
-    $objectOperatorPtr = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true, null, true);
+    $objectOperatorPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
     if (($objectOperatorPtr === false) || ($tokens[$objectOperatorPtr]['code'] !== T_OBJECT_OPERATOR)) {
       return false;
     }
