@@ -7,7 +7,7 @@ class MyClass {
     }
 
     public function funcUsingSelfCallbackFromArgument($meta, $callback) {
-        return self::$callback( $meta  );
+        return self::$callback /*comment*/ ( $meta  );
     }
 
     public function funcUsingStaticCallbackFromArgument($meta, $callback) {
