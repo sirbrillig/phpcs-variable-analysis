@@ -706,11 +706,14 @@ class VariableAnalysisSniff implements Sniff {
     $tokens = $phpcsFile->getTokens();
     $token  = $tokens[$stackPtr];
 
-    $doubleColonPtr = $stackPtr - 1;
-    if ($tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
+    $doubleColonPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
+    if ($doubleColonPtr === false || $tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
       return false;
     }
-    $classNamePtr = $stackPtr - 2;
+    $classNamePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $doubleColonPtr - 1, null, true);
+    if ($classNamePtr === false) {
+      return false;
+    }
     $code = $tokens[$classNamePtr]['code'];
     $staticReferences = [
       T_SELF,
