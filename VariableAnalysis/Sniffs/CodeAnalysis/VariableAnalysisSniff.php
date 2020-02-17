@@ -853,7 +853,7 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    $prevPtr = $phpcsFile->findPrevious(T_WHITESPACE, $openPtr - 1, null, true, null, true);
+    $prevPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $openPtr - 1, null, true, null, true);
     if (($prevPtr === false) || ($tokens[$prevPtr]['code'] !== T_LIST)) {
       return false;
     }
