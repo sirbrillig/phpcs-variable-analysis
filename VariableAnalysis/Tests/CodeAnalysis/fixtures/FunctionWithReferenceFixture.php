@@ -32,7 +32,7 @@ function function_with_pass_by_reference_calls() {
     echo $matches;
     echo $needle;
     echo $haystack;
-    preg_match('/(abc)/', 'defabcghi', $matches);
+    preg_match('/(abc)/', 'defabcghi', /* comment */ $matches);
     preg_match($needle,   'defabcghi', $matches);
     preg_match('/(abc)/', $haystack,   $matches);
     echo $matches;
