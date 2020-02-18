@@ -763,9 +763,9 @@ class VariableAnalysisSniff implements Sniff {
 
     // Are we are reference variable?
     $tokens = $tokens = $phpcsFile->getTokens();
-    $referencePtr = $phpcsFile->findNext(T_WHITESPACE, $assignPtr + 1, null, true, null, true);
+    $referencePtr = $phpcsFile->findNext(Tokens::$emptyTokens, $assignPtr + 1, null, true, null, true);
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
-    if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
+    if ($referencePtr !== false && $tokens[$referencePtr]['code'] === T_BITWISE_AND) {
       $varInfo->isReference = true;
     } elseif ($varInfo->isReference) {
       // If this is an assigment to a reference variable then that variable is
