@@ -1075,7 +1075,7 @@ class VariableAnalysisSniff implements Sniff {
       if ($ptr === $stackPtr) {
         continue;
       }
-      if ($tokens[$ptr]['code'] !== T_WHITESPACE) {
+      if (isset(Tokens::$emptyTokens[$tokens[$ptr]['code']]) === false) {
         return false;
       }
     }
