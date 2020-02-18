@@ -15,7 +15,7 @@ class A {
 function usedAssignmentByReference() {
   $a = new A();
 
-  $var = &$a->getProp();
+  $var = /*comment*/ &$a->getProp();
   $var = ['bar'];
   return $a;
 }
