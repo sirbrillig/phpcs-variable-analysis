@@ -824,7 +824,7 @@ class VariableAnalysisSniff implements Sniff {
     // OK, we're a [ ... ] construct... are we being assigned to?
     $assignments = Lists::getAssignments($phpcsFile, $openPtr);
     $matchingAssignment = array_reduce($assignments, function ($thisAssignment, array $assignment) use ($stackPtr) {
-      if ($assignment['assignment_token'] ?? null === $stackPtr) {
+      if (isset($assignment['assignment_token']) && $assignment['assignment_token'] === $stackPtr) {
         return $assignment;
       }
       return $thisAssignment;
@@ -863,7 +863,7 @@ class VariableAnalysisSniff implements Sniff {
     // OK, we're a list (...) construct... are we being assigned to?
     $assignments = Lists::getAssignments($phpcsFile, $prevPtr);
     $matchingAssignment = array_reduce($assignments, function ($thisAssignment, array $assignment) use ($stackPtr) {
-      if ($assignment['assignment_token'] ?? null === $stackPtr) {
+      if (isset($assignment['assignment_token']) && $assignment['assignment_token'] === $stackPtr) {
         return $assignment;
       }
       return $thisAssignment;
