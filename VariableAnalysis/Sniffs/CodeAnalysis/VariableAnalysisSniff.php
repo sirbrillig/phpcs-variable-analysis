@@ -9,6 +9,7 @@ use VariableAnalysis\Lib\Helpers;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
+use PHPCSUtils\Utils\Lists;
 
 class VariableAnalysisSniff implements Sniff {
   /**
@@ -859,15 +860,19 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // OK, we're a list (...) construct... are we being assigned to?
-    $closePtr = $tokens[$openPtr]['parenthesis_closer'];
-    $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $closePtr);
-    if (! is_int($assignPtr)) {
+    $assignments = Lists::getAssignments($phpcsFile, $prevPtr);
+    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, array $assignment) use ($stackPtr) {
+      if ($assignment['assignment_token'] ?? null === $stackPtr) {
+        return $assignment;
+      }
+      return $thisAssignment;
+    });
+    if (! $matchingAssignment) {
       return false;
     }
 
     // Yes, we're being assigned.
-    $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
-    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+    $this->markVariableAssignment($varName, $stackPtr, $currScope);
     return true;
   }
 
