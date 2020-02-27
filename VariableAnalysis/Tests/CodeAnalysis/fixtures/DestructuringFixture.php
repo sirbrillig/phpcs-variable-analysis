@@ -31,3 +31,20 @@ function function_with_nested_destructure_using_list() {
     echo $foo;
     echo $bar;
 }
+
+function function_with_nested_destructure_using_short_list() {
+    [
+        $foo,
+        [
+            $bar,
+        ]
+    ] = [ 'foo', [ 'bar'  ]  ];
+    [
+        $baz, // unused
+        [
+            $bap, //unused
+        ]
+    ] = [ 'foo', [ 'bar'  ]  ];
+    echo $foo;
+    echo $bar;
+}
