@@ -822,18 +822,19 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // OK, we're a [ ... ] construct... are we being assigned to?
-    $closePtr = Helpers::findContainingClosingSquareBracket($phpcsFile, $stackPtr);
-    if (! is_int($closePtr)) {
-      return false;
-    }
-    $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $closePtr);
-    if (! is_int($assignPtr)) {
+    $assignments = Lists::getAssignments($phpcsFile, $openPtr);
+    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, array $assignment) use ($stackPtr) {
+      if ($assignment['assignment_token'] ?? null === $stackPtr) {
+        return $assignment;
+      }
+      return $thisAssignment;
+    });
+    if (! $matchingAssignment) {
       return false;
     }
 
     // Yes, we're being assigned.
-    $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
-    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+    $this->markVariableAssignment($varName, $stackPtr, $currScope);
     return true;
   }
 
