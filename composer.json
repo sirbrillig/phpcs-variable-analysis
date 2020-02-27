@@ -35,7 +35,8 @@
     },
     "require" : {
         "php" : ">=5.6.0",
-        "squizlabs/php_codesniffer": "^3.1"
+        "squizlabs/php_codesniffer": "^3.1",
+        "phpcsstandards/phpcsutils": "^1.0"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4 || ^0.5 || ^0.6",

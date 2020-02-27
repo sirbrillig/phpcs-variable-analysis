@@ -9,6 +9,7 @@ use VariableAnalysis\Lib\Helpers;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
+use PHPCSUtils\Utils\Lists;
 
 class VariableAnalysisSniff implements Sniff {
   /**
@@ -821,18 +822,23 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // OK, we're a [ ... ] construct... are we being assigned to?
-    $closePtr = Helpers::findContainingClosingSquareBracket($phpcsFile, $stackPtr);
-    if (! is_int($closePtr)) {
+    try {
+      $assignments = Lists::getAssignments($phpcsFile, $openPtr);
+    } catch (\Exception $error) {
       return false;
     }
-    $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $closePtr);
-    if (! is_int($assignPtr)) {
+    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, array $assignment) use ($stackPtr) {
+      if (isset($assignment['assignment_token']) && $assignment['assignment_token'] === $stackPtr) {
+        return $assignment;
+      }
+      return $thisAssignment;
+    });
+    if (! $matchingAssignment) {
       return false;
     }
 
     // Yes, we're being assigned.
-    $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
-    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+    $this->markVariableAssignment($varName, $stackPtr, $currScope);
     return true;
   }
 
@@ -854,20 +860,28 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $prevPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $openPtr - 1, null, true, null, true);
-    if (($prevPtr === false) || ($tokens[$prevPtr]['code'] !== T_LIST)) {
+    if ((is_bool($prevPtr)) || ($tokens[$prevPtr]['code'] !== T_LIST)) {
       return false;
     }
 
     // OK, we're a list (...) construct... are we being assigned to?
-    $closePtr = $tokens[$openPtr]['parenthesis_closer'];
-    $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $closePtr);
-    if (! is_int($assignPtr)) {
+    try {
+      $assignments = Lists::getAssignments($phpcsFile, $prevPtr);
+    } catch (\Exception $error) {
+      return false;
+    }
+    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, array $assignment) use ($stackPtr) {
+      if (isset($assignment['assignment_token']) && $assignment['assignment_token'] === $stackPtr) {
+        return $assignment;
+      }
+      return $thisAssignment;
+    });
+    if (! $matchingAssignment) {
       return false;
     }
 
     // Yes, we're being assigned.
-    $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
-    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+    $this->markVariableAssignment($varName, $stackPtr, $currScope);
     return true;
   }
 
