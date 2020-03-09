@@ -44,9 +44,9 @@ It should just work after that!
 
    Do ensure that PHP_CodeSniffer's version matches our [requirements](#requirements)
 
-2. Clone the repository:
+2. Download and uncompress the latest release:
 
-        git clone -b master https://github.com/sirbrillig/VariableAnalysis.git VariableAnalysis
+Click to download either the zip or tar.gz file from [the latest release page](https://github.com/sirbrillig/phpcs-variable-analysis/releases/latest). Expand the file and rename the resulting directory to `VariableAnalysis`.
 
 3. Add its path to the PHP_CodeSniffer configuration:
 
