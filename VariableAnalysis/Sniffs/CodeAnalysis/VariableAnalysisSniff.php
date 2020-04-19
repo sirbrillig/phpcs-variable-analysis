@@ -1029,7 +1029,11 @@ class VariableAnalysisSniff implements Sniff {
     }
     $this->markVariableAssignment($varName, $stackPtr, $currScope);
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
-    $varInfo->isForeachLoopVar = true;
+
+    // Is this the value of a key => value foreach?
+    if ($phpcsFile->findPrevious(T_DOUBLE_ARROW, $stackPtr - 1, $openParenPtr) !== false) {
+      $varInfo->isForeachLoopAssociativeValue = true;
+    }
 
     return true;
   }
@@ -1415,7 +1419,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === 'param' && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
       return;
     }
-    if ($this->allowUnusedForeachVariables && $varInfo->isForeachLoopVar) {
+    if ($this->allowUnusedForeachVariables && $varInfo->isForeachLoopAssociativeValue) {
       return;
     }
     if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {
