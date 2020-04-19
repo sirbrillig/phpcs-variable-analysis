@@ -886,12 +886,15 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
+      5,
       7,
       8,
       16,
       17,
+      23,
       25,
       26,
+      32,
       33,
       34,
     ];
