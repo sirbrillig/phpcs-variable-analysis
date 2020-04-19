@@ -99,7 +99,7 @@ class VariableAnalysisSniff implements Sniff {
   public $allowUnusedParametersBeforeUsed = true;
 
   /**
-   * If set to true, unused keys or values created by the `as` statement
+   * If set to true, unused values from the `key => value` syntax
    * in a `foreach` loop will never be marked as unused.
    *
    *  @var bool
