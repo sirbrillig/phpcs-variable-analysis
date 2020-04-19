@@ -8,7 +8,7 @@ use PHP_CodeSniffer\Config;
 
 class BaseTestCase extends TestCase {
   const STANDARD_NAME = 'VariableAnalysis';
-  const SNIFF_FILE = __DIR__ . '/../Sniffs/CodeAnalysis/VariableAnalysisSniff.php';
+  const SNIFF_FILE = __DIR__ . '/../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php';
 
   public function prepareLocalFileForSniffs($fixtureFile) {
     $config            = new Config();
@@ -41,6 +41,6 @@ class BaseTestCase extends TestCase {
   }
 
   public function getFixture($fixtureFilename) {
-    return realpath(__DIR__ . '/CodeAnalysis/fixtures/' . $fixtureFilename);
+    return realpath(__DIR__ . '/fixtures/' . $fixtureFilename);
   }
 }

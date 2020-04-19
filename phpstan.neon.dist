@@ -6,6 +6,6 @@ parameters:
   paths:
     - %currentWorkingDirectory%/VariableAnalysis/
   excludes_analyse:
-    - %currentWorkingDirectory%/VariableAnalysis/Tests/
+    - %currentWorkingDirectory%/tests/
   ignoreErrors:
     - '~^Constant T_\w+ not found.$~'

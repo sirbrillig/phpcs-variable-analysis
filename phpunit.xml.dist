@@ -1,10 +1,10 @@
 <phpunit
-	bootstrap="VariableAnalysis/Tests/bootstrap.php"
+	bootstrap="tests/bootstrap.php"
 	printerClass="LimeDeck\Testing\Printer"
 	>
 	<testsuites>
 		<testsuite name="VariableAnalysis">
-			<directory>VariableAnalysis/Tests</directory>
+			<directory>tests</directory>
 		</testsuite>
 	</testsuites>
 </phpunit>

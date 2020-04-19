@@ -13,7 +13,7 @@
 /phpunit.xml.dist export-ignore
 /phpunit.circleci.xml export-ignore
 /.circleci/ export-ignore
-/VariableAnalysis/Tests/ export-ignore
+/tests/ export-ignore
 
 #
 # Auto detect text files and perform LF normalization
