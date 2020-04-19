@@ -82,7 +82,7 @@ class Helpers {
    * @return bool
    */
   public static function areAnyConditionsAClass(array $conditions) {
-    foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
+    foreach (array_reverse($conditions, true) as $scopeCode) {
       if ($scopeCode === T_CLASS || $scopeCode === T_ANON_CLASS || $scopeCode === T_TRAIT) {
         return true;
       }
@@ -99,7 +99,7 @@ class Helpers {
     // Return true if the token conditions are within a function before
     // they are within a class.
     $classTypes = [T_CLASS, T_ANON_CLASS, T_TRAIT];
-    foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
+    foreach (array_reverse($conditions, true) as $scopeCode) {
       if (in_array($scopeCode, $classTypes)) {
         return false;
       }

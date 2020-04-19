@@ -36,9 +36,9 @@ class Foo {
             }
         }
     }
-}
+};
 
-$anonClass = class() {
+$anonClass = new class() {
     public function bar() {
         // Using $this here is fine.
         if ($this->something) {
@@ -50,7 +50,7 @@ $anonClass = class() {
             }
         }
     }
-}
+};
 
 trait FooTrait {
     public function bar() {

@@ -99,7 +99,7 @@ class VariableAnalysisSniff implements Sniff {
   public $allowUnusedParametersBeforeUsed = true;
 
   /**
-   * If set to true, unused keys or values created by the `as` statement
+   * If set to true, unused values from the `key => value` syntax
    * in a `foreach` loop will never be marked as unused.
    *
    *  @var bool
@@ -608,7 +608,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $inFunction = false;
-    foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
+    foreach (array_reverse($token['conditions'], true) as $scopeCode) {
       //  $this within a closure is valid
       if ($scopeCode === T_CLOSURE && $inFunction === false) {
         return true;
@@ -1029,7 +1029,11 @@ class VariableAnalysisSniff implements Sniff {
     }
     $this->markVariableAssignment($varName, $stackPtr, $currScope);
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
-    $varInfo->isForeachLoopVar = true;
+
+    // Is this the value of a key => value foreach?
+    if ($phpcsFile->findPrevious(T_DOUBLE_ARROW, $stackPtr - 1, $openParenPtr) !== false) {
+      $varInfo->isForeachLoopAssociativeValue = true;
+    }
 
     return true;
   }
@@ -1415,7 +1419,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === 'param' && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
       return;
     }
-    if ($this->allowUnusedForeachVariables && $varInfo->isForeachLoopVar) {
+    if ($this->allowUnusedForeachVariables && $varInfo->isForeachLoopAssociativeValue) {
       return;
     }
     if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {

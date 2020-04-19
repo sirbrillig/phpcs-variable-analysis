@@ -124,6 +124,10 @@ class VariableAnalysisTest extends BaseTestCase {
       22,
       24,
       26,
+      48,
+      50,
+      52,
+      54,
       // FIXME: this is an unused variable that needs to be fixed but for now
       // we will ignore it. See
       // https://github.com/sirbrillig/phpcs-variable-analysis/pull/36
@@ -836,12 +840,15 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
+      5,
       7,
       8,
       16,
       17,
+      23,
       25,
       26,
+      32,
       33,
       34,
     ];
@@ -886,12 +893,15 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
+      5,
       7,
       8,
       16,
       17,
+      23,
       25,
       26,
+      32,
       33,
       34,
     ];

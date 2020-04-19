@@ -67,7 +67,7 @@ class VariableInfo {
   /**
    * @var bool
    */
-  public $isForeachLoopVar = false;
+  public $isForeachLoopAssociativeValue = false;
 
   /**
    * @var string[]
