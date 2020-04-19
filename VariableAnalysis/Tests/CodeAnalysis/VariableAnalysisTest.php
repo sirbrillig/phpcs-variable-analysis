@@ -914,10 +914,31 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
-			6,
-			18,
-			22,
-			29,
+      6,
+      18,
+      22,
+      29,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testReassignedVariablesAreWarnings() {
+    $fixtureFile = $this->getFixture('ReassignedVariableFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($this->getSniffFiles(), $fixtureFile);
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      8,
+      28,
+      36,
+      48,
+      52,
+      75,
+      86,
+      97,
+      106,
+      109,
+      127,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
