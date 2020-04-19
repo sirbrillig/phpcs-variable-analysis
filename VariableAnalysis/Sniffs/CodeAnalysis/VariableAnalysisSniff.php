@@ -608,7 +608,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $inFunction = false;
-    foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
+    foreach (array_reverse($token['conditions'], true) as $scopeCode) {
       //  $this within a closure is valid
       if ($scopeCode === T_CLOSURE && $inFunction === false) {
         return true;
