@@ -3,6 +3,7 @@
     <file>./VariableAnalysis/</file>
     <file>./tests/</file>
     <exclude-pattern>./tests/Sniffs/fixtures/</exclude-pattern>
+    <exclude-pattern>./vendor/</exclude-pattern>
 
     <!-- Only check PHP files. -->
     <arg name="extensions" value="php"/>
