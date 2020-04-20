@@ -41,6 +41,6 @@ class BaseTestCase extends TestCase {
   }
 
   public function getFixture($fixtureFilename) {
-    return realpath(__DIR__ . '/fixtures/' . $fixtureFilename);
+    return realpath(__DIR__ . '/Sniffs/fixtures/' . $fixtureFilename);
   }
 }

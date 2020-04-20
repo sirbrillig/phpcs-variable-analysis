@@ -2,7 +2,7 @@
 <ruleset name="PaytonsStandard">
     <file>./VariableAnalysis/</file>
     <file>./tests/</file>
-    <exclude-pattern>./tests/fixtures/</exclude-pattern>
+    <exclude-pattern>./tests/Sniffs/fixtures/</exclude-pattern>
 
     <!-- Only check PHP files. -->
     <arg name="extensions" value="php"/>
