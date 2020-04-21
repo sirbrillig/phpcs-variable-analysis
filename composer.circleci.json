@@ -28,7 +28,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "VariableAnalysis\\Tests\\": "tests/"
+            "VariableAnalysis\\Tests\\": "Tests/"
         }
     },
     "minimum-stability": "dev",
