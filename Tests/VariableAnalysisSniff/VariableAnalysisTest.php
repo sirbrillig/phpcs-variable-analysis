@@ -1,5 +1,5 @@
 <?php
-namespace VariableAnalysis\Tests\Sniffs;
+namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
