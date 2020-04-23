@@ -1,14 +1,9 @@
 <?xml version="1.0"?>
 <ruleset name="PaytonsStandard">
-    <description>
-        Originally from https://gist.github.com/Ovsyanka/e2ab2ff76e7c0d7e75a1e4213a03ff95
-        PSR2 with changes:
-            - bracers on end of line instead new line
-            - two space indentation
-    </description>
-
     <file>./VariableAnalysis/</file>
-    <exclude-pattern>./VariableAnalysis/Tests/CodeAnalysis/fixtures/</exclude-pattern>
+    <file>./Tests/</file>
+    <exclude-pattern>./Tests/VariableAnalysisSniff/fixtures/</exclude-pattern>
+    <exclude-pattern>./vendor/</exclude-pattern>
 
     <!-- Only check PHP files. -->
     <arg name="extensions" value="php"/>

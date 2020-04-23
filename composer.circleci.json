@@ -26,6 +26,11 @@
             "VariableAnalysis\\": "VariableAnalysis/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "VariableAnalysis\\Tests\\": "Tests/"
+        }
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
