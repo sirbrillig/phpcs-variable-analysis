@@ -526,12 +526,10 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * @param File $phpcsFile
    * @param int $stackPtr
-   * @param string $varName
-   * @param int $currScope
    *
    * @return bool
    */
-  protected function checkForClassProperty(File $phpcsFile, $stackPtr, $varName, $currScope) {
+  protected function checkForClassProperty(File $phpcsFile, $stackPtr) {
     $propertyDeclarationKeywords = [
       T_PUBLIC,
       T_PRIVATE,
@@ -664,12 +662,10 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * @param File $phpcsFile
    * @param int $stackPtr
-   * @param string $varName
-   * @param int $currScope
    *
    * @return bool
    */
-  protected function checkForStaticMember(File $phpcsFile, $stackPtr, $varName, $currScope) {
+  protected function checkForStaticMember(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     $doubleColonPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
@@ -700,11 +696,10 @@ class VariableAnalysisSniff implements Sniff {
    * @param File $phpcsFile
    * @param int $stackPtr
    * @param string $varName
-   * @param int $currScope
    *
    * @return bool
    */
-  protected function checkForStaticOutsideClass(File $phpcsFile, $stackPtr, $varName, $currScope) {
+  protected function checkForStaticOutsideClass(File $phpcsFile, $stackPtr, $varName) {
     // Are we refering to self:: outside a class?
 
     $tokens = $phpcsFile->getTokens();
@@ -756,7 +751,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // Is this a variable variable? If so, it's not an assignment to the current variable.
-    if ($this->checkForVariableVariable($phpcsFile, $stackPtr, $varName, $currScope)) {
+    if ($this->checkForVariableVariable($phpcsFile, $stackPtr)) {
       Helpers::debug('found variable variable');
       return false;
     }
@@ -783,12 +778,10 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * @param File $phpcsFile
    * @param int $stackPtr
-   * @param string $varName
-   * @param int $currScope
    *
    * @return bool
    */
-  protected function checkForVariableVariable(File $phpcsFile, $stackPtr, $varName, $currScope) {
+  protected function checkForVariableVariable(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
     $prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), null, true);
@@ -1201,18 +1194,18 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // Check for static members used outside a class
-    if ($this->checkForStaticOutsideClass($phpcsFile, $stackPtr, $varName, $currScope)) {
+    if ($this->checkForStaticOutsideClass($phpcsFile, $stackPtr, $varName)) {
       Helpers::debug('found static usage outside of class');
       return;
     }
 
     // $var part of class::$var static member
-    if ($this->checkForStaticMember($phpcsFile, $stackPtr, $varName, $currScope)) {
+    if ($this->checkForStaticMember($phpcsFile, $stackPtr)) {
       Helpers::debug('found static member');
       return;
     }
 
-    if ($this->checkForClassProperty($phpcsFile, $stackPtr, $varName, $currScope)) {
+    if ($this->checkForClassProperty($phpcsFile, $stackPtr)) {
       Helpers::debug('found class property definition');
       return;
     }
