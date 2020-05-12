@@ -50,3 +50,8 @@ function updateGlobalWithListShorthand($newVal) {
   [ $myGlobal, $otherVar ] = my_function($newVal);
   echo $otherVar;
 }
+
+function globalWithUnusedFunctionArg($user_type, $text, $testvar) { // should warn that testvar is unused
+	global $config;
+	return $config . $text . $user_type;
+}

@@ -97,6 +97,7 @@ class VariableAnalysisTest extends BaseTestCase {
       28,
       29,
       39,
+      54,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -762,6 +763,7 @@ class VariableAnalysisTest extends BaseTestCase {
       7,
       23,
       39,
+			54,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -802,6 +804,8 @@ class VariableAnalysisTest extends BaseTestCase {
       8,
       16,
       19,
+      28,
+      34,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -814,6 +818,8 @@ class VariableAnalysisTest extends BaseTestCase {
     $expectedWarnings = [
       8,
       19,
+      28,
+      34,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
