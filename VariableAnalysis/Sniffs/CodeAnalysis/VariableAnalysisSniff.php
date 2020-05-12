@@ -284,6 +284,9 @@ class VariableAnalysisSniff implements Sniff {
       if (! $foundVarPosition) {
         continue;
       }
+      if ($variable->scopeType !== 'param') {
+        continue;
+      }
       if ($variable->firstRead) {
         return true;
       }
@@ -1417,6 +1420,7 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === 'param' && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
+      Helpers::debug("variable {$varInfo->name} at end of scope has unused following args");
       return;
     }
     if ($this->allowUnusedForeachVariables && $varInfo->isForeachLoopAssociativeValue) {
