@@ -23,3 +23,17 @@ function inner_function() {
     };
     $foo();
 }
+
+// The following line should report an unused variable (unused after used)
+function function_with_one_unused_param($used, $used_two, $unused_three) {
+    echo $used;
+    echo $used_two;
+}
+
+// The following line should report an unused variable (unused after used)
+function function_with_local_and_unused_params($used, $used_two, $unused_three) {
+    $foobar = 'hello';
+    echo $used;
+    echo $foobar;
+    echo $used_two;
+}
