@@ -91,6 +91,15 @@ class VariableAnalysisSniff implements Sniff {
   public $validUndefinedVariableNames = null;
 
   /**
+   *  A PHP regexp string for variables that you want to ignore from undefined
+   *  variable warnings. For example, to ignore the variables `$_junk` and
+   *  `$_unused`, this could be set to `'/^_/'`.
+   *
+   *  @var string|null
+   */
+  public $validUndefinedVariableRegexp= null;
+
+  /**
    * Allows unused arguments in a function definition if they are
    * followed by an argument which is used.
    *
@@ -262,6 +271,9 @@ class VariableAnalysisSniff implements Sniff {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
       }
       if (in_array($varName, $validUndefinedVariableNames)) {
+        $scopeInfo->variables[$varName]->ignoreUndefined = true;
+      }
+      if (isset($this->validUndefinedVariableRegexp) && preg_match($this->validUndefinedVariableRegexp, $varName) === 1) {
         $scopeInfo->variables[$varName]->ignoreUndefined = true;
       }
     }
