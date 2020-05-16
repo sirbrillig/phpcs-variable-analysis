@@ -3,6 +3,7 @@
 namespace VariableAnalysis\Sniffs\CodeAnalysis;
 
 use VariableAnalysis\Lib\ScopeInfo;
+use VariableAnalysis\Lib\ScopeType;
 use VariableAnalysis\Lib\VariableInfo;
 use VariableAnalysis\Lib\Constants;
 use VariableAnalysis\Lib\Helpers;
@@ -296,7 +297,7 @@ class VariableAnalysisSniff implements Sniff {
       if (! $foundVarPosition) {
         continue;
       }
-      if ($variable->scopeType !== 'param') {
+      if ($variable->scopeType !== ScopeType::PARAM) {
         continue;
       }
       if ($variable->firstRead) {
@@ -316,7 +317,7 @@ class VariableAnalysisSniff implements Sniff {
   protected function markVariableAssignment($varName, $stackPtr, $currScope) {
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (!isset($varInfo->scopeType)) {
-      $varInfo->scopeType = 'local';
+      $varInfo->scopeType = ScopeType::LOCAL;
     }
     if (isset($varInfo->firstInitialized) && ($varInfo->firstInitialized <= $stackPtr)) {
       return;
@@ -493,7 +494,7 @@ class VariableAnalysisSniff implements Sniff {
       && (($tokens[$functionPtr]['code'] === T_FUNCTION)
       || ($tokens[$functionPtr]['code'] === T_CLOSURE))
     ) {
-      $this->markVariableDeclaration($varName, 'param', null, $stackPtr, $functionPtr);
+      $this->markVariableDeclaration($varName, ScopeType::PARAM, null, $stackPtr, $functionPtr);
       // Are we pass-by-reference?
       $referencePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
       if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
@@ -519,7 +520,7 @@ class VariableAnalysisSniff implements Sniff {
       // $functionPtr is at the use, we need the function keyword for start of scope.
       $functionPtr = $phpcsFile->findPrevious([T_CLOSURE], $functionPtr - 1, $currScope + 1, false, null, true);
       if (! is_bool($functionPtr)) {
-        $this->markVariableDeclaration($varName, 'bound', null, $stackPtr, $functionPtr);
+        $this->markVariableDeclaration($varName, ScopeType::BOUND, null, $stackPtr, $functionPtr);
         $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
 
         // Are we pass-by-reference?
@@ -593,7 +594,7 @@ class VariableAnalysisSniff implements Sniff {
     $catchPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $openPtr - 1, null, true, null, true);
     if (($catchPtr !== false) && ($tokens[$catchPtr]['code'] === T_CATCH)) {
       // Scope of the exception var is actually the function, not just the catch block.
-      $this->markVariableDeclaration($varName, 'local', null, $stackPtr, $currScope, true);
+      $this->markVariableDeclaration($varName, ScopeType::LOCAL, null, $stackPtr, $currScope, true);
       $this->markVariableAssignment($varName, $stackPtr, $currScope);
       if ($this->allowUnusedCaughtExceptions) {
         $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
@@ -916,7 +917,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // It's a global declaration.
-    $this->markVariableDeclaration($varName, 'global', null, $stackPtr, $currScope);
+    $this->markVariableDeclaration($varName, ScopeType::GLOBALSCOPE, null, $stackPtr, $currScope);
     return true;
   }
 
@@ -981,7 +982,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // It's a static declaration.
-    $this->markVariableDeclaration($varName, 'static', null, $stackPtr, $currScope);
+    $this->markVariableDeclaration($varName, ScopeType::STATICSCOPE, null, $stackPtr, $currScope);
     if (Helpers::getNextAssignPointer($phpcsFile, $stackPtr) !== null) {
       $this->markVariableAssignment($varName, $stackPtr, $currScope);
     }
@@ -1421,10 +1422,10 @@ class VariableAnalysisSniff implements Sniff {
     if ($varInfo->ignoreUnused || isset($varInfo->firstRead)) {
       return;
     }
-    if ($this->allowUnusedFunctionParameters && $varInfo->scopeType === 'param') {
+    if ($this->allowUnusedFunctionParameters && $varInfo->scopeType === ScopeType::PARAM) {
       return;
     }
-    if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === 'param' && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
+    if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === ScopeType::PARAM && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
       Helpers::debug("variable {$varInfo->name} at end of scope has unused following args");
       return;
     }
@@ -1438,7 +1439,7 @@ class VariableAnalysisSniff implements Sniff {
       // of "unused variable" warnings.
       return;
     }
-    if ($varInfo->scopeType === 'global' && isset($varInfo->firstInitialized)) {
+    if ($varInfo->scopeType === ScopeType::GLOBALSCOPE && isset($varInfo->firstInitialized)) {
       // If we imported this variable from the global scope, any further use of
       // the variable, including assignment, should count as "variable use" for
       // the purposes of "unused variable" warnings.
