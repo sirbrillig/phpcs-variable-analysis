@@ -1,6 +1,15 @@
 version: 2
 jobs:
-  build_php7:
+  build_php7.4:
+    docker:
+      - image: circleci/php:7.4.6
+    steps:
+      - checkout
+      - run: COMPOSER=composer.json composer install
+      - run: COMPOSER=composer.json composer test
+      - run: COMPOSER=composer.json composer phpstan
+      - run: COMPOSER=composer.json composer lint
+  build_php7.3:
     docker:
       - image: circleci/php:7.3.1
     steps:
@@ -9,7 +18,7 @@ jobs:
       - run: COMPOSER=composer.json composer test
       - run: COMPOSER=composer.json composer phpstan
       - run: COMPOSER=composer.json composer lint
-  build_php5:
+  build_php5.6:
     docker:
       - image: circleci/php:5.6.40-zts-stretch-node-browsers-legacy
     steps:
@@ -20,5 +29,6 @@ workflows:
   version: 2
   build_php_versions:
     jobs:
-      - build_php5
-      - build_php7
+      - build_php5.6
+      - build_php7.3
+      - build_php7.4
