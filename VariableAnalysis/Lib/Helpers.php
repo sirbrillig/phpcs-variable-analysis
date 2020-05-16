@@ -318,17 +318,25 @@ class Helpers {
   }
 
   /**
-   * @param string $message
-   *
    * @return void
    */
-  public static function debug($message) {
+  public static function debug(...$messages) {
     if (! defined('PHP_CODESNIFFER_VERBOSITY')) {
       return;
     }
-    if (PHP_CODESNIFFER_VERBOSITY > 3) {
-      echo PHP_EOL . "VariableAnalysisSniff: DEBUG: $message" . PHP_EOL;
+    if (PHP_CODESNIFFER_VERBOSITY <= 3) {
+      return;
     }
+    $output = PHP_EOL . "VariableAnalysisSniff: DEBUG:";
+    foreach ($messages as $message) {
+      if (is_string($message) || is_numeric($message)) {
+        $output .= ' "' . $message . '"';
+        continue;
+      }
+      $output .= PHP_EOL . var_export($message, true) . PHP_EOL;
+    }
+    $output .= PHP_EOL;
+    echo $output;
   }
 
   /**
