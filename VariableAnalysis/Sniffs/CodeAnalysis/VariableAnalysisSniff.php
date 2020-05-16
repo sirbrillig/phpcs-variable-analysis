@@ -645,13 +645,11 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   /**
-   * @param File $phpcsFile
-   * @param int $stackPtr
    * @param string $varName
    *
    * @return bool
    */
-  protected function checkForSuperGlobal(File $phpcsFile, $stackPtr, $varName) {
+  protected function checkForSuperGlobal($varName) {
     // Are we a superglobal variable?
     if (in_array($varName, [
       'GLOBALS',
@@ -1201,7 +1199,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // Are we a $GLOBALS, $_REQUEST, etc superglobal?
-    if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName)) {
+    if ($this->checkForSuperGlobal($varName)) {
       Helpers::debug('found superglobal');
       return;
     }
@@ -1306,7 +1304,7 @@ class VariableAnalysisSniff implements Sniff {
         continue;
       }
 
-      if ($this->checkForSuperGlobal($phpcsFile, $stackPtr, $varName)) {
+      if ($this->checkForSuperGlobal($varName)) {
         continue;
       }
 
