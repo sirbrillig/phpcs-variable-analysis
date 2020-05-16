@@ -4,6 +4,8 @@
 
  <!-- If you want everything, with the defaults, just include this line -->
  <rule ref="VariableAnalysis.CodeAnalysis.VariableAnalysis"/>
+ <!-- PHPCSUtils is required for this sniff to operate -->
+ <rule ref="PHPCSUtils"/>
  <!--
     You can also refer to these policy codes to customize them:
       VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable
