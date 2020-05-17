@@ -58,15 +58,16 @@ function arrowFunctionAsExpressionWithUnusedVariableInside($subject) {
     echo $ids;
 }
 
-function arrowFunctionAsExpressionWithUsedAfterUnused($subject) {
+function arrowFunctionAsExpressionWithUsedAfterUnused($subject) { // unused variable $subject
     $posts = [];
     $ids = array_map(fn($foo, $post) => $post->id, $posts); // unused variable $foo (but before used)
     echo $ids;
 }
 
-function arrowFunctionAsExpressionWithUnusedVariableOutsideArrow($subject) {
+function arrowFunctionAsExpressionWithUnusedVariableOutsideArrow($subject) { //unused variable $subject
     $posts = [];
     $ids = array_map(fn($post) => $post->id, $posts);
     echo $ids;
     echo $post; // undefined variable $post;
 }
+

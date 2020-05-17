@@ -2,6 +2,8 @@
 
 namespace VariableAnalysis\Lib;
 
+use VariableAnalysis\Lib\ScopeType;
+
 /**
  * Holds details of a variable within a scope.
  */
@@ -27,6 +29,16 @@ class VariableInfo {
    * @var bool
    */
   public $passByReference = false;
+
+  /**
+   * @var self | null
+   */
+  public $referencedVariable;
+
+  /**
+   * @var int | null
+   */
+  public $referencedVariableScope;
 
   /**
    * @var bool

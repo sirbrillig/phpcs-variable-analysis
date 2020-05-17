@@ -15,16 +15,17 @@ class ArrowFunctionTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
-        9,
-        14,
-        19,
-        24,
-        30,
-        34,
-        39,
-        51,
-        57,
-        71,
+      9,
+      14,
+      19,
+      24,
+      30,
+      34,
+      51,
+      57,
+      61,
+      67,
+      71,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
