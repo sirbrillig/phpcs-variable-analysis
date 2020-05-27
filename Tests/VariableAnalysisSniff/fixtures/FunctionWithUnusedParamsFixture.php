@@ -82,3 +82,12 @@ function function_with_multi_line_unused_params(
     echo "xxx {$param} xxx";
     return $param;
 }
+
+function function_with_only_use_of_param_as_return($param) {
+	return $param;
+}
+
+function function_with_only_use_of_var_as_return() {
+	$param = 'foobar';
+	return $param;
+}
