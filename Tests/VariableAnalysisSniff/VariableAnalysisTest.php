@@ -793,6 +793,25 @@ class VariableAnalysisTest extends BaseTestCase {
     $this->assertEquals($expectedWarnings, $lines);
   }
 
+  public function testValidUndefinedVariableRegexpIgnoresUndefinedProperties() {
+    $fixtureFile = $this->getFixture('ClassReferenceFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'validUndefinedVariableRegexp',
+      '/^undefined_/'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      12,
+      13,
+      24,
+      25
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
   public function testUnusedArgumentsBeforeUsedArgumentsAreFoundIfFalse() {
     $fixtureFile = $this->getFixture('UnusedAfterUsedFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
