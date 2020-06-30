@@ -44,7 +44,6 @@
         "phpcsstandards/phpcsutils": "^1.0"
     },
     "require-dev": {
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4 || ^0.5 || ^0.6",
         "phpunit/phpunit": "^5.0 || ^6.5 || ^7.0 || ^8.0",
         "sirbrillig/phpcs-import-detection": "^1.1",
         "limedeck/phpunit-detailed-printer": "^3.1 || ^4.0 || ^5.0",
