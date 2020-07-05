@@ -1135,7 +1135,25 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   /**
-   * Called to process normal member vars.
+   * Process a normal variable in the code
+   *
+   * Most importantly, this function determines if the variable use is a "read"
+   * (using the variable for something) or a "write" (an assignment) or,
+   * sometimes, both at once.
+   *
+   * It also determines the scope of the variable (where it begins and ends).
+   *
+   * Using these two pieces of information, we can determine if the variable is
+   * being used ("read") without having been defined ("write").
+   *
+   * We can also determine, once the scan has hit the end of a scope, if any of
+   * the variables within that scope have been defined ("write") without being
+   * used ("read"). That behavior, however, happens in the `processScopeClose`
+   * function using the data gathered by this function.
+   *
+   * Some variables are used in more complex ways, so there are other similar
+   * functions to this one, like `processVariableInString`, and
+   * `processCompact`. They have the same purpose as this function, though.
    *
    * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
    * @param int $stackPtr  The position where the token was found.
@@ -1154,7 +1172,7 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
 
-    // Determine if variable is being assigned or read.
+    // Determine if variable is being assigned ("write") or used ("read").
 
     // Read methods that preempt assignment:
     //   Are we a $object->$property type symbolic reference?
