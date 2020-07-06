@@ -137,6 +137,7 @@ class Helpers {
     $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
     $nonFunctionTokenTypes[] = T_OPEN_PARENTHESIS;
     $nonFunctionTokenTypes[] = T_VARIABLE;
+    $nonFunctionTokenTypes[] = T_ELLIPSIS;
     $nonFunctionTokenTypes[] = T_COMMA;
     $nonFunctionTokenTypes[] = T_STRING;
     $nonFunctionTokenTypes[] = T_BITWISE_AND;
@@ -179,6 +180,7 @@ class Helpers {
 
     $nonUseTokenTypes = array_values(Tokens::$emptyTokens);
     $nonUseTokenTypes[] = T_VARIABLE;
+    $nonUseTokenTypes[] = T_ELLIPSIS;
     $nonUseTokenTypes[] = T_COMMA;
     $nonUseTokenTypes[] = T_BITWISE_AND;
     $openParenPtr = self::getIntOrNull($phpcsFile->findPrevious($nonUseTokenTypes, $stackPtr - 1, null, true, null, true));
