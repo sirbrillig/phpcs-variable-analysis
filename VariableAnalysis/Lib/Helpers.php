@@ -149,8 +149,10 @@ class Helpers {
     $functionTokenTypes = [
       T_FUNCTION,
       T_CLOSURE,
-      T_FN, // TODO: cannot use this before PHP 7.4
     ];
+    if (defined('T_FN')) {
+      $functionTokenTypes[] = T_FN;
+    }
     if (!in_array($tokens[$functionPtr]['code'], $functionTokenTypes, true)) {
       return null;
     }
@@ -436,8 +438,10 @@ class Helpers {
     $functionTokenTypes = [
       T_FUNCTION,
       T_CLOSURE,
-      T_FN, // TODO: cannot use this before PHP 7.4
     ];
+    if (defined('T_FN')) {
+      $functionTokenTypes[] = T_FN;
+    }
     foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
       if (in_array($scopeCode, $functionTokenTypes, true)) {
         return $scopePtr;
@@ -494,9 +498,12 @@ class Helpers {
    * @return ?int
    */
   public static function getContainingArrowFunctionIndex(File $phpcsFile, $stackPtr) {
+    if (! defined('T_FN')) {
+      return null;
+    }
     $tokens = $phpcsFile->getTokens();
     $enclosingScopeIndex = self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
-    $arrowFunctionIndex = $phpcsFile->findPrevious([T_FN], $stackPtr - 1, $enclosingScopeIndex); // TODO: cannot use T_FN before PHP 7.4
+    $arrowFunctionIndex = $phpcsFile->findPrevious([T_FN], $stackPtr - 1, $enclosingScopeIndex);
     if (! is_int($arrowFunctionIndex)) {
       return null;
     }

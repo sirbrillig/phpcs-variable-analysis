@@ -127,7 +127,7 @@ class VariableAnalysisSniff implements Sniff {
    * @return (int|string)[]
    */
   public function register() {
-    return [
+    $types = [
       T_VARIABLE,
       T_DOUBLE_QUOTED_STRING,
       T_HEREDOC,
@@ -138,8 +138,11 @@ class VariableAnalysisSniff implements Sniff {
       T_COMMA,
       T_SEMICOLON,
       T_CLOSE_PARENTHESIS,
-      T_FN, // TODO: we can't use this before php 7.4 so we need to replace it somehow
     ];
+    if (defined('T_FN')) {
+      $types[] = T_FN;
+    }
+    return $types;
   }
 
   /**
@@ -174,8 +177,10 @@ class VariableAnalysisSniff implements Sniff {
     $scopeStartTokenTypes = [
       T_FUNCTION,
       T_CLOSURE,
-      T_FN, // TODO: we cannot use this before PHP 7.4
     ];
+    if (defined('T_FN')) {
+      $scopeStartTokenTypes[] = T_FN;
+    }
 
     $scopeIndexThisCloses = array_reduce($this->scopeStartIndices, function ($found, $index) use ($stackPtr, $tokens) {
       if ($stackPtr === $tokens[$index]['scope_closer']) {
@@ -288,7 +293,6 @@ class VariableAnalysisSniff implements Sniff {
    * @return VariableInfo
    */
   protected function getOrCreateVariableInfo($varName, $currScope) {
-    // TODO: this needs to find the scope of an arrow function if we are inside one, which must also include the scope of its parent!
     $scopeInfo = $this->getOrCreateScopeInfo($currScope);
     if (!isset($scopeInfo->variables[$varName])) {
       Helpers::debug("creating a new variable for '{$varName}' in scope", $scopeInfo);
@@ -472,7 +476,6 @@ class VariableAnalysisSniff implements Sniff {
     if (isset($varInfo->firstInitialized) && $varInfo->firstInitialized <= $stackPtr) {
       return false;
     }
-    // TODO: if the variable is in an arrow function body, also check the enclosing scope
     return true;
   }
 
