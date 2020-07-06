@@ -544,4 +544,13 @@ class Helpers {
     $result = preg_split($pattern, $value);
     return is_array($result) ? $result : [];
   }
+
+  /**
+   * @param string $varName
+   *
+   * @return bool
+   */
+  public static function isVariableANumericVariable($varName) {
+    return is_numeric(substr($varName, 0, 1));
+  }
 }

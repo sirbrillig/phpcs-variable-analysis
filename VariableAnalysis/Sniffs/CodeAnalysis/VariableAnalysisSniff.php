@@ -1061,15 +1061,6 @@ class VariableAnalysisSniff implements Sniff {
   }
 
   /**
-   * @param string $varName
-   *
-   * @return bool
-   */
-  protected function processVariableAsNumericVariable($varName) {
-    return is_numeric(substr($varName, 0, 1));
-  }
-
-  /**
    * @param File $phpcsFile
    * @param int $stackPtr
    * @param string $varName
@@ -1364,7 +1355,7 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // Are we a numeric variable used for constructs like preg_replace?
-    if ($this->processVariableAsNumericVariable($varName)) {
+    if (Helpers::isVariableANumericVariable($varName)) {
       Helpers::debug('found numeric variable');
       return;
     }
@@ -1410,7 +1401,7 @@ class VariableAnalysisSniff implements Sniff {
       }
 
       // Are we a numeric variable used for constructs like preg_replace?
-      if ($this->processVariableAsNumericVariable($varName)) {
+      if (Helpers::isVariableANumericVariable($varName)) {
         continue;
       }
 
