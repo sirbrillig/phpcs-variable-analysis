@@ -31,20 +31,6 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return ?int
-   */
-  public static function findContainingClosingSquareBracket(File $phpcsFile, $stackPtr) {
-    $endOfStatementPtr = self::getIntOrNull($phpcsFile->findNext([T_SEMICOLON], $stackPtr + 1));
-    if (! $endOfStatementPtr) {
-      return null;
-    }
-    return self::getIntOrNull($phpcsFile->findNext([T_CLOSE_SHORT_ARRAY], $stackPtr + 1, $endOfStatementPtr));
-  }
-
-  /**
-   * @param File $phpcsFile
-   * @param int $stackPtr
-   *
    * @return int
    */
   public static function getPreviousStatementPtr(File $phpcsFile, $stackPtr) {
@@ -65,16 +51,6 @@ class Helpers {
       return (int)end($openPtrs);
     }
     return null;
-  }
-
-  /**
-   * @param File $phpcsFile
-   * @param int $stackPtr
-   *
-   * @return ?int
-   */
-  public static function findParenthesisOwner(File $phpcsFile, $stackPtr) {
-    return self::getIntOrNull($phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true));
   }
 
   /**

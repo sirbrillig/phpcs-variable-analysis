@@ -1085,7 +1085,7 @@ class VariableAnalysisSniff implements Sniff {
     if (! is_int($openParenPtr)) {
       return false;
     }
-    $foreachPtr = Helpers::findParenthesisOwner($phpcsFile, $openParenPtr);
+    $foreachPtr = Helpers::getIntOrNull($phpcsFile->findPrevious(Tokens::$emptyTokens, $openParenPtr - 1, null, true));
     if (! is_int($foreachPtr)) {
       return false;
     }
@@ -1094,7 +1094,7 @@ class VariableAnalysisSniff implements Sniff {
       if (! is_int($openParenPtr)) {
         return false;
       }
-      $foreachPtr = Helpers::findParenthesisOwner($phpcsFile, $openParenPtr);
+      $foreachPtr = Helpers::getIntOrNull($phpcsFile->findPrevious(Tokens::$emptyTokens, $openParenPtr - 1, null, true));
       if (! is_int($foreachPtr)) {
         return false;
       }
