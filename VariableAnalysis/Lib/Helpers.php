@@ -434,7 +434,7 @@ class Helpers {
     $token = $tokens[$stackPtr];
 
     $in_class = false;
-    $conditions = $token['conditions'] ?? [];
+    $conditions = isset($token['conditions']) ? $token['conditions'] : [];
     $functionTokenTypes = [
       T_FUNCTION,
       T_CLOSURE,
@@ -473,7 +473,7 @@ class Helpers {
   public static function isTokenInsideArrowFunctionDefinition(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
     $token = $tokens[$stackPtr];
-    $openParenIndices = $token['nested_parenthesis'] ?? [];
+    $openParenIndices = isset($token['nested_parenthesis']) ? $token['nested_parenthesis'] : [];
     if ($openParenIndices) {
       return false;
     }
