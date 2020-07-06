@@ -183,7 +183,11 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $scopeIndexThisCloses = array_reduce($this->scopeStartIndices, function ($found, $index) use ($stackPtr, $tokens) {
-      if ($stackPtr === $tokens[$index]['scope_closer']) {
+      $scopeCloserIndex = $tokens[$index]['scope_closer'] ?? null;
+      if (!$scopeCloserIndex) {
+        Helpers::debug('No scope closer found for scope start', $index);
+      }
+      if ($stackPtr === $scopeCloserIndex) {
         return $index;
       }
       return $found;
