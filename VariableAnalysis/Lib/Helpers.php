@@ -467,14 +467,16 @@ class Helpers {
    * @return ?int
    */
   public static function getContainingArrowFunctionIndex(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
     $arrowFunctionIndex = self::getPreviousArrowFunctionIndex($phpcsFile, $stackPtr);
     if (! is_int($arrowFunctionIndex)) {
       return null;
     }
-    $arrowFunctionToken = $tokens[$arrowFunctionIndex];
-    $arrowFunctionScopeStart = $arrowFunctionToken['scope_opener'];
-    $arrowFunctionScopeEnd = $arrowFunctionToken['scope_closer'];
+    $arrowFunctionInfo = FunctionDeclarations::getArrowFunctionOpenClose($phpcsFile, $arrowFunctionIndex);
+    if (! $arrowFunctionInfo) {
+      return null;
+    }
+    $arrowFunctionScopeStart = $arrowFunctionInfo['scope_opener'];
+    $arrowFunctionScopeEnd = $arrowFunctionInfo['scope_closer'];
     if ($stackPtr > $arrowFunctionScopeStart && $stackPtr < $arrowFunctionScopeEnd) {
       return $arrowFunctionIndex;
     }

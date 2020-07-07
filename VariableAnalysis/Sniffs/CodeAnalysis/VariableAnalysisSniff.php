@@ -180,8 +180,12 @@ class VariableAnalysisSniff implements Sniff {
       T_CLOSURE,
     ];
 
-    $scopeIndexThisCloses = array_reduce($this->scopeStartIndices, function ($found, $index) use ($stackPtr, $tokens) {
+    $scopeIndexThisCloses = array_reduce($this->scopeStartIndices, function ($found, $index) use ($phpcsFile, $stackPtr, $tokens) {
       $scopeCloserIndex = isset($tokens[$index]['scope_closer']) ? $tokens[$index]['scope_closer'] : null;
+      if (FunctionDeclarations::isArrowFunction($phpcsFile, $index)) {
+        $arrowFunctionInfo = FunctionDeclarations::getArrowFunctionOpenClose($phpcsFile, $index);
+        $scopeCloserIndex = $arrowFunctionInfo ? $arrowFunctionInfo['scope_closer'] : $scopeCloserIndex;
+      }
       if (!$scopeCloserIndex) {
         Helpers::debug('No scope closer found for scope start', $index);
       }
