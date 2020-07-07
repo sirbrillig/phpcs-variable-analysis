@@ -412,11 +412,8 @@ class Helpers {
       T_FUNCTION,
       T_CLOSURE,
     ];
-    if (defined('T_FN')) {
-      $functionTokenTypes[] = T_FN;
-    }
     foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
-      if (in_array($scopeCode, $functionTokenTypes, true)) {
+      if (in_array($scopeCode, $functionTokenTypes, true) || FunctionDeclarations::isArrowFunction($phpcsFile, $scopePtr)) {
         return $scopePtr;
       }
       if (isset(Tokens::$ooScopeTokens[$scopeCode]) === true) {
