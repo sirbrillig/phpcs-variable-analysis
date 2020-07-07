@@ -380,8 +380,7 @@ class Helpers {
       if (! is_int($functionPtr)) {
         throw new \Exception("Function index not found for function argument index {$stackPtr}");
       }
-      $functionToken = $tokens[$functionPtr];
-      return $functionToken['scope_condition'];
+      return $functionPtr;
     }
 
     self::debug('Cannot find function scope for variable at', $stackPtr);
