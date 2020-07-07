@@ -2,6 +2,8 @@
 
 namespace VariableAnalysis\Lib;
 
+use VariableAnalysis\Lib\ScopeType;
+
 /**
  * Holds details of a variable within a scope.
  */
@@ -27,6 +29,16 @@ class VariableInfo {
    * @var bool
    */
   public $passByReference = false;
+
+  /**
+   * @var self | null
+   */
+  public $referencedVariable;
+
+  /**
+   * @var int | null
+   */
+  public $referencedVariableScope;
 
   /**
    * @var bool
@@ -73,11 +85,11 @@ class VariableInfo {
    * @var string[]
    */
   public static $scopeTypeDescriptions = array(
-    'local'  => 'variable',
-    'param'  => 'function parameter',
-    'static' => 'static variable',
-    'global' => 'global variable',
-    'bound'  => 'bound variable',
+    ScopeType::LOCAL  => 'variable',
+    ScopeType::PARAM  => 'function parameter',
+    ScopeType::STATICSCOPE => 'static variable',
+    ScopeType::GLOBALSCOPE => 'global variable',
+    ScopeType::BOUND  => 'bound variable',
   );
 
   public function __construct($varName) {

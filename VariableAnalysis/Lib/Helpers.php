@@ -4,6 +4,7 @@ namespace VariableAnalysis\Lib;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
+use PHPCSUtils\Utils\FunctionDeclarations;
 
 class Helpers {
   /**
@@ -30,20 +31,6 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return ?int
-   */
-  public static function findContainingClosingSquareBracket(File $phpcsFile, $stackPtr) {
-    $endOfStatementPtr = self::getIntOrNull($phpcsFile->findNext([T_SEMICOLON], $stackPtr + 1));
-    if (! $endOfStatementPtr) {
-      return null;
-    }
-    return self::getIntOrNull($phpcsFile->findNext([T_CLOSE_SHORT_ARRAY], $stackPtr + 1, $endOfStatementPtr));
-  }
-
-  /**
-   * @param File $phpcsFile
-   * @param int $stackPtr
-   *
    * @return int
    */
   public static function getPreviousStatementPtr(File $phpcsFile, $stackPtr) {
@@ -64,16 +51,6 @@ class Helpers {
       return (int)end($openPtrs);
     }
     return null;
-  }
-
-  /**
-   * @param File $phpcsFile
-   * @param int $stackPtr
-   *
-   * @return ?int
-   */
-  public static function findParenthesisOwner(File $phpcsFile, $stackPtr) {
-    return self::getIntOrNull($phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true));
   }
 
   /**
@@ -112,20 +89,85 @@ class Helpers {
 
   /**
    * @param File $phpcsFile
-   * @param int $openPtr
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isTokenInsideFunctionDefinitionArgumentList(File $phpcsFile, $stackPtr) {
+    return (bool) self::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr);
+  }
+
+  /**
+   * Find the index of the function keyword for a token in a function definition's arguments
+   *
+   * Does not work for tokens inside the "use".
+   *
+   * @param File $phpcsFile
+   * @param int $stackPtr
    *
    * @return ?int
    */
-  public static function findPreviousFunctionPtr(File $phpcsFile, $openPtr) {
-    // Function names are T_STRING, and return-by-reference is T_BITWISE_AND,
-    // so we look backwards from the opening bracket for the first thing that
-    // isn't a function name, reference sigil or whitespace and check if it's a
-    // function keyword.
-    $functionPtrTypes                = Tokens::$emptyTokens;
-    $functionPtrTypes[T_STRING]      = T_STRING;
-    $functionPtrTypes[T_BITWISE_AND] = T_BITWISE_AND;
+  public static function getFunctionIndexForFunctionArgument(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
 
-    return self::getIntOrNull($phpcsFile->findPrevious($functionPtrTypes, $openPtr - 1, null, true, null, true));
+    $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
+    $nonFunctionTokenTypes[] = T_OPEN_PARENTHESIS;
+    $nonFunctionTokenTypes[] = T_VARIABLE;
+    $nonFunctionTokenTypes[] = T_ELLIPSIS;
+    $nonFunctionTokenTypes[] = T_COMMA;
+    $nonFunctionTokenTypes[] = T_STRING;
+    $nonFunctionTokenTypes[] = T_BITWISE_AND;
+    $functionPtr = self::getIntOrNull($phpcsFile->findPrevious($nonFunctionTokenTypes, $stackPtr - 1, null, true, null, true));
+    if (! is_int($functionPtr)) {
+      return null;
+    }
+
+    $functionTokenTypes = [
+      T_FUNCTION,
+      T_CLOSURE,
+    ];
+    if (!in_array($tokens[$functionPtr]['code'], $functionTokenTypes, true) && ! FunctionDeclarations::isArrowFunction($phpcsFile, $functionPtr)) {
+      return null;
+    }
+    return $functionPtr;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isTokenInsideFunctionUseImport(File $phpcsFile, $stackPtr) {
+    return (bool) self::getUseIndexForUseImport($phpcsFile, $stackPtr);
+  }
+
+  /**
+   * Find the token index of the "use" for a token inside a function use import
+   *
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return ?int
+   */
+  public static function getUseIndexForUseImport(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+
+    $nonUseTokenTypes = array_values(Tokens::$emptyTokens);
+    $nonUseTokenTypes[] = T_VARIABLE;
+    $nonUseTokenTypes[] = T_ELLIPSIS;
+    $nonUseTokenTypes[] = T_COMMA;
+    $nonUseTokenTypes[] = T_BITWISE_AND;
+    $openParenPtr = self::getIntOrNull($phpcsFile->findPrevious($nonUseTokenTypes, $stackPtr - 1, null, true, null, true));
+    if (! is_int($openParenPtr) || $tokens[$openParenPtr]['code'] !== T_OPEN_PARENTHESIS) {
+      return null;
+    }
+
+    $usePtr = self::getIntOrNull($phpcsFile->findPrevious(array_values($nonUseTokenTypes), $openParenPtr - 1, null, true, null, true));
+    if (! is_int($usePtr) || $tokens[$usePtr]['code'] !== T_USE) {
+      return null;
+    }
+    return $usePtr;
   }
 
   /**
@@ -267,16 +309,176 @@ class Helpers {
    *
    * @return ?int
    */
-  public static function findFunctionPrototype(File $phpcsFile, $stackPtr) {
+  public static function findVariableScope(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
+    $token = $tokens[$stackPtr];
 
-    $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
-    if (! is_int($openPtr)) {
+    if (self::isTokenInsideArrowFunctionBody($phpcsFile, $stackPtr)) {
+      // Get the list of variables defined by the arrow function
+      // If this matches any of them, the scope is the arrow function,
+      // otherwise, it uses the enclosing scope.
+      $arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
+      if ($arrowFunctionIndex) {
+        $variableNames = self::getVariablesDefinedByArrowFunction($phpcsFile, $arrowFunctionIndex);
+        if (in_array($token['content'], $variableNames, true)) {
+          return $arrowFunctionIndex;
+        }
+      }
+    }
+
+    return self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
+  }
+
+  /**
+   * Return the token index of the scope start for a token
+   *
+   * For a variable within a function body, or a variable within a function
+   * definition argument list, this will return the function keyword's index.
+   *
+   * For a variable within a "use" import list within a function definition,
+   * this will return the enclosing scope, not the function keyword. This is
+   * important to note because the "use" keyword performs double-duty, defining
+   * variables for the function's scope, and consuming the variables in the
+   * enclosing scope. Use `getUseIndexForUseImport` to determine if this
+   * token needs to be treated as a "use".
+   *
+   * For a variable within an arrow function definition argument list,
+   * this will return the arrow function's keyword index.
+   *
+   * For a variable in an arrow function body, this will return the enclosing
+   * function's index, which may be incorrect.
+   *
+   * Since a variable in an arrow function's body may be imported from the
+   * enclosing scope, it's important to test to see if the variable is in an
+   * arrow function and also check its enclosing scope separately.
+   *
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return ?int
+   */
+  public static function findVariableScopeExceptArrowFunctions(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $allowedTypes = [
+      T_VARIABLE,
+      T_DOUBLE_QUOTED_STRING,
+      T_HEREDOC,
+      T_STRING,
+    ];
+    if (! in_array($tokens[$stackPtr]['code'], $allowedTypes, true)) {
+      throw new \Exception("Cannot find variable scope for non-variable {$tokens[$stackPtr]['type']}");
+    }
+
+    $startOfTokenScope = self::getStartOfTokenScope($phpcsFile, $stackPtr);
+    if (is_int($startOfTokenScope) && $startOfTokenScope > 0) {
+      return $startOfTokenScope;
+    }
+
+    // If there is no "conditions" array, this is a function definition argument.
+    if (self::isTokenInsideFunctionDefinitionArgumentList($phpcsFile, $stackPtr)) {
+      $functionPtr = self::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr);
+      if (! is_int($functionPtr)) {
+        throw new \Exception("Function index not found for function argument index {$stackPtr}");
+      }
+      return $functionPtr;
+    }
+
+    self::debug('Cannot find function scope for variable at', $stackPtr);
+    return $startOfTokenScope;
+  }
+
+  /**
+   * Return the token index of the scope start for a variable token
+   *
+   * This will only work for a variable within a function's body. Otherwise,
+   * see `findVariableScope`, which is more complex.
+   *
+   * Note that if used on a variable in an arrow function, it will return the
+   * enclosing function's scope, which may be incorrect.
+   *
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return ?int
+   */
+  private static function getStartOfTokenScope(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $token = $tokens[$stackPtr];
+
+    $in_class = false;
+    $conditions = isset($token['conditions']) ? $token['conditions'] : [];
+    $functionTokenTypes = [
+      T_FUNCTION,
+      T_CLOSURE,
+    ];
+    foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
+      if (in_array($scopeCode, $functionTokenTypes, true) || FunctionDeclarations::isArrowFunction($phpcsFile, $scopePtr)) {
+        return $scopePtr;
+      }
+      if (isset(Tokens::$ooScopeTokens[$scopeCode]) === true) {
+        $in_class = true;
+      }
+    }
+
+    if ($in_class) {
+      // If this is inside a class and not inside a function, this is either a
+      // class member variable definition, or a function argument. If it is a
+      // variable definition, it has no scope on its own (it can only be used
+      // with an object reference). If it is a function argument, we need to do
+      // more work (see `findVariableScopeExceptArrowFunctions`).
       return null;
     }
-    $functionPtr = Helpers::findPreviousFunctionPtr($phpcsFile, $openPtr);
-    if (($functionPtr !== null) && ($tokens[$functionPtr]['code'] === T_FUNCTION)) {
-      return $functionPtr;
+
+    // If we can't find a scope, let's use the first token of the file.
+    return 0;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isTokenInsideArrowFunctionDefinition(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $token = $tokens[$stackPtr];
+    $openParenIndices = isset($token['nested_parenthesis']) ? $token['nested_parenthesis'] : [];
+    if ($openParenIndices) {
+      return false;
+    }
+    $openParenPtr = $openParenIndices[0];
+    return FunctionDeclarations::isArrowFunction($phpcsFile, $openParenPtr - 1);
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isTokenInsideArrowFunctionBody(File $phpcsFile, $stackPtr) {
+    return (bool) self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return ?int
+   */
+  public static function getContainingArrowFunctionIndex(File $phpcsFile, $stackPtr) {
+    $arrowFunctionIndex = self::getPreviousArrowFunctionIndex($phpcsFile, $stackPtr);
+    if (! is_int($arrowFunctionIndex)) {
+      return null;
+    }
+    $arrowFunctionInfo = FunctionDeclarations::getArrowFunctionOpenClose($phpcsFile, $arrowFunctionIndex);
+    if (! $arrowFunctionInfo) {
+      return null;
+    }
+    $arrowFunctionScopeStart = $arrowFunctionInfo['scope_opener'];
+    $arrowFunctionScopeEnd = $arrowFunctionInfo['scope_closer'];
+    if ($stackPtr > $arrowFunctionScopeStart && $stackPtr < $arrowFunctionScopeEnd) {
+      return $arrowFunctionIndex;
     }
     return null;
   }
@@ -287,48 +489,56 @@ class Helpers {
    *
    * @return ?int
    */
-  public static function findVariableScope(File $phpcsFile, $stackPtr) {
-    $tokens = $phpcsFile->getTokens();
-    $token  = $tokens[$stackPtr];
-
-    $in_class = false;
-    if (!empty($token['conditions'])) {
-      foreach (array_reverse($token['conditions'], true) as $scopePtr => $scopeCode) {
-        if (($scopeCode === T_FUNCTION) || ($scopeCode === T_CLOSURE)) {
-          return $scopePtr;
-        }
-        if (isset(Tokens::$ooScopeTokens[$scopeCode]) === true) {
-          $in_class = true;
-        }
+  private static function getPreviousArrowFunctionIndex(File $phpcsFile, $stackPtr) {
+    $enclosingScopeIndex = self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
+    for ($index = $stackPtr - 1; $index > $enclosingScopeIndex; $index--) {
+      if (FunctionDeclarations::isArrowFunction($phpcsFile, $index)) {
+        return $index;
       }
     }
-
-    $scopePtr = Helpers::findFunctionPrototype($phpcsFile, $stackPtr);
-    if (is_int($scopePtr)) {
-      return $scopePtr;
-    }
-
-    if ($in_class) {
-      // Member var of a class, we don't care.
-      return null;
-    }
-
-    // File scope, hmm, lets use first token of file?
-    return 0;
+    return null;
   }
 
   /**
-   * @param string $message
+   * @param File $phpcsFile
+   * @param int $stackPtr
    *
+   * @return string[]
+   */
+  public static function getVariablesDefinedByArrowFunction(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $arrowFunctionToken = $tokens[$stackPtr];
+    $variableNames = [];
+    self::debug('looking for variables in arrow function token', $arrowFunctionToken);
+    for ($index = $arrowFunctionToken['parenthesis_opener']; $index < $arrowFunctionToken['parenthesis_closer']; $index++) {
+      $token = $tokens[$index];
+      if ($token['code'] === T_VARIABLE) {
+        $variableNames[] = $token['content'];
+      }
+    }
+    return $variableNames;
+  }
+
+  /**
    * @return void
    */
-  public static function debug($message) {
+  public static function debug(...$messages) {
     if (! defined('PHP_CODESNIFFER_VERBOSITY')) {
       return;
     }
-    if (PHP_CODESNIFFER_VERBOSITY > 3) {
-      echo PHP_EOL . "VariableAnalysisSniff: DEBUG: $message" . PHP_EOL;
+    if (PHP_CODESNIFFER_VERBOSITY <= 3) {
+      return;
     }
+    $output = PHP_EOL . "VariableAnalysisSniff: DEBUG:";
+    foreach ($messages as $message) {
+      if (is_string($message) || is_numeric($message)) {
+        $output .= ' "' . $message . '"';
+        continue;
+      }
+      $output .= PHP_EOL . var_export($message, true) . PHP_EOL;
+    }
+    $output .= PHP_EOL;
+    echo $output;
   }
 
   /**
@@ -340,5 +550,14 @@ class Helpers {
   public static function splitStringToArray($pattern, $value) {
     $result = preg_split($pattern, $value);
     return is_array($result) ? $result : [];
+  }
+
+  /**
+   * @param string $varName
+   *
+   * @return bool
+   */
+  public static function isVariableANumericVariable($varName) {
+    return is_numeric(substr($varName, 0, 1));
   }
 }

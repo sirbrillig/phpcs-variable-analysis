@@ -16,7 +16,7 @@ class ScopeInfo {
    */
   public $variables = [];
 
-  public function __construct($currScope) {
-    $this->owner = $currScope;
+  public function __construct($scopeStartIndex) {
+    $this->owner = $scopeStartIndex;
   }
 }
