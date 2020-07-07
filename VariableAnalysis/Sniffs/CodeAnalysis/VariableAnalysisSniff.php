@@ -11,6 +11,7 @@ use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
 use PHPCSUtils\Utils\Lists;
+use PHPCSUtils\Utils\FunctionDeclarations;
 
 class VariableAnalysisSniff implements Sniff {
   /**
@@ -178,9 +179,6 @@ class VariableAnalysisSniff implements Sniff {
       T_FUNCTION,
       T_CLOSURE,
     ];
-    if (defined('T_FN')) {
-      $scopeStartTokenTypes[] = T_FN;
-    }
 
     $scopeIndexThisCloses = array_reduce($this->scopeStartIndices, function ($found, $index) use ($stackPtr, $tokens) {
       $scopeCloserIndex = isset($tokens[$index]['scope_closer']) ? $tokens[$index]['scope_closer'] : null;
@@ -220,7 +218,7 @@ class VariableAnalysisSniff implements Sniff {
       $this->markAllVariablesRead($phpcsFile, $stackPtr);
       return;
     }
-    if (isset($token['scope_condition']) && in_array($token['code'], $scopeStartTokenTypes, true)) {
+    if (isset($token['scope_condition']) && (in_array($token['code'], $scopeStartTokenTypes, true) || FunctionDeclarations::isArrowFunction($phpcsFile, $stackPtr))) {
       Helpers::debug('found scope condition', $token);
       $this->scopeStartIndices[] = $token['scope_condition'];
       return;
