@@ -218,9 +218,11 @@ class VariableAnalysisSniff implements Sniff {
       $this->markAllVariablesRead($phpcsFile, $stackPtr);
       return;
     }
-    if (isset($token['scope_condition']) && (in_array($token['code'], $scopeStartTokenTypes, true) || FunctionDeclarations::isArrowFunction($phpcsFile, $stackPtr))) {
+    if (in_array($token['code'], $scopeStartTokenTypes, true)
+      || FunctionDeclarations::isArrowFunction($phpcsFile, $stackPtr)
+    ) {
       Helpers::debug('found scope condition', $token);
-      $this->scopeStartIndices[] = $token['scope_condition'];
+      $this->scopeStartIndices[] = $stackPtr;
       return;
     }
   }
