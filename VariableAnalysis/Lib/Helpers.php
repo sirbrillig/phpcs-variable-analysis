@@ -126,10 +126,7 @@ class Helpers {
       T_FUNCTION,
       T_CLOSURE,
     ];
-    if (defined('T_FN')) {
-      $functionTokenTypes[] = T_FN;
-    }
-    if (!in_array($tokens[$functionPtr]['code'], $functionTokenTypes, true)) {
+    if (!in_array($tokens[$functionPtr]['code'], $functionTokenTypes, true) && ! FunctionDeclarations::isArrowFunction($phpcsFile, $functionPtr)) {
       return null;
     }
     return $functionPtr;
