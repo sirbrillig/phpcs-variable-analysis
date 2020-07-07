@@ -474,12 +474,8 @@ class Helpers {
    * @return ?int
    */
   public static function getContainingArrowFunctionIndex(File $phpcsFile, $stackPtr) {
-    if (! defined('T_FN')) {
-      return null;
-    }
     $tokens = $phpcsFile->getTokens();
-    $enclosingScopeIndex = self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
-    $arrowFunctionIndex = $phpcsFile->findPrevious([T_FN], $stackPtr - 1, $enclosingScopeIndex);
+    $arrowFunctionIndex = self::getPreviousArrowFunctionIndex($phpcsFile, $stackPtr);
     if (! is_int($arrowFunctionIndex)) {
       return null;
     }
@@ -488,6 +484,22 @@ class Helpers {
     $arrowFunctionScopeEnd = $arrowFunctionToken['scope_closer'];
     if ($stackPtr > $arrowFunctionScopeStart && $stackPtr < $arrowFunctionScopeEnd) {
       return $arrowFunctionIndex;
+    }
+    return null;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return ?int
+   */
+  private static function getPreviousArrowFunctionIndex(File $phpcsFile, $stackPtr) {
+    $enclosingScopeIndex = self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
+    for ($index = $stackPtr - 1; $index > $enclosingScopeIndex; $index--) {
+      if (FunctionDeclarations::isArrowFunction($phpcsFile, $index)) {
+        return $index;
+      }
     }
     return null;
   }
