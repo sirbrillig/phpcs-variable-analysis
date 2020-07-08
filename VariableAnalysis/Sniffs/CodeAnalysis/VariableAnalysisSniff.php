@@ -373,11 +373,12 @@ class VariableAnalysisSniff implements Sniff {
       $varInfo->scopeType = ScopeType::LOCAL;
     }
     if (isset($varInfo->firstInitialized) && ($varInfo->firstInitialized <= $stackPtr)) {
-      Helpers::debug('markVariableAssignment failed; already initialized', $varName);
+      Helpers::debug('markVariableAssignment variable is already initialized', $varName);
       return;
     }
-    Helpers::debug('markVariableAssignment', $varName);
     $varInfo->firstInitialized = $stackPtr;
+    $varInfo->allAssignments[] = $stackPtr;
+    Helpers::debug('markVariableAssignment complete', $varName);
   }
 
   /**
@@ -429,6 +430,7 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     $varInfo->firstDeclared = $stackPtr;
+    $varInfo->allAssignments[] = $stackPtr;
     Helpers::debug("variable '{$varName}' marked declared", $varInfo);
   }
 
@@ -1547,19 +1549,24 @@ class VariableAnalysisSniff implements Sniff {
       // the purposes of "unused variable" warnings.
       return;
     }
-
-    $stackPtr = null;
-    if (! empty($varInfo->firstDeclared)) {
-      $stackPtr = $varInfo->firstDeclared;
-    } elseif (! empty($varInfo->firstInitialized)) {
-      $stackPtr = $varInfo->firstInitialized;
+    if (empty($varInfo->firstDeclared) && empty($varInfo->firstInitialized)) {
+      return;
     }
+    $this->warnAboutUnusedVariable($phpcsFile, $varInfo);
+  }
 
-    if ($stackPtr) {
+  /**
+   * @param File $phpcsFile
+   * @param VariableInfo $varInfo
+   *
+   * @return void
+   */
+  protected function warnAboutUnusedVariable(File $phpcsFile, VariableInfo $varInfo) {
+    foreach (array_unique($varInfo->allAssignments) as $indexForWarning) {
       Helpers::debug("variable {$varInfo->name} at end of scope looks unused");
       $phpcsFile->addWarning(
         "Unused %s %s.",
-        $stackPtr,
+        $indexForWarning,
         'UnusedVariable',
         [
           VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],

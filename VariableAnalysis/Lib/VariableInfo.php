@@ -56,6 +56,16 @@ class VariableInfo {
   public $firstRead;
 
   /**
+   * Stack pointers of all assignments
+   *
+   * This includes both declarations and initializations and may contain
+   * duplicates!
+   *
+   * @var int[]
+   */
+  public $allAssignments = [];
+
+  /**
    * @var bool
    */
   public $ignoreUnused = false;
