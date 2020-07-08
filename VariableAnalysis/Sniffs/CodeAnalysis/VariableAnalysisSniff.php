@@ -362,6 +362,23 @@ class VariableAnalysisSniff implements Sniff {
    * @return void
    */
   protected function markVariableAssignment($varName, $stackPtr, $currScope) {
+    $this->markVariableAssignmentWithoutInitialization($varName, $stackPtr, $currScope);
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+    if (isset($varInfo->firstInitialized) && ($varInfo->firstInitialized <= $stackPtr)) {
+      Helpers::debug('markVariableAssignment variable is already initialized', $varName);
+      return;
+    }
+    $varInfo->firstInitialized = $stackPtr;
+  }
+
+  /**
+   * @param string $varName
+   * @param int $stackPtr
+   * @param int $currScope
+   *
+   * @return void
+   */
+  protected function markVariableAssignmentWithoutInitialization($varName, $stackPtr, $currScope) {
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
 
     // Is the variable referencing another variable? If so, mark that variable used also.
@@ -372,13 +389,7 @@ class VariableAnalysisSniff implements Sniff {
     if (!isset($varInfo->scopeType)) {
       $varInfo->scopeType = ScopeType::LOCAL;
     }
-    if (isset($varInfo->firstInitialized) && ($varInfo->firstInitialized <= $stackPtr)) {
-      Helpers::debug('markVariableAssignment variable is already initialized', $varName);
-      return;
-    }
-    $varInfo->firstInitialized = $stackPtr;
     $varInfo->allAssignments[] = $stackPtr;
-    Helpers::debug('markVariableAssignment complete', $varName);
   }
 
   /**
@@ -846,7 +857,6 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
-    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
 
     // If the right-hand-side of the assignment to this variable is a reference
     // variable, then this variable is a reference to that one, and as such any
@@ -854,10 +864,15 @@ class VariableAnalysisSniff implements Sniff {
     // which would change the binding) has a side effect of changing the
     // referenced variable and therefore should count as both an assignment and
     // a read.
-    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     $tokens = $phpcsFile->getTokens();
     $referencePtr = $phpcsFile->findNext(Tokens::$emptyTokens, $assignPtr + 1, null, true, null, true);
     if (is_int($referencePtr) && $tokens[$referencePtr]['code'] === T_BITWISE_AND) {
+      $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+      // If the variable was already declared, but was not yet read, it is
+      // unused because we're about to change the binding.
+      if (is_int($varInfo->firstDeclared) && ! is_int($varInfo->firstRead)) {
+        $this->warnAboutUnusedVariable($phpcsFile, $varInfo);
+      }
       Helpers::debug('found reference variable');
       // The referenced variable may have a different name, but we don't
       // actually need to mark it as used in this case because the act of this
@@ -866,8 +881,11 @@ class VariableAnalysisSniff implements Sniff {
       $this->markVariableDeclaration($varName, ScopeType::LOCAL, null, $writtenPtr, $currScope, true);
       // An assignment to a reference is a binding and should not count as
       // initialization since it doesn't change any values.
-      $varInfo->firstInitialized = null;
+      $this->markVariableAssignmentWithoutInitialization($varName, $writtenPtr, $currScope);
+      return true;
     }
+
+    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
 
     return true;
   }
