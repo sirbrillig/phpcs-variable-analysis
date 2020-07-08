@@ -870,9 +870,8 @@ class VariableAnalysisSniff implements Sniff {
       $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
       // If the variable was already declared, but was not yet read, it is
       // unused because we're about to change the binding.
-      if (is_int($varInfo->firstDeclared) && ! is_int($varInfo->firstRead)) {
-        $this->warnAboutUnusedVariable($phpcsFile, $varInfo);
-      }
+      $scopeInfo = $this->getScopeInfo($currScope);
+      $this->processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo);
       Helpers::debug('found reference variable');
       // The referenced variable may have a different name, but we don't
       // actually need to mark it as used in this case because the act of this
