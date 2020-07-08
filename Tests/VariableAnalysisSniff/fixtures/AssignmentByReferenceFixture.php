@@ -40,12 +40,12 @@ function doubleUnusedThenUsedAssignmentByReference() {
   $a = new A();
   $bee = 'hello';
 
-  $var = &$a->getProp(); // unused variable $var (because it is actually $a->prop and changes to $bee on the next line)
-  $var = &$bee;
-  return $var;
+  $varX = &$a->getProp(); // unused variable $varX (because it is actually $a->prop and changes to $bee on the next line)
+  $varX = &$bee;
+  return $varX;
 }
 
-function doubleiUsedThenUsedAssignmentByReference() {
+function doubleUsedThenUsedAssignmentByReference() {
   $a = new A();
   $bee = 'hello';
 

@@ -992,4 +992,22 @@ class VariableAnalysisTest extends BaseTestCase {
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
+
+  public function testAssignmentByReferenceWithIgnoreUnusedMatch() {
+    $fixtureFile = $this->getFixture('AssignmentByReferenceFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'ignoreUnusedRegexp',
+      '/^varX$/'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      26,
+      34,
+      35,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }
