@@ -26,27 +26,16 @@ class VariableInfo {
   public $typeHint;
 
   /**
-   * @var bool
-   */
-  public $passByReference = false;
-
-  /**
-   * @var self | null
-   */
-  public $referencedVariable;
-
-  /**
    * @var int | null
    */
   public $referencedVariableScope;
 
   /**
-   * @var bool
-   */
-  public $isReference = false;
-
-  /**
    * Stack pointer of first declaration
+   *
+   * Declaration is when a variable is created but has no value assigned.
+   *
+   * Assignment by reference is also a declaration and not an initialization.
    *
    * @var int
    */
@@ -65,6 +54,16 @@ class VariableInfo {
    * @var int
    */
   public $firstRead;
+
+  /**
+   * Stack pointers of all assignments
+   *
+   * This includes both declarations and initializations and may contain
+   * duplicates!
+   *
+   * @var int[]
+   */
+  public $allAssignments = [];
 
   /**
    * @var bool

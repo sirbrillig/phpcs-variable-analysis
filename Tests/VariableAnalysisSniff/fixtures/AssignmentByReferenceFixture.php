@@ -23,23 +23,34 @@ function usedAssignmentByReference() {
 function unusedAssignmentByReference() {
   $a = new A();
 
-  $var = &$a->getProp();
+  $var = &$a->getProp(); // unused variable $var
   return $a;
 }
 
 function doubleUnusedAssignmentByReference() {
   $a = new A();
+  $bee = 'hello';
 
-  $var = &$a->getProp();
-  $var = &$a->getProp();
+  $var = &$a->getProp(); // unused variable $var
+  $var = &$bee; // unused variable $var
   return $a;
 }
 
 function doubleUnusedThenUsedAssignmentByReference() {
   $a = new A();
+  $bee = 'hello';
 
-  // @todo the first one should be marked as unused.
+  $varX = &$a->getProp(); // unused variable $varX (because it is actually $a->prop and changes to $bee on the next line)
+  $varX = &$bee;
+  return $varX;
+}
+
+function doubleUsedThenUsedAssignmentByReference() {
+  $a = new A();
+  $bee = 'hello';
+
   $var = &$a->getProp();
-  $var = &$a->getProp();
+  echo $var;
+  $var = &$bee;
   return $var;
 }

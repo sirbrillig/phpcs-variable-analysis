@@ -362,22 +362,34 @@ class VariableAnalysisSniff implements Sniff {
    * @return void
    */
   protected function markVariableAssignment($varName, $stackPtr, $currScope) {
+    $this->markVariableAssignmentWithoutInitialization($varName, $stackPtr, $currScope);
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+    if (isset($varInfo->firstInitialized) && ($varInfo->firstInitialized <= $stackPtr)) {
+      Helpers::debug('markVariableAssignment variable is already initialized', $varName);
+      return;
+    }
+    $varInfo->firstInitialized = $stackPtr;
+  }
+
+  /**
+   * @param string $varName
+   * @param int $stackPtr
+   * @param int $currScope
+   *
+   * @return void
+   */
+  protected function markVariableAssignmentWithoutInitialization($varName, $stackPtr, $currScope) {
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
 
     // Is the variable referencing another variable? If so, mark that variable used also.
-    if ($varInfo->referencedVariable && $varInfo->referencedVariableScope) {
+    if ($varInfo->referencedVariableScope !== null && $varInfo->referencedVariableScope !== $currScope) {
       $this->markVariableAssignment($varInfo->name, $stackPtr, $varInfo->referencedVariableScope);
     }
 
     if (!isset($varInfo->scopeType)) {
       $varInfo->scopeType = ScopeType::LOCAL;
     }
-    if (isset($varInfo->firstInitialized) && ($varInfo->firstInitialized <= $stackPtr)) {
-      Helpers::debug('markVariableAssignment failed; already initialized', $varName);
-      return;
-    }
-    Helpers::debug('markVariableAssignment', $varName);
-    $varInfo->firstInitialized = $stackPtr;
+    $varInfo->allAssignments[] = $stackPtr;
   }
 
   /**
@@ -400,6 +412,7 @@ class VariableAnalysisSniff implements Sniff {
   ) {
     Helpers::debug("marking variable '{$varName}' declared in scope starting at token", $currScope);
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+
     if (isset($varInfo->scopeType)) {
       if (($permitMatchingRedeclaration === false) || ($varInfo->scopeType !== $scopeType)) {
         //  Issue redeclaration/reuse warning
@@ -418,6 +431,7 @@ class VariableAnalysisSniff implements Sniff {
         );
       }
     }
+
     $varInfo->scopeType = $scopeType;
     if (isset($typeHint)) {
       $varInfo->typeHint = $typeHint;
@@ -427,6 +441,7 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     $varInfo->firstDeclared = $stackPtr;
+    $varInfo->allAssignments[] = $stackPtr;
     Helpers::debug("variable '{$varName}' marked declared", $varInfo);
   }
 
@@ -538,7 +553,7 @@ class VariableAnalysisSniff implements Sniff {
    *
    * @return void
    */
-  protected function processVariableAsFunctionDefinitionArgument(File $phpcsFile, $stackPtr, $varName) {
+  protected function processVariableAsFunctionDefinitionArgument(File $phpcsFile, $stackPtr, $varName, $outerScope) {
     Helpers::debug("processVariableAsFunctionDefinitionArgument", $stackPtr, $varName);
     $tokens = $phpcsFile->getTokens();
 
@@ -554,7 +569,7 @@ class VariableAnalysisSniff implements Sniff {
     $referencePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
     if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
       $varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
-      $varInfo->passByReference = true;
+      $varInfo->referencedVariableScope = $outerScope;
     }
 
     //  Are we optional with a default?
@@ -576,7 +591,7 @@ class VariableAnalysisSniff implements Sniff {
   protected function processVariableAsUseImportDefinition(File $phpcsFile, $stackPtr, $varName, $outerScope) {
     $tokens = $phpcsFile->getTokens();
 
-    Helpers::debug("processVariableAsUseImportDefinition", $stackPtr, $varName);
+    Helpers::debug("processVariableAsUseImportDefinition", $stackPtr, $varName, $outerScope);
 
     $endOfArgsPtr = $phpcsFile->findPrevious([T_CLOSE_PARENTHESIS], $stackPtr - 1, null);
     if (! is_int($endOfArgsPtr)) {
@@ -606,9 +621,6 @@ class VariableAnalysisSniff implements Sniff {
     if (is_int($referencePtr) && $tokens[$referencePtr]['code'] === T_BITWISE_AND) {
       Helpers::debug("variable '{$varName}' in function definition looks passed by reference");
       $varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
-      $varInfo->passByReference = true;
-      $referencedVariable = $this->getVariableInfo($varName, $outerScope);
-      $varInfo->referencedVariable = $referencedVariable;
       $varInfo->referencedVariableScope = $outerScope;
     }
   }
@@ -844,21 +856,35 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    // Plain ol' assignment. Simpl(ish).
     $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
-    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
 
-    // Are we are reference variable?
-    $tokens = $tokens = $phpcsFile->getTokens();
+    // If the right-hand-side of the assignment to this variable is a reference
+    // variable, then this variable is a reference to that one, and as such any
+    // assignment to this variable (except another assignment by reference,
+    // which would change the binding) has a side effect of changing the
+    // referenced variable and therefore should count as both an assignment and
+    // a read.
+    $tokens = $phpcsFile->getTokens();
     $referencePtr = $phpcsFile->findNext(Tokens::$emptyTokens, $assignPtr + 1, null, true, null, true);
-    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
-    if ($referencePtr !== false && $tokens[$referencePtr]['code'] === T_BITWISE_AND) {
-      $varInfo->isReference = true;
-    } elseif ($varInfo->isReference) {
-      // If this is an assigment to a reference variable then that variable is
-      // used.
-      $this->markVariableRead($varName, $stackPtr, $currScope);
+    if (is_int($referencePtr) && $tokens[$referencePtr]['code'] === T_BITWISE_AND) {
+      $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+      // If the variable was already declared, but was not yet read, it is
+      // unused because we're about to change the binding.
+      $scopeInfo = $this->getOrCreateScopeInfo($currScope);
+      $this->processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo);
+      Helpers::debug('found reference variable');
+      // The referenced variable may have a different name, but we don't
+      // actually need to mark it as used in this case because the act of this
+      // assignment will mark it used on the next token.
+      $varInfo->referencedVariableScope = $currScope;
+      $this->markVariableDeclaration($varName, ScopeType::LOCAL, null, $writtenPtr, $currScope, true);
+      // An assignment to a reference is a binding and should not count as
+      // initialization since it doesn't change any values.
+      $this->markVariableAssignmentWithoutInitialization($varName, $writtenPtr, $currScope);
+      return true;
     }
+
+    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
 
     return true;
   }
@@ -1233,7 +1259,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     $varName = Helpers::normalizeVarName($token['content']);
-    Helpers::debug("examining token for variable '{$varName}'", $token);
+    Helpers::debug("examining token for variable '{$varName}' on line {$token['line']}", $token);
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
     if ($currScope === null) {
       Helpers::debug('no scope found');
@@ -1270,7 +1296,7 @@ class VariableAnalysisSniff implements Sniff {
     // Are we a function or closure parameter?
     if (Helpers::isTokenInsideFunctionDefinitionArgumentList($phpcsFile, $stackPtr)) {
       Helpers::debug('found function definition argument');
-      $this->processVariableAsFunctionDefinitionArgument($phpcsFile, $stackPtr, $varName);
+      $this->processVariableAsFunctionDefinitionArgument($phpcsFile, $stackPtr, $varName, $currScope);
       return;
     }
 
@@ -1527,7 +1553,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($this->allowUnusedForeachVariables && $varInfo->isForeachLoopAssociativeValue) {
       return;
     }
-    if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {
+    if ($varInfo->referencedVariableScope !== null && isset($varInfo->firstInitialized)) {
       // If we're pass-by-reference then it's a common pattern to
       // use the variable to return data to the caller, so any
       // assignment also counts as "variable use" for the purposes
@@ -1540,19 +1566,24 @@ class VariableAnalysisSniff implements Sniff {
       // the purposes of "unused variable" warnings.
       return;
     }
-
-    $stackPtr = null;
-    if (! empty($varInfo->firstDeclared)) {
-      $stackPtr = $varInfo->firstDeclared;
-    } elseif (! empty($varInfo->firstInitialized)) {
-      $stackPtr = $varInfo->firstInitialized;
+    if (empty($varInfo->firstDeclared) && empty($varInfo->firstInitialized)) {
+      return;
     }
+    $this->warnAboutUnusedVariable($phpcsFile, $varInfo);
+  }
 
-    if ($stackPtr) {
+  /**
+   * @param File $phpcsFile
+   * @param VariableInfo $varInfo
+   *
+   * @return void
+   */
+  protected function warnAboutUnusedVariable(File $phpcsFile, VariableInfo $varInfo) {
+    foreach (array_unique($varInfo->allAssignments) as $indexForWarning) {
       Helpers::debug("variable {$varInfo->name} at end of scope looks unused");
       $phpcsFile->addWarning(
         "Unused %s %s.",
-        $stackPtr,
+        $indexForWarning,
         'UnusedVariable',
         [
           VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],

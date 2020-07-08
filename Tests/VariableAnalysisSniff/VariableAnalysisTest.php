@@ -970,8 +970,11 @@ class VariableAnalysisTest extends BaseTestCase {
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
             5,
+            6,
             8,
+            9,
             11,
+            12,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -983,7 +986,27 @@ class VariableAnalysisTest extends BaseTestCase {
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
       26,
-      33,
+      34,
+      35,
+      43,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testAssignmentByReferenceWithIgnoreUnusedMatch() {
+    $fixtureFile = $this->getFixture('AssignmentByReferenceFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'ignoreUnusedRegexp',
+      '/^varX$/'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      26,
+      34,
+      35,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
