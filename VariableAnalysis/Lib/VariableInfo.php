@@ -31,12 +31,11 @@ class VariableInfo {
   public $referencedVariableScope;
 
   /**
-   * @var bool
-   */
-  public $isReference = false;
-
-  /**
    * Stack pointer of first declaration
+   *
+   * Declaration is when a variable is created but has no value assigned.
+   *
+   * Assignment by reference is also a declaration and not an initialization.
    *
    * @var int
    */

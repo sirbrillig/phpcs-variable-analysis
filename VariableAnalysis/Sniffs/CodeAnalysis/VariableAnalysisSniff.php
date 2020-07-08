@@ -400,6 +400,7 @@ class VariableAnalysisSniff implements Sniff {
   ) {
     Helpers::debug("marking variable '{$varName}' declared in scope starting at token", $currScope);
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+
     if (isset($varInfo->scopeType)) {
       if (($permitMatchingRedeclaration === false) || ($varInfo->scopeType !== $scopeType)) {
         //  Issue redeclaration/reuse warning
@@ -418,6 +419,7 @@ class VariableAnalysisSniff implements Sniff {
         );
       }
     }
+
     $varInfo->scopeType = $scopeType;
     if (isset($typeHint)) {
       $varInfo->typeHint = $typeHint;
@@ -841,19 +843,28 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    // Plain ol' assignment. Simpl(ish).
     $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
     $this->markVariableAssignment($varName, $writtenPtr, $currScope);
 
-    // Are we are reference variable?
+    // If the right-hand-side of the assignment to this variable is a reference
+    // variable, then this variable is a reference to that one, and as such any
+    // assignment to this variable (except another assignment by reference,
+    // which would change the binding) has a side effect of changing the
+    // referenced variable and therefore should count as both an assignment and
+    // a read.
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
-    $tokens = $tokens = $phpcsFile->getTokens();
+    $tokens = $phpcsFile->getTokens();
     $referencePtr = $phpcsFile->findNext(Tokens::$emptyTokens, $assignPtr + 1, null, true, null, true);
-    if ($referencePtr !== false && $tokens[$referencePtr]['code'] === T_BITWISE_AND) {
-      $varInfo->isReference = true;
-    } elseif ($varInfo->isReference) {
-      // If this is an assigment to a reference variable then that variable is used.
-      $this->markVariableRead($varName, $stackPtr, $currScope);
+    if (is_int($referencePtr) && $tokens[$referencePtr]['code'] === T_BITWISE_AND) {
+      Helpers::debug('found reference variable');
+      // The referenced variable may have a different name, but we don't
+      // actually need to mark it as used in this case because the act of this
+      // assignment will mark it used on the next token.
+      $varInfo->referencedVariableScope = $currScope;
+      $this->markVariableDeclaration($varName, ScopeType::LOCAL, null, $writtenPtr, $currScope, true);
+      // An assignment to a reference is a binding and should not count as
+      // initialization since it doesn't change any values.
+      $varInfo->firstInitialized = null;
     }
 
     return true;
@@ -1229,7 +1240,7 @@ class VariableAnalysisSniff implements Sniff {
     $token  = $tokens[$stackPtr];
 
     $varName = Helpers::normalizeVarName($token['content']);
-    Helpers::debug("examining token for variable '{$varName}'", $token);
+    Helpers::debug("examining token for variable '{$varName}' on line {$token['line']}", $token);
     $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
     if ($currScope === null) {
       Helpers::debug('no scope found');
