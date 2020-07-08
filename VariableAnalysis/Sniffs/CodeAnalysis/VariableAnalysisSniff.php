@@ -365,7 +365,7 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
 
     // Is the variable referencing another variable? If so, mark that variable used also.
-    if ($varInfo->referencedVariable && $varInfo->referencedVariableScope) {
+    if ($varInfo->referencedVariableScope && $varInfo->referencedVariableScope !== $currScope) {
       $this->markVariableAssignment($varInfo->name, $stackPtr, $varInfo->referencedVariableScope);
     }
 
@@ -538,7 +538,7 @@ class VariableAnalysisSniff implements Sniff {
    *
    * @return void
    */
-  protected function processVariableAsFunctionDefinitionArgument(File $phpcsFile, $stackPtr, $varName) {
+  protected function processVariableAsFunctionDefinitionArgument(File $phpcsFile, $stackPtr, $varName, $outerScope) {
     Helpers::debug("processVariableAsFunctionDefinitionArgument", $stackPtr, $varName);
     $tokens = $phpcsFile->getTokens();
 
@@ -554,7 +554,7 @@ class VariableAnalysisSniff implements Sniff {
     $referencePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
     if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
       $varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
-      $varInfo->passByReference = true;
+      $varInfo->referencedVariableScope = $outerScope;
     }
 
     //  Are we optional with a default?
@@ -606,9 +606,6 @@ class VariableAnalysisSniff implements Sniff {
     if (is_int($referencePtr) && $tokens[$referencePtr]['code'] === T_BITWISE_AND) {
       Helpers::debug("variable '{$varName}' in function definition looks passed by reference");
       $varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
-      $varInfo->passByReference = true;
-      $referencedVariable = $this->getVariableInfo($varName, $outerScope);
-      $varInfo->referencedVariable = $referencedVariable;
       $varInfo->referencedVariableScope = $outerScope;
     }
   }
@@ -1270,7 +1267,7 @@ class VariableAnalysisSniff implements Sniff {
     // Are we a function or closure parameter?
     if (Helpers::isTokenInsideFunctionDefinitionArgumentList($phpcsFile, $stackPtr)) {
       Helpers::debug('found function definition argument');
-      $this->processVariableAsFunctionDefinitionArgument($phpcsFile, $stackPtr, $varName);
+      $this->processVariableAsFunctionDefinitionArgument($phpcsFile, $stackPtr, $varName, $currScope);
       return;
     }
 
@@ -1527,7 +1524,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($this->allowUnusedForeachVariables && $varInfo->isForeachLoopAssociativeValue) {
       return;
     }
-    if ($varInfo->passByReference && isset($varInfo->firstInitialized)) {
+    if ($varInfo->referencedVariableScope && isset($varInfo->firstInitialized)) {
       // If we're pass-by-reference then it's a common pattern to
       // use the variable to return data to the caller, so any
       // assignment also counts as "variable use" for the purposes

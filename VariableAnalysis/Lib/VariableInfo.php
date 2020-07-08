@@ -26,16 +26,6 @@ class VariableInfo {
   public $typeHint;
 
   /**
-   * @var bool
-   */
-  public $passByReference = false;
-
-  /**
-   * @var self | null
-   */
-  public $referencedVariable;
-
-  /**
    * @var int | null
    */
   public $referencedVariableScope;
