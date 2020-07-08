@@ -365,7 +365,7 @@ class VariableAnalysisSniff implements Sniff {
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
 
     // Is the variable referencing another variable? If so, mark that variable used also.
-    if ($varInfo->referencedVariableScope && $varInfo->referencedVariableScope !== $currScope) {
+    if ($varInfo->referencedVariableScope !== null && $varInfo->referencedVariableScope !== $currScope) {
       $this->markVariableAssignment($varInfo->name, $stackPtr, $varInfo->referencedVariableScope);
     }
 
@@ -576,7 +576,7 @@ class VariableAnalysisSniff implements Sniff {
   protected function processVariableAsUseImportDefinition(File $phpcsFile, $stackPtr, $varName, $outerScope) {
     $tokens = $phpcsFile->getTokens();
 
-    Helpers::debug("processVariableAsUseImportDefinition", $stackPtr, $varName);
+    Helpers::debug("processVariableAsUseImportDefinition", $stackPtr, $varName, $outerScope);
 
     $endOfArgsPtr = $phpcsFile->findPrevious([T_CLOSE_PARENTHESIS], $stackPtr - 1, null);
     if (! is_int($endOfArgsPtr)) {
@@ -846,14 +846,13 @@ class VariableAnalysisSniff implements Sniff {
     $this->markVariableAssignment($varName, $writtenPtr, $currScope);
 
     // Are we are reference variable?
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     $tokens = $tokens = $phpcsFile->getTokens();
     $referencePtr = $phpcsFile->findNext(Tokens::$emptyTokens, $assignPtr + 1, null, true, null, true);
-    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if ($referencePtr !== false && $tokens[$referencePtr]['code'] === T_BITWISE_AND) {
       $varInfo->isReference = true;
     } elseif ($varInfo->isReference) {
-      // If this is an assigment to a reference variable then that variable is
-      // used.
+      // If this is an assigment to a reference variable then that variable is used.
       $this->markVariableRead($varName, $stackPtr, $currScope);
     }
 
@@ -1524,7 +1523,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($this->allowUnusedForeachVariables && $varInfo->isForeachLoopAssociativeValue) {
       return;
     }
-    if ($varInfo->referencedVariableScope && isset($varInfo->firstInitialized)) {
+    if ($varInfo->referencedVariableScope !== null && isset($varInfo->firstInitialized)) {
       // If we're pass-by-reference then it's a common pattern to
       // use the variable to return data to the caller, so any
       // assignment also counts as "variable use" for the purposes
