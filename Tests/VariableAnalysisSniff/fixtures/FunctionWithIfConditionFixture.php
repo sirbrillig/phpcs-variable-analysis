@@ -76,6 +76,20 @@ function definedInsideFirstBlockUndefinedInsideElseBlock($first) {
   echo $words;
 }
 
+function definedInsideFirstBlockUndefinedInsideElseBlockInsideAnotherIf($first) {
+  $name = 'human';
+  if ($first) {
+    $second = true; // unused variable $second
+    $words = "hello {$name}";
+  } else {
+    if ($name) {
+      $words = "bye {$name}";
+      echo $second; // undefined variable $second
+    }
+  }
+  echo $words;
+}
+
 function definedInsideFirstBlockUndefinedInsideUnconnectedElseCondition($first) {
   $name = 'human';
   if ($first) {
