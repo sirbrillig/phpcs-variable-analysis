@@ -1390,8 +1390,56 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
 
+    if (Helpers::isVariableInsideElseCondition($phpcsFile, $stackPtr) || Helpers::isVariableInsideElseBody($phpcsFile, $stackPtr)) {
+      Helpers::debug('found variable inside else condition or body');
+      $this->processVaribleInsideElse($phpcsFile, $stackPtr, $varName, $currScope);
+      return;
+    }
+
     // OK, we don't appear to be a write to the var, assume we're a read.
     Helpers::debug('looks like a variable read');
+    $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   * @param string $varName
+   * @param int $currScope
+   *
+   * @return void
+   */
+  protected function processVaribleInsideElse(File $phpcsFile, $stackPtr, $varName, $currScope) {
+    // Find all assignments to this variable inside the current scope.
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+    $allAssignmentIndices = array_unique($varInfo->allAssignments);
+    // Find the attached 'if' and 'elseif' block start and end indices.
+    $blockIndices = Helpers::getAttachedBlockIndicesForElse($phpcsFile, $stackPtr);
+
+    // If all of the assignments are within the previous attached blocks, then warn about undefined.
+    $tokens = $phpcsFile->getTokens();
+    $assignmentsInsideAttachedBlocks = [];
+    foreach ($allAssignmentIndices as $index) {
+      foreach ($blockIndices as $blockIndex) {
+        Helpers::debug('looking at scope', $index, 'between', $tokens[$blockIndex]['scope_opener'], 'and', $tokens[$blockIndex]['scope_closer']);
+        if (Helpers::isIndexInsideScope($index, $tokens[$blockIndex]['scope_opener'], $tokens[$blockIndex]['scope_closer'])) {
+          $assignmentsInsideAttachedBlocks[] = $index;
+        }
+      }
+    }
+
+    if (count($assignmentsInsideAttachedBlocks) === count($allAssignmentIndices)) {
+      Helpers::debug("variable $varName inside else looks undefined");
+      $phpcsFile->addWarning(
+        "Variable %s is undefined.",
+        $stackPtr,
+        'UndefinedVariable',
+        ["\${$varName}"]
+      );
+      return;
+    }
+
+    Helpers::debug('looks like a variable read inside else');
     $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
   }
 

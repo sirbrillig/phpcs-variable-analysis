@@ -560,4 +560,93 @@ class Helpers {
   public static function isVariableANumericVariable($varName) {
     return is_numeric(substr($varName, 0, 1));
   }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isVariableInsideElseCondition(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
+    $nonFunctionTokenTypes[] = T_OPEN_PARENTHESIS;
+    $nonFunctionTokenTypes[] = T_VARIABLE;
+    $nonFunctionTokenTypes[] = T_ELLIPSIS;
+    $nonFunctionTokenTypes[] = T_COMMA;
+    $nonFunctionTokenTypes[] = T_STRING;
+    $nonFunctionTokenTypes[] = T_BITWISE_AND;
+    $elsePtr = self::getIntOrNull($phpcsFile->findPrevious($nonFunctionTokenTypes, $stackPtr - 1, null, true, null, true));
+    $elseTokenTypes = [
+      T_ELSE,
+      T_ELSEIF,
+    ];
+    if (is_int($elsePtr) && in_array($tokens[$elsePtr]['code'], $elseTokenTypes, true)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isVariableInsideElseBody(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $token = $tokens[$stackPtr];
+    $conditions = isset($token['conditions']) ? $token['conditions'] : [];
+    $elseTokenTypes = [
+      T_ELSE,
+      T_ELSEIF,
+    ];
+    foreach (array_reverse($conditions, true) as $scopeCode) {
+      if (in_array($scopeCode, $elseTokenTypes, true)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return int[]
+   */
+  public static function getAttachedBlockIndicesForElse(File $phpcsFile, $stackPtr) {
+    $currentElsePtr = $phpcsFile->findPrevious([T_ELSE, T_ELSEIF], $stackPtr - 1);
+    if (! is_int($currentElsePtr)) {
+      throw new \Exception("Cannot find expected else at {$stackPtr}");
+    }
+
+    $ifPtr = $phpcsFile->findPrevious([T_IF], $currentElsePtr - 1);
+    if (! is_int($ifPtr)) {
+      throw new \Exception("Cannot find if for else at {$stackPtr}");
+    }
+    $blockIndices = [$ifPtr];
+
+    $previousElseIfPtr = $currentElsePtr;
+    do {
+      $elseIfPtr = $phpcsFile->findPrevious([T_ELSEIF], $previousElseIfPtr - 1, $ifPtr);
+      if (is_int($elseIfPtr)) {
+        $blockIndices[] = $elseIfPtr;
+        $previousElseIfPtr = $elseIfPtr;
+      }
+    } while (is_int($elseIfPtr));
+
+    return $blockIndices;
+  }
+
+  /**
+   * @param int $needle
+   * @param int $scopeStart
+   * @param int $scopeEnd
+   *
+   * @return bool
+   */
+  public static function isIndexInsideScope($needle, $scopeStart, $scopeEnd) {
+    return ($needle > $scopeStart && $needle < $scopeEnd);
+  }
 }
