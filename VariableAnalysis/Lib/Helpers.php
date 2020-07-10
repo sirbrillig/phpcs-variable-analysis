@@ -560,4 +560,74 @@ class Helpers {
   public static function isVariableANumericVariable($varName) {
     return is_numeric(substr($varName, 0, 1));
   }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isVariableInsideElseCondition(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
+    $nonFunctionTokenTypes[] = T_OPEN_PARENTHESIS;
+    $nonFunctionTokenTypes[] = T_VARIABLE;
+    $nonFunctionTokenTypes[] = T_ELLIPSIS;
+    $nonFunctionTokenTypes[] = T_COMMA;
+    $nonFunctionTokenTypes[] = T_STRING;
+    $nonFunctionTokenTypes[] = T_BITWISE_AND;
+    $elsePtr = self::getIntOrNull($phpcsFile->findPrevious($nonFunctionTokenTypes, $stackPtr - 1, null, true, null, true));
+    $elseTokenTypes = [
+      T_ELSE,
+      T_ELSEIF,
+    ];
+    if (is_int($elsePtr) && in_array($tokens[$elsePtr]['code'], $elseTokenTypes, true)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isVariableInsideElseBody(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $token = $tokens[$stackPtr];
+    $conditions = isset($token['conditions']) ? $token['conditions'] : [];
+    $elseTokenTypes = [
+      T_ELSE,
+      T_ELSEIF,
+    ];
+    foreach (array_reverse($conditions, true) as $scopeCode) {
+      if (in_array($scopeCode, $elseTokenTypes, true)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return [int, int]
+   */
+  public static function getAttachedIfBlockStartEndForElse(File $phpcsFile, $stackPtr) {
+    // If this is indeed an `else` or `elseif`, we can look backward until we
+    // find the nearest `if` without worrying about scope.
+    $ifPtr = self::getIntOrNull($phpcsFile->findPrevious([T_IF], $stackPtr - 1));
+    if (! is_int($ifPtr)) {
+      throw new \Exception("Cannot find if for else at {$stackPtr}");
+    }
+    $tokens = $phpcsFile->getTokens();
+      $token = $tokens[$ifPtr];
+    self::debug("found if token", $token);
+    return [
+      $token['scope_opener'],
+      $token['scope_closer'],
+    ];
+  }
 }
