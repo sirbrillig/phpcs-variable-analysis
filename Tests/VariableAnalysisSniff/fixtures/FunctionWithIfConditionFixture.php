@@ -90,6 +90,19 @@ function definedInsideFirstBlockUndefinedInsideElseBlockInsideAnotherIf($first) 
   echo $words;
 }
 
+function definedInsideElseIfBlockUndefinedInsideElseBlock($first) {
+  $name = 'human';
+  if ($first) {
+    $words = "hello {$name}";
+  } elseif ($name) {
+    $second = true; // unused variable $second
+  } else {
+    $words = "bye {$name}";
+    echo $second; // undefined variable $second
+  }
+  echo $words;
+}
+
 function definedInsideFirstBlockUndefinedInsideUnconnectedElseCondition($first) {
   $name = 'human';
   if ($first) {
