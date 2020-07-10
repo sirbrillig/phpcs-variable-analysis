@@ -1413,14 +1413,19 @@ class VariableAnalysisSniff implements Sniff {
     // Find all assignments to this variable inside the current scope.
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     $allAssignmentIndices = array_unique($varInfo->allAssignments);
-    // Find the attached if-block start and end.
-    list($ifStart, $ifEnd) = Helpers::getAttachedIfBlockStartEndForElse($phpcsFile, $stackPtr);
-    // If all of the assignments are within the attached if-block, then warn about undefined.
+    // Find the attached 'if' and 'elseif' block start and end indices.
+    $blockIndices = Helpers::getAttachedBlockIndicesForElse($phpcsFile, $stackPtr);
+    Helpers::debug('else block attached indices are', $blockIndices);
+    // If all of the assignments are within the previous attached blocks, then warn about undefined.
+    $tokens = $phpcsFile->getTokens();
     foreach ($allAssignmentIndices as $index) {
-      if ($index < $ifStart || $index > $ifEnd) {
-        Helpers::debug('looks like a variable read');
-        $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
-        return;
+      foreach ($blockIndices as $blockIndex) {
+        Helpers::debug('looking at scope', $index, $tokens[$blockIndex]['scope_opener'], $tokens[$blockIndex]['scope_closer']);
+        if (! Helpers::isIndexInsideScope($index, $tokens[$blockIndex]['scope_opener'], $tokens[$blockIndex]['scope_closer'])) {
+          Helpers::debug('looks like a variable read inside else');
+          $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);
+          return;
+        }
       }
     }
     Helpers::debug("variable $varName inside else looks undefined");

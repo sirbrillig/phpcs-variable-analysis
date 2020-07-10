@@ -613,21 +613,40 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return [int, int]
+   * @return int[]
    */
-  public static function getAttachedIfBlockStartEndForElse(File $phpcsFile, $stackPtr) {
-    // If this is indeed an `else` or `elseif`, we can look backward until we
-    // find the nearest `if` without worrying about scope.
-    $ifPtr = self::getIntOrNull($phpcsFile->findPrevious([T_IF], $stackPtr - 1));
+  public static function getAttachedBlockIndicesForElse(File $phpcsFile, $stackPtr) {
+    $currentElsePtr = $phpcsFile->findPrevious([T_ELSE, T_ELSEIF], $stackPtr - 1);
+    if (! is_int($currentElsePtr)) {
+      throw new \Exception("Cannot find expected else at {$stackPtr}");
+    }
+
+    $ifPtr = $phpcsFile->findPrevious([T_IF], $currentElsePtr - 1);
     if (! is_int($ifPtr)) {
       throw new \Exception("Cannot find if for else at {$stackPtr}");
     }
-    $tokens = $phpcsFile->getTokens();
-      $token = $tokens[$ifPtr];
-    self::debug("found if token", $token);
-    return [
-      $token['scope_opener'],
-      $token['scope_closer'],
-    ];
+    $blockIndices = [$ifPtr];
+
+    $previousElseIfPtr = $currentElsePtr;
+    do {
+      $elseIfPtr = $phpcsFile->findPrevious([T_ELSEIF], $previousElseIfPtr - 1, $ifPtr);
+      if (is_int($elseIfPtr)) {
+        $blockIndices[] = $elseIfPtr;
+        $previousElseIfPtr = $elseIfPtr;
+      }
+    } while (is_int($elseIfPtr));
+
+    return $blockIndices;
+  }
+
+  /**
+   * @param int $needle
+   * @param int $scopeStart
+   * @param int $scopeEnd
+   *
+   * @return bool
+   */
+  public static function isIndexInsideScope($needle, $scopeStart, $scopeEnd) {
+    return ($needle > $scopeStart && $needle < $scopeEnd);
   }
 }
