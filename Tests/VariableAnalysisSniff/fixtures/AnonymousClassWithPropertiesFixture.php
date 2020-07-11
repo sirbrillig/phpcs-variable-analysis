@@ -23,7 +23,7 @@ class ClassWithAnonymousClass {
     }
 }
 
-$anonClass = new class() {
+$anonClass = new class() { // should trigger unused warning
     protected $storedHello;
     private static $storedHello2;
     private $storedHello3;

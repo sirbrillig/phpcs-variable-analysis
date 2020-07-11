@@ -585,6 +585,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
       17,
+      26,
       38,
     ];
     $this->assertEquals($expectedWarnings, $lines);
