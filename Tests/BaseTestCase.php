@@ -8,15 +8,16 @@ use PHP_CodeSniffer\Config;
 
 class BaseTestCase extends TestCase {
   const STANDARD_NAME = 'VariableAnalysis';
-  const SNIFF_FILE = __DIR__ . '/../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php';
 
   public function prepareLocalFileForSniffs($fixtureFile) {
+    $sniffFile = __DIR__ . '/../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php';
+
     $config            = new Config();
     $config->cache     = false;
     $config->standards = [self::STANDARD_NAME];
     $config->ignored   = [];
 
-    $sniffFiles = [realpath(self::SNIFF_FILE)];
+    $sniffFiles = [realpath($sniffFile)];
     $ruleset    = new Ruleset($config);
     $ruleset->registerSniffs($sniffFiles, [], []);
     $ruleset->populateTokenListeners();
