@@ -33,7 +33,7 @@ class VariableAnalysisSniff implements Sniff {
    *
    * @var int[]
    */
-  private $scopeStartIndices = [];
+  private $scopeStartIndices = [0];
 
   /**
    * A list of custom functions which pass in variables to be initialized by
@@ -180,21 +180,29 @@ class VariableAnalysisSniff implements Sniff {
       T_CLOSURE,
     ];
 
-    $scopeIndexThisCloses = array_reduce($this->scopeStartIndices, function ($found, $index) use ($phpcsFile, $stackPtr, $tokens) {
-      $scopeCloserIndex = isset($tokens[$index]['scope_closer']) ? $tokens[$index]['scope_closer'] : null;
-      if (FunctionDeclarations::isArrowFunction($phpcsFile, $index)) {
-        $arrowFunctionInfo = FunctionDeclarations::getArrowFunctionOpenClose($phpcsFile, $index);
+    $scopeIndexThisCloses = array_reduce($this->scopeStartIndices, function ($found, $scopeStartIndex) use ($phpcsFile, $stackPtr, $tokens) {
+      $scopeCloserIndex = isset($tokens[$scopeStartIndex]['scope_closer']) ? $tokens[$scopeStartIndex]['scope_closer'] : null;
+
+      if (FunctionDeclarations::isArrowFunction($phpcsFile, $scopeStartIndex)) {
+        $arrowFunctionInfo = FunctionDeclarations::getArrowFunctionOpenClose($phpcsFile, $scopeStartIndex);
         $scopeCloserIndex = $arrowFunctionInfo ? $arrowFunctionInfo['scope_closer'] : $scopeCloserIndex;
       }
-      if (!$scopeCloserIndex) {
-        Helpers::debug('No scope closer found for scope start', $index);
+
+      if ($scopeStartIndex === 0) {
+        $scopeCloserIndex = Helpers::getLastNonEmptyTokenIndexInFile($phpcsFile);
       }
+
+      if (!$scopeCloserIndex) {
+        Helpers::debug('No scope closer found for scope start', $scopeStartIndex);
+      }
+
       if ($stackPtr === $scopeCloserIndex) {
-        return $index;
+        return $scopeStartIndex;
       }
       return $found;
     }, null);
-    if ($scopeIndexThisCloses) {
+
+    if (is_int($scopeIndexThisCloses)) {
       Helpers::debug('found closing scope at', $stackPtr, 'for scope', $scopeIndexThisCloses);
       $this->processScopeClose($phpcsFile, $scopeIndexThisCloses);
     }

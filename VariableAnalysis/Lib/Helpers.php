@@ -649,4 +649,20 @@ class Helpers {
   public static function isIndexInsideScope($needle, $scopeStart, $scopeEnd) {
     return ($needle > $scopeStart && $needle < $scopeEnd);
   }
+
+  /**
+   * @param File $phpcsFile
+   *
+   * @return int
+   */
+  public static function getLastNonEmptyTokenIndexInFile(File $phpcsFile) {
+    $tokens = $phpcsFile->getTokens();
+    foreach (array_reverse($tokens, true) as $index => $token) {
+      if (! in_array($token['code'], Tokens::$emptyTokens, true)) {
+        return $index;
+      }
+    }
+    self::debug('no non-empty token found for end of file');
+    return 0;
+  }
 }
