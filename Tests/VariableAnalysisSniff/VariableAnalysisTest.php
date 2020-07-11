@@ -114,6 +114,11 @@ class VariableAnalysisTest extends BaseTestCase {
   public function testFunctionWithForeachWarnings() {
     $fixtureFile = $this->getFixture('FunctionWithForeachFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedForeachVariables',
+      'false'
+    );
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
@@ -129,10 +134,7 @@ class VariableAnalysisTest extends BaseTestCase {
       50,
       52,
       54,
-      // FIXME: this is an unused variable that needs to be fixed but for now
-      // we will ignore it. See
-      // https://github.com/sirbrillig/phpcs-variable-analysis/pull/36
-      // 67,
+      67,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -585,6 +587,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
       17,
+      26,
       38,
     ];
     $this->assertEquals($expectedWarnings, $lines);
@@ -767,7 +770,7 @@ class VariableAnalysisTest extends BaseTestCase {
       7,
       23,
       39,
-			54,
+      54,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -939,10 +942,10 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
-			6,
-			18,
-			22,
-			29,
+      6,
+      18,
+      22,
+      29,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -953,12 +956,14 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
-            5,
-            8,
-            20,
-            33,
-            47,
-            61,
+      5,
+      8,
+      15,
+      20,
+      33,
+      41,
+      47,
+      61,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -969,12 +974,12 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
-            5,
-            6,
-            8,
-            9,
-            11,
-            12,
+      5,
+      6,
+      8,
+      9,
+      11,
+      12,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }

@@ -55,3 +55,5 @@ function globalWithUnusedFunctionArg($user_type, $text, $testvar) { // should wa
 	global $config;
 	return $config . $text . $user_type;
 }
+
+echo $sunday;

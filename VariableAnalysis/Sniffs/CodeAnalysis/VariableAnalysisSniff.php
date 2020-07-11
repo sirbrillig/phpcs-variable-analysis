@@ -33,7 +33,7 @@ class VariableAnalysisSniff implements Sniff {
    *
    * @var int[]
    */
-  private $scopeStartIndices = [];
+  private $scopeStartIndices = [0];
 
   /**
    * A list of custom functions which pass in variables to be initialized by
@@ -180,21 +180,20 @@ class VariableAnalysisSniff implements Sniff {
       T_CLOSURE,
     ];
 
-    $scopeIndexThisCloses = array_reduce($this->scopeStartIndices, function ($found, $index) use ($phpcsFile, $stackPtr, $tokens) {
-      $scopeCloserIndex = isset($tokens[$index]['scope_closer']) ? $tokens[$index]['scope_closer'] : null;
-      if (FunctionDeclarations::isArrowFunction($phpcsFile, $index)) {
-        $arrowFunctionInfo = FunctionDeclarations::getArrowFunctionOpenClose($phpcsFile, $index);
-        $scopeCloserIndex = $arrowFunctionInfo ? $arrowFunctionInfo['scope_closer'] : $scopeCloserIndex;
-      }
+    $scopeIndicesThisCloses = array_reduce($this->scopeStartIndices, function ($found, $scopeStartIndex) use ($phpcsFile, $stackPtr) {
+      $scopeCloserIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $scopeStartIndex);
+
       if (!$scopeCloserIndex) {
-        Helpers::debug('No scope closer found for scope start', $index);
+        Helpers::debug('No scope closer found for scope start', $scopeStartIndex);
       }
+
       if ($stackPtr === $scopeCloserIndex) {
-        return $index;
+        $found[] = $scopeStartIndex;
       }
       return $found;
-    }, null);
-    if ($scopeIndexThisCloses) {
+    }, []);
+
+    foreach ($scopeIndicesThisCloses as $scopeIndexThisCloses) {
       Helpers::debug('found closing scope at', $stackPtr, 'for scope', $scopeIndexThisCloses);
       $this->processScopeClose($phpcsFile, $scopeIndexThisCloses);
     }
@@ -856,8 +855,6 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
-
     // If the right-hand-side of the assignment to this variable is a reference
     // variable, then this variable is a reference to that one, and as such any
     // assignment to this variable (except another assignment by reference,
@@ -877,14 +874,14 @@ class VariableAnalysisSniff implements Sniff {
       // actually need to mark it as used in this case because the act of this
       // assignment will mark it used on the next token.
       $varInfo->referencedVariableScope = $currScope;
-      $this->markVariableDeclaration($varName, ScopeType::LOCAL, null, $writtenPtr, $currScope, true);
+      $this->markVariableDeclaration($varName, ScopeType::LOCAL, null, $stackPtr, $currScope, true);
       // An assignment to a reference is a binding and should not count as
       // initialization since it doesn't change any values.
-      $this->markVariableAssignmentWithoutInitialization($varName, $writtenPtr, $currScope);
+      $this->markVariableAssignmentWithoutInitialization($varName, $stackPtr, $currScope);
       return true;
     }
 
-    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+    $this->markVariableAssignment($varName, $stackPtr, $currScope);
 
     return true;
   }
