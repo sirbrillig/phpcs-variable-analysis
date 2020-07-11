@@ -114,6 +114,11 @@ class VariableAnalysisTest extends BaseTestCase {
   public function testFunctionWithForeachWarnings() {
     $fixtureFile = $this->getFixture('FunctionWithForeachFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedForeachVariables',
+      'false'
+    );
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
