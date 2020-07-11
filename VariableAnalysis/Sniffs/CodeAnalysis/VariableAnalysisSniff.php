@@ -855,8 +855,6 @@ class VariableAnalysisSniff implements Sniff {
       return false;
     }
 
-    $writtenPtr = Helpers::findWhereAssignExecuted($phpcsFile, $assignPtr);
-
     // If the right-hand-side of the assignment to this variable is a reference
     // variable, then this variable is a reference to that one, and as such any
     // assignment to this variable (except another assignment by reference,
@@ -876,14 +874,14 @@ class VariableAnalysisSniff implements Sniff {
       // actually need to mark it as used in this case because the act of this
       // assignment will mark it used on the next token.
       $varInfo->referencedVariableScope = $currScope;
-      $this->markVariableDeclaration($varName, ScopeType::LOCAL, null, $writtenPtr, $currScope, true);
+      $this->markVariableDeclaration($varName, ScopeType::LOCAL, null, $stackPtr, $currScope, true);
       // An assignment to a reference is a binding and should not count as
       // initialization since it doesn't change any values.
-      $this->markVariableAssignmentWithoutInitialization($varName, $writtenPtr, $currScope);
+      $this->markVariableAssignmentWithoutInitialization($varName, $stackPtr, $currScope);
       return true;
     }
 
-    $this->markVariableAssignment($varName, $writtenPtr, $currScope);
+    $this->markVariableAssignment($varName, $stackPtr, $currScope);
 
     return true;
   }
