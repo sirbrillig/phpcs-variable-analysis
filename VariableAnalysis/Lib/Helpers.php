@@ -487,7 +487,8 @@ class Helpers {
   /**
    * @return void
    */
-  public static function debug(...$messages) {
+  public static function debug() {
+    $messages = func_get_args();
     if (! defined('PHP_CODESNIFFER_VERBOSITY')) {
       return;
     }
