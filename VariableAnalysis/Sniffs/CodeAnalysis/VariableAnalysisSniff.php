@@ -180,7 +180,7 @@ class VariableAnalysisSniff implements Sniff {
       T_CLOSURE,
     ];
 
-    $scopeIndexThisCloses = array_reduce($this->scopeStartIndices, function ($found, $scopeStartIndex) use ($phpcsFile, $stackPtr) {
+    $scopeIndicesThisCloses = array_reduce($this->scopeStartIndices, function ($found, $scopeStartIndex) use ($phpcsFile, $stackPtr) {
       $scopeCloserIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $scopeStartIndex);
 
       if (!$scopeCloserIndex) {
@@ -188,12 +188,12 @@ class VariableAnalysisSniff implements Sniff {
       }
 
       if ($stackPtr === $scopeCloserIndex) {
-        return $scopeStartIndex;
+        $found[] = $scopeStartIndex;
       }
       return $found;
-    }, null);
+    }, []);
 
-    if (is_int($scopeIndexThisCloses)) {
+    foreach ($scopeIndicesThisCloses as $scopeIndexThisCloses) {
       Helpers::debug('found closing scope at', $stackPtr, 'for scope', $scopeIndexThisCloses);
       $this->processScopeClose($phpcsFile, $scopeIndexThisCloses);
     }
