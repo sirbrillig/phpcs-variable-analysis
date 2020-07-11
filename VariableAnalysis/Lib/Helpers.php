@@ -652,6 +652,27 @@ class Helpers {
 
   /**
    * @param File $phpcsFile
+   * @param int $scopeStartIndex
+   *
+   * @return int
+   */
+  public static function getScopeCloseForScopeOpen(File $phpcsFile, $scopeStartIndex) {
+    $tokens = $phpcsFile->getTokens();
+    $scopeCloserIndex = isset($tokens[$scopeStartIndex]['scope_closer']) ? $tokens[$scopeStartIndex]['scope_closer'] : null;
+
+    if (FunctionDeclarations::isArrowFunction($phpcsFile, $scopeStartIndex)) {
+      $arrowFunctionInfo = FunctionDeclarations::getArrowFunctionOpenClose($phpcsFile, $scopeStartIndex);
+      $scopeCloserIndex = $arrowFunctionInfo ? $arrowFunctionInfo['scope_closer'] : $scopeCloserIndex;
+    }
+
+    if ($scopeStartIndex === 0) {
+      $scopeCloserIndex = Helpers::getLastNonEmptyTokenIndexInFile($phpcsFile);
+    }
+    return $scopeCloserIndex;
+  }
+
+  /**
+   * @param File $phpcsFile
    *
    * @return int
    */
