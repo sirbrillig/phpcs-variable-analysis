@@ -956,8 +956,10 @@ class VariableAnalysisTest extends BaseTestCase {
     $expectedWarnings = [
       5,
       8,
+      15,
       20,
       33,
+      41,
       47,
       61,
     ];
