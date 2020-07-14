@@ -56,11 +56,18 @@ class VariableAnalysisSniff implements Sniff {
 
   /**
    *  Allow function parameters to be unused without provoking unused-var warning.
-   *  Set generic.codeanalysis.variableanalysis.allowUnusedFunctionParameters to a true value.
    *
    *  @var bool
    */
   public $allowUnusedFunctionParameters = false;
+
+  /**
+   *  If set, ignores undefined variables in the file scope (the top-level
+   *  scope of a file).
+   *
+   *  @var bool
+   */
+  public $allowUndefinedVariablesInFileScope = false;
 
   /**
    *  A space-separated list of names of placeholder variables that you want to
@@ -259,6 +266,9 @@ class VariableAnalysisSniff implements Sniff {
       }
       if (isset($this->ignoreUnusedRegexp) && preg_match($this->ignoreUnusedRegexp, $varName) === 1) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
+      }
+      if ($scopeInfo->owner === 0 && $this->allowUndefinedVariablesInFileScope) {
+        $scopeInfo->variables[$varName]->ignoreUndefined = true;
       }
       if (in_array($varName, $validUndefinedVariableNames)) {
         $scopeInfo->variables[$varName]->ignoreUndefined = true;
