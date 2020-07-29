@@ -6,6 +6,8 @@ Plugin for PHP_CodeSniffer static analysis tool that adds analysis of problemati
 
 - Warns if variables are used without being defined. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable`)
 - Warns if variables are set or declared but never used. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable`)
+- Warns if function parameters are declared but never used. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter`)
+- Warns if function parameters are declared but never used before other parameters that are used. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameterBeforeUsed`)
 - Warns if `$this`, `self::$static_member`, `static::$static_member` is used outside class scope. (Sniff codes: `VariableAnalysis.CodeAnalysis.VariableAnalysis.SelfOutsideClass` or `VariableAnalysis.CodeAnalysis.VariableAnalysis.StaticOutsideClass`)
 
 ## Installation
