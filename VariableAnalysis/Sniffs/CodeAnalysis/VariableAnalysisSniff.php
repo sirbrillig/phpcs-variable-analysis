@@ -113,6 +113,15 @@ class VariableAnalysisSniff implements Sniff {
   public $allowUnusedForeachVariables = true;
 
   /**
+   * If set to true, unused variables in a function before a require or import
+   * statement will not be marked as unused because they may be used in the
+   * required file.
+   *
+   *  @var bool
+   */
+  public $allowUnusedVariablesBeforeRequire = false;
+
+  /**
    * @return (int|string)[]
    */
   public function register() {
@@ -275,32 +284,6 @@ class VariableAnalysisSniff implements Sniff {
       }
     }
     return $scopeInfo->variables[$varName];
-  }
-
-  /**
-   * @param VariableInfo $varInfo
-   * @param ScopeInfo $scopeInfo
-   *
-   * @return bool
-   */
-  protected function areFollowingArgumentsUsed($varInfo, $scopeInfo) {
-    $foundVarPosition = false;
-    foreach ($scopeInfo->variables as $variable) {
-      if ($variable === $varInfo) {
-        $foundVarPosition = true;
-        continue;
-      }
-      if (! $foundVarPosition) {
-        continue;
-      }
-      if ($variable->scopeType !== 'param') {
-        continue;
-      }
-      if ($variable->firstRead) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /**
@@ -1408,7 +1391,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($this->allowUnusedFunctionParameters && $varInfo->scopeType === 'param') {
       return;
     }
-    if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === 'param' && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
+    if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === 'param' && Helpers::areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
       Helpers::debug("variable {$varInfo->name} at end of scope has unused following args");
       return;
     }

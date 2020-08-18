@@ -3,6 +3,8 @@
 namespace VariableAnalysis\Lib;
 
 use PHP_CodeSniffer\Files\File;
+use VariableAnalysis\Lib\ScopeInfo;
+use VariableAnalysis\Lib\VariableInfo;
 use PHP_CodeSniffer\Util\Tokens;
 
 class Helpers {
@@ -340,5 +342,31 @@ class Helpers {
   public static function splitStringToArray($pattern, $value) {
     $result = preg_split($pattern, $value);
     return is_array($result) ? $result : [];
+  }
+
+  /**
+   * @param VariableInfo $varInfo
+   * @param ScopeInfo $scopeInfo
+   *
+   * @return bool
+   */
+  public static function areFollowingArgumentsUsed(VariableInfo $varInfo, ScopeInfo $scopeInfo) {
+    $foundVarPosition = false;
+    foreach ($scopeInfo->variables as $variable) {
+      if ($variable === $varInfo) {
+        $foundVarPosition = true;
+        continue;
+      }
+      if (! $foundVarPosition) {
+        continue;
+      }
+      if ($variable->scopeType !== 'param') {
+        continue;
+      }
+      if ($variable->firstRead) {
+        return true;
+      }
+    }
+    return false;
   }
 }
