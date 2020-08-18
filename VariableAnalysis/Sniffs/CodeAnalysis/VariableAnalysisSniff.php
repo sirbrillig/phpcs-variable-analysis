@@ -1607,6 +1607,9 @@ class VariableAnalysisSniff implements Sniff {
     if (empty($varInfo->firstDeclared) && empty($varInfo->firstInitialized)) {
       return;
     }
+    if ($this->allowUnusedVariablesBeforeRequire && Helpers::isRequireInScopeAfter($phpcsFile, $varInfo, $scopeInfo)) {
+      return;
+    }
     $this->warnAboutUnusedVariable($phpcsFile, $varInfo);
   }
 

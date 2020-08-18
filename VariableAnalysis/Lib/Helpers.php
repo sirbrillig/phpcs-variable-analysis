@@ -681,4 +681,34 @@ class Helpers {
     }
     return false;
   }
+
+  /**
+   * @param File $phpcsFile
+   * @param VariableInfo $varInfo
+   * @param ScopeInfo $scopeInfo
+   *
+   * @return bool
+   */
+  public static function isRequireInScopeAfter(File $phpcsFile, VariableInfo $varInfo, ScopeInfo $scopeInfo) {
+    $requireTokens = [
+      T_REQUIRE,
+      T_REQUIRE_ONCE,
+      T_INCLUDE,
+      T_INCLUDE_ONCE,
+    ];
+    $indexToStartSearch = $varInfo->firstDeclared;
+    if (! empty($varInfo->firstInitialized)) {
+      $indexToStartSearch = $varInfo->firstInitialized;
+    }
+    $tokens = $phpcsFile->getTokens();
+    $indexToStopSearch = isset($tokens[$scopeInfo->owner]['scope_closer']) ? $tokens[$scopeInfo->owner]['scope_closer'] : null;
+    if (! is_int($indexToStartSearch) || ! is_int($indexToStopSearch)) {
+      return false;
+    }
+    $requireTokenIndex = $phpcsFile->findNext($requireTokens, $indexToStartSearch + 1, $indexToStopSearch);
+    if (is_int($requireTokenIndex)) {
+      return true;
+    }
+    return false;
+  }
 }
