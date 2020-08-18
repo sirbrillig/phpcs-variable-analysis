@@ -132,6 +132,15 @@ class VariableAnalysisSniff implements Sniff {
   public $allowUnusedForeachVariables = true;
 
   /**
+   * If set to true, unused variables in a function before a require or import
+   * statement will not be marked as unused because they may be used in the
+   * required file.
+   *
+   *  @var bool
+   */
+  public $allowUnusedVariablesBeforeRequire = false;
+
+  /**
    * @return (int|string)[]
    */
   public function register() {
@@ -335,32 +344,6 @@ class VariableAnalysisSniff implements Sniff {
     }
     Helpers::debug("scope for '{$varName}' is now", $scopeInfo);
     return $scopeInfo->variables[$varName];
-  }
-
-  /**
-   * @param VariableInfo $varInfo
-   * @param ScopeInfo $scopeInfo
-   *
-   * @return bool
-   */
-  protected function areFollowingArgumentsUsed($varInfo, $scopeInfo) {
-    $foundVarPosition = false;
-    foreach ($scopeInfo->variables as $variable) {
-      if ($variable === $varInfo) {
-        $foundVarPosition = true;
-        continue;
-      }
-      if (! $foundVarPosition) {
-        continue;
-      }
-      if ($variable->scopeType !== ScopeType::PARAM) {
-        continue;
-      }
-      if ($variable->firstRead) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /**
@@ -1601,7 +1584,7 @@ class VariableAnalysisSniff implements Sniff {
     if ($this->allowUnusedFunctionParameters && $varInfo->scopeType === ScopeType::PARAM) {
       return;
     }
-    if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === ScopeType::PARAM && $this->areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
+    if ($this->allowUnusedParametersBeforeUsed && $varInfo->scopeType === ScopeType::PARAM && Helpers::areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
       Helpers::debug("variable {$varInfo->name} at end of scope has unused following args");
       return;
     }
@@ -1622,6 +1605,9 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     if (empty($varInfo->firstDeclared) && empty($varInfo->firstInitialized)) {
+      return;
+    }
+    if ($this->allowUnusedVariablesBeforeRequire && Helpers::isRequireInScopeAfter($phpcsFile, $varInfo, $scopeInfo)) {
       return;
     }
     $this->warnAboutUnusedVariable($phpcsFile, $varInfo);

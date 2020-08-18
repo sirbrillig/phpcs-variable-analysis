@@ -3,6 +3,9 @@
 namespace VariableAnalysis\Lib;
 
 use PHP_CodeSniffer\Files\File;
+use VariableAnalysis\Lib\ScopeInfo;
+use VariableAnalysis\Lib\ScopeType;
+use VariableAnalysis\Lib\VariableInfo;
 use PHP_CodeSniffer\Util\Tokens;
 use PHPCSUtils\Utils\FunctionDeclarations;
 
@@ -651,5 +654,61 @@ class Helpers {
     }
     self::debug('no non-empty token found for end of file');
     return 0;
+  }
+
+  /**
+   * @param VariableInfo $varInfo
+   * @param ScopeInfo $scopeInfo
+   *
+   * @return bool
+   */
+  public static function areFollowingArgumentsUsed(VariableInfo $varInfo, ScopeInfo $scopeInfo) {
+    $foundVarPosition = false;
+    foreach ($scopeInfo->variables as $variable) {
+      if ($variable === $varInfo) {
+        $foundVarPosition = true;
+        continue;
+      }
+      if (! $foundVarPosition) {
+        continue;
+      }
+      if ($variable->scopeType !== ScopeType::PARAM) {
+        continue;
+      }
+      if ($variable->firstRead) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param VariableInfo $varInfo
+   * @param ScopeInfo $scopeInfo
+   *
+   * @return bool
+   */
+  public static function isRequireInScopeAfter(File $phpcsFile, VariableInfo $varInfo, ScopeInfo $scopeInfo) {
+    $requireTokens = [
+      T_REQUIRE,
+      T_REQUIRE_ONCE,
+      T_INCLUDE,
+      T_INCLUDE_ONCE,
+    ];
+    $indexToStartSearch = $varInfo->firstDeclared;
+    if (! empty($varInfo->firstInitialized)) {
+      $indexToStartSearch = $varInfo->firstInitialized;
+    }
+    $tokens = $phpcsFile->getTokens();
+    $indexToStopSearch = isset($tokens[$scopeInfo->owner]['scope_closer']) ? $tokens[$scopeInfo->owner]['scope_closer'] : null;
+    if (! is_int($indexToStartSearch) || ! is_int($indexToStopSearch)) {
+      return false;
+    }
+    $requireTokenIndex = $phpcsFile->findNext($requireTokens, $indexToStartSearch + 1, $indexToStopSearch);
+    if (is_int($requireTokenIndex)) {
+      return true;
+    }
+    return false;
   }
 }

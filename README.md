@@ -67,6 +67,7 @@ The available options are as follows:
 - `allowUnusedFunctionParameters` (bool, default `false`): if set to true, function arguments will never be marked as unused.
 - `allowUnusedCaughtExceptions` (bool, default `true`): if set to true, caught Exception variables will never be marked as unused.
 - `allowUnusedParametersBeforeUsed` (bool, default `true`): if set to true, unused function arguments will be ignored if they are followed by used function arguments.
+- `allowUnusedVariablesBeforeRequire` (bool, default `false`): if set to true, variables defined before a `require`, `require_once`, `include`, or `include_once` will not be marked as unused. They may be intended for the required file.
 - `allowUndefinedVariablesInFileScope` (bool, default `false`): if set to true, undefined variables in the file's top-level scope will never be marked as undefined.
 - `validUnusedVariableNames` (string, default `null`): a space-separated list of names of placeholder variables that you want to ignore from unused variable warnings. For example, to ignore the variables `$junk` and `$unused`, this could be set to `'junk unused'`.
 - `ignoreUnusedRegexp` (string, default `null`): a PHP regexp string (note that this requires explicit delimiters) for variables that you want to ignore from unused variable warnings. For example, to ignore the variables `$_junk` and `$_unused`, this could be set to `'/^_/'`.
