@@ -13,6 +13,15 @@ class UnusedFollowedByRequire extends BaseTestCase {
       2,
       3,
       4,
+      8,
+      9,
+      10,
+      14,
+      15,
+      16,
+      20,
+      21,
+      22,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -29,6 +38,9 @@ class UnusedFollowedByRequire extends BaseTestCase {
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [
       4,
+      10,
+      16,
+      22,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
