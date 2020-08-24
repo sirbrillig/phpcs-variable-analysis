@@ -589,6 +589,18 @@ class Helpers {
         return true;
       }
     }
+
+    // Some else body code will not have conditions because it is inline (no
+    // curly braces) so we have to look in other ways.
+    $previousSemicolonPtr = $phpcsFile->findPrevious([T_SEMICOLON], $stackPtr - 1);
+    if (! is_int($previousSemicolonPtr)) {
+      $previousSemicolonPtr = 0;
+    }
+    $elsePtr = $phpcsFile->findPrevious([T_ELSE, T_ELSEIF], $stackPtr - 1, $previousSemicolonPtr);
+    if (is_int($elsePtr)) {
+      return true;
+    }
+
     return false;
   }
 
