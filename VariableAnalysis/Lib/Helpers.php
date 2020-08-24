@@ -105,6 +105,8 @@ class Helpers {
    *
    * Does not work for tokens inside the "use".
    *
+   * Will also work for the parenthesis that make up the function definition's arguments list.
+   *
    * @param File $phpcsFile
    * @param int $stackPtr
    *
@@ -112,25 +114,36 @@ class Helpers {
    */
   public static function getFunctionIndexForFunctionArgument(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
+    $token = $tokens[$stackPtr];
+    if ($token['code'] === 'PHPCS_T_OPEN_PARENTHESIS') {
+      $startOfArguments = $stackPtr;
+    } elseif ($token['code'] === 'PHPCS_T_CLOSE_PARENTHESIS') {
+      if (empty($token['parenthesis_opener'])) {
+        return null;
+      }
+      $startOfArguments = $token['parenthesis_opener'];
+    } else {
+      if (empty($token['nested_parenthesis'])) {
+        return null;
+      }
+      $startingParenthesis = array_keys($token['nested_parenthesis']);
+      $startOfArguments = end($startingParenthesis);
+    }
 
     $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
-    $nonFunctionTokenTypes[] = T_OPEN_PARENTHESIS;
-    $nonFunctionTokenTypes[] = T_VARIABLE;
-    $nonFunctionTokenTypes[] = T_ELLIPSIS;
-    $nonFunctionTokenTypes[] = T_COMMA;
     $nonFunctionTokenTypes[] = T_STRING;
     $nonFunctionTokenTypes[] = T_BITWISE_AND;
-    $nonFunctionTokenTypes[] = T_NS_SEPARATOR;
-    $functionPtr = self::getIntOrNull($phpcsFile->findPrevious($nonFunctionTokenTypes, $stackPtr - 1, null, true, null, true));
+    $functionPtr = self::getIntOrNull($phpcsFile->findPrevious($nonFunctionTokenTypes, $startOfArguments - 1, null, true, null, true));
     if (! is_int($functionPtr)) {
       return null;
     }
+    $functionToken = $tokens[$functionPtr];
 
     $functionTokenTypes = [
       T_FUNCTION,
       T_CLOSURE,
     ];
-    if (!in_array($tokens[$functionPtr]['code'], $functionTokenTypes, true) && ! FunctionDeclarations::isArrowFunction($phpcsFile, $functionPtr)) {
+    if (!in_array($functionToken['code'], $functionTokenTypes, true) && ! FunctionDeclarations::isArrowFunction($phpcsFile, $functionPtr)) {
       return null;
     }
     return $functionPtr;
