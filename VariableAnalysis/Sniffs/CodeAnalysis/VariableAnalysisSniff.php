@@ -591,7 +591,7 @@ class VariableAnalysisSniff implements Sniff {
     }
     $functionPtr = Helpers::getFunctionIndexForFunctionArgument($phpcsFile, $endOfArgsPtr);
     if (! is_int($functionPtr)) {
-      throw new \Exception("Function index not found for function use index {$stackPtr} when processing variable {$varName}");
+      throw new \Exception("Function index not found for function use index {$stackPtr} (using {$endOfArgsPtr}) when processing variable {$varName}");
     }
 
     // Use is both a read (in the enclosing scope) and a define (in the function scope)

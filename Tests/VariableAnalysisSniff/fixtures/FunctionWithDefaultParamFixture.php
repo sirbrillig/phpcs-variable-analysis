@@ -21,3 +21,7 @@ function function_with_default_null_param($unused, $param = null) {
     echo "xxx {$param} xxx";
     return $param;
 }
+
+function fetch_product($product_id, $meta = '', $cost = null, $currency = null, $volume = 1, $free_trial = false, $extra = array()) {
+    return get_product($product_id, $meta, $currency, $cost, $volume, $free_trial, $extra);
+}
