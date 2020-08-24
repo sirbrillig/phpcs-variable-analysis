@@ -120,6 +120,7 @@ class Helpers {
     $nonFunctionTokenTypes[] = T_COMMA;
     $nonFunctionTokenTypes[] = T_STRING;
     $nonFunctionTokenTypes[] = T_BITWISE_AND;
+    $nonFunctionTokenTypes[] = T_NS_SEPARATOR;
     $functionPtr = self::getIntOrNull($phpcsFile->findPrevious($nonFunctionTokenTypes, $stackPtr - 1, null, true, null, true));
     if (! is_int($functionPtr)) {
       return null;
