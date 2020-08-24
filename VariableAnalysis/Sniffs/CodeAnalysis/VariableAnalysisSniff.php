@@ -587,11 +587,11 @@ class VariableAnalysisSniff implements Sniff {
 
     $endOfArgsPtr = $phpcsFile->findPrevious([T_CLOSE_PARENTHESIS], $stackPtr - 1, null);
     if (! is_int($endOfArgsPtr)) {
-      throw new \Exception("Arguments index not found for function use index {$stackPtr}");
+      throw new \Exception("Arguments index not found for function use index {$stackPtr} when processing variable {$varName}");
     }
     $functionPtr = Helpers::getFunctionIndexForFunctionArgument($phpcsFile, $endOfArgsPtr);
     if (! is_int($functionPtr)) {
-      throw new \Exception("Function index not found for function use index {$stackPtr}");
+      throw new \Exception("Function index not found for function use index {$stackPtr} when processing variable {$varName}");
     }
 
     // Use is both a read (in the enclosing scope) and a define (in the function scope)

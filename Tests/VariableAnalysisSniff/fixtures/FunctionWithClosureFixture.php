@@ -82,3 +82,15 @@ class ClassWithStaticInsideClosure {
         echo static::$static_member;
     }
 }
+
+function function_with_type_argument_in_closure($items, $item_id) {
+    return array_filter($items, function (Taxed_Line_Item $line_item) use ($item_id) {
+        return $line_item->item_id === $item_id;
+    });
+}
+
+function function_with_fully_qualified_type_argument_in_closure($items, $item_id) {
+    return array_filter($items, function (\Taxed_Line_Item $line_item) use ($item_id) {
+        return $line_item->item_id === $item_id;
+    });
+}
