@@ -31,4 +31,32 @@ class IfConditionTest extends BaseTestCase {
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
+
+  public function testInlineIfConditionWarnings() {
+    $fixtureFile = $this->getFixture('FunctionWithInlineIfConditionFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedParametersBeforeUsed',
+      'true'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      14,
+      25,
+      34,
+      35,
+      44,
+      54,
+      56,
+      64,
+      66,
+      74,
+      77,
+      86,
+      88,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
 }
