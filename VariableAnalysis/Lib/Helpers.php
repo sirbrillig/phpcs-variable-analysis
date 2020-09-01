@@ -463,9 +463,11 @@ class Helpers {
    * @return ?int
    */
   private static function getPreviousArrowFunctionIndex(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
     $enclosingScopeIndex = self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
     for ($index = $stackPtr - 1; $index > $enclosingScopeIndex; $index--) {
-      if (FunctionDeclarations::isArrowFunction($phpcsFile, $index)) {
+      $token = $tokens[$index];
+      if ($token['content'] === 'fn' && FunctionDeclarations::isArrowFunction($phpcsFile, $index)) {
         return $index;
       }
     }
