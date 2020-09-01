@@ -295,11 +295,12 @@ class Helpers {
     $tokens = $phpcsFile->getTokens();
     $token = $tokens[$stackPtr];
 
-    if (self::isTokenInsideArrowFunctionBody($phpcsFile, $stackPtr)) {
+    $arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
+    $isTokenInsideArrowFunctionBody = (bool) $arrowFunctionIndex;
+    if ($isTokenInsideArrowFunctionBody) {
       // Get the list of variables defined by the arrow function
       // If this matches any of them, the scope is the arrow function,
       // otherwise, it uses the enclosing scope.
-      $arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
       if ($arrowFunctionIndex) {
         $variableNames = self::getVariablesDefinedByArrowFunction($phpcsFile, $arrowFunctionIndex);
         if (in_array($token['content'], $variableNames, true)) {
@@ -430,16 +431,6 @@ class Helpers {
     }
     $openParenPtr = $openParenIndices[0];
     return FunctionDeclarations::isArrowFunction($phpcsFile, $openParenPtr - 1);
-  }
-
-  /**
-   * @param File $phpcsFile
-   * @param int $stackPtr
-   *
-   * @return bool
-   */
-  public static function isTokenInsideArrowFunctionBody(File $phpcsFile, $stackPtr) {
-    return (bool) self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
   }
 
   /**
