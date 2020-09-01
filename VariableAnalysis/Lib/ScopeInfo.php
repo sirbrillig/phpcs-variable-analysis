@@ -11,7 +11,14 @@ class ScopeInfo {
    *
    * @var int
    */
-  public $owner;
+  public $scopeStartIndex;
+
+  /**
+   * The token index of the end of this scope, if important.
+   *
+   * @var int|null
+   */
+  public $scopeEndIndex;
 
   /**
    * The variables defined in this scope.
@@ -20,7 +27,8 @@ class ScopeInfo {
    */
   public $variables = [];
 
-  public function __construct($scopeStartIndex) {
-    $this->owner = $scopeStartIndex;
+  public function __construct($scopeStartIndex, $scopeEndIndex = null) {
+    $this->scopeStartIndex = $scopeStartIndex;
+    $this->scopeEndIndex = $scopeEndIndex;
   }
 }

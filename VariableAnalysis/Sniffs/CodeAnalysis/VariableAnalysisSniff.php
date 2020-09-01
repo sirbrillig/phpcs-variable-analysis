@@ -22,18 +22,18 @@ class VariableAnalysisSniff implements Sniff {
   protected $currentFile = null;
 
   /**
-   * A list of scopes encountered so far and the variables within them.
+   * A list of scopes for variables encountered so far and the variables within them.
    *
    * @var ScopeInfo[]
    */
   private $scopes = [];
 
   /**
-   * A list of token indices which start scopes and will be used to check for unused variables.
+   * A list of token indices which start and end scopes and will be used to check for unused variables.
    *
-   * @var int[]
+   * @var ScopeInfo[]
    */
-  private $scopeStartIndices = [0];
+  private $scopeStartEndPairs = [];
 
   /**
    * A list of custom functions which pass in variables to be initialized by
@@ -189,6 +189,12 @@ class VariableAnalysisSniff implements Sniff {
    * @return void
    */
   public function process(File $phpcsFile, $stackPtr) {
+    // Add the global scope
+    if (empty($this->scopeStartEndPairs)) {
+      $endOfFilePtr = Helpers::getScopeCloseForScopeOpen($phpcsFile, 0);
+      $this->scopeStartEndPairs[] = new ScopeInfo(0, $endOfFilePtr);
+    }
+
     $tokens = $phpcsFile->getTokens();
 
     $scopeStartTokenTypes = [
@@ -196,23 +202,7 @@ class VariableAnalysisSniff implements Sniff {
       T_CLOSURE,
     ];
 
-    $scopeIndicesThisCloses = array_reduce($this->scopeStartIndices, function ($found, $scopeStartIndex) use ($phpcsFile, $stackPtr) {
-      $scopeCloserIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $scopeStartIndex);
-
-      if (!$scopeCloserIndex) {
-        Helpers::debug('No scope closer found for scope start', $scopeStartIndex);
-      }
-
-      if ($stackPtr === $scopeCloserIndex) {
-        $found[] = $scopeStartIndex;
-      }
-      return $found;
-    }, []);
-
-    foreach ($scopeIndicesThisCloses as $scopeIndexThisCloses) {
-      Helpers::debug('found closing scope at', $stackPtr, 'for scope', $scopeIndexThisCloses);
-      $this->processScopeClose($phpcsFile, $scopeIndexThisCloses);
-    }
+    $this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
 
     $token = $tokens[$stackPtr];
 
@@ -241,8 +231,33 @@ class VariableAnalysisSniff implements Sniff {
       || FunctionDeclarations::isArrowFunction($phpcsFile, $stackPtr)
     ) {
       Helpers::debug('found scope condition', $token);
-      $this->scopeStartIndices[] = $stackPtr;
+      $scopeEndIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $stackPtr);
+      $this->scopeStartEndPairs[] = new ScopeInfo($stackPtr, $scopeEndIndex);
       return;
+    }
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return void
+   */
+  private function searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr) {
+    $scopeIndicesThisCloses = array_reduce($this->scopeStartEndPairs, function ($found, $scope) use ($stackPtr) {
+      if (!$scope->scopeEndIndex) {
+        Helpers::debug('No scope closer found for scope start', $scope->scopeStartIndex);
+      }
+
+      if ($stackPtr === $scope->scopeEndIndex) {
+        $found[] = $scope->scopeStartIndex;
+      }
+      return $found;
+    }, []);
+
+    foreach ($scopeIndicesThisCloses as $scopeIndexThisCloses) {
+      Helpers::debug('found closing scope at', $stackPtr, 'for scope', $scopeIndexThisCloses);
+      $this->processScopeClose($phpcsFile, $scopeIndexThisCloses);
     }
   }
 
@@ -332,7 +347,7 @@ class VariableAnalysisSniff implements Sniff {
       if (isset($this->ignoreUnusedRegexp) && preg_match($this->ignoreUnusedRegexp, $varName) === 1) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
       }
-      if ($scopeInfo->owner === 0 && $this->allowUndefinedVariablesInFileScope) {
+      if ($scopeInfo->scopeStartIndex === 0 && $this->allowUndefinedVariablesInFileScope) {
         $scopeInfo->variables[$varName]->ignoreUndefined = true;
       }
       if (in_array($varName, $validUndefinedVariableNames)) {
@@ -530,7 +545,7 @@ class VariableAnalysisSniff implements Sniff {
     $count = count($scopeInfo->variables);
     Helpers::debug("marking all $count variables in scope as read");
     foreach ($scopeInfo->variables as $varInfo) {
-      $this->markVariableRead($varInfo->name, $stackPtr, $scopeInfo->owner);
+      $this->markVariableRead($varInfo->name, $stackPtr, $scopeInfo->scopeStartIndex);
     }
   }
 
