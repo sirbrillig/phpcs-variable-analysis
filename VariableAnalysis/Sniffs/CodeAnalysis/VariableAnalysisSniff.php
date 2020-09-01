@@ -29,11 +29,18 @@ class VariableAnalysisSniff implements Sniff {
   private $scopes = [];
 
   /**
-   * A list of token indices which start and end scopes and will be used to check for unused variables.
+   * A list of token index pairs which start and end scopes and will be used to check for unused variables.
    *
    * @var ScopeInfo[]
    */
   private $scopeStartEndPairs = [];
+
+  /**
+   * A list of token indices which end scopes and will be used to check for unused variables.
+   *
+   * @var int[]
+   */
+  private $scopeEndIndices = [];
 
   /**
    * A list of custom functions which pass in variables to be initialized by
@@ -202,7 +209,9 @@ class VariableAnalysisSniff implements Sniff {
       T_CLOSURE,
     ];
 
-    $this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
+    if (in_array($stackPtr, $this->scopeEndIndices, true)) {
+      $this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
+    }
 
     $token = $tokens[$stackPtr];
 
@@ -233,6 +242,7 @@ class VariableAnalysisSniff implements Sniff {
       Helpers::debug('found scope condition', $token);
       $scopeEndIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $stackPtr);
       $this->scopeStartEndPairs[] = new ScopeInfo($stackPtr, $scopeEndIndex);
+      $this->scopeEndIndices[] = $scopeEndIndex;
       return;
     }
   }
