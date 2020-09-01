@@ -254,7 +254,6 @@ class VariableAnalysisSniff implements Sniff {
    */
   private function searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr) {
     if (! in_array($stackPtr, $this->scopeEndIndices, true)) {
-      Helpers::debug('this is not in scopeEndIndices', $stackPtr, $this->scopeEndIndices);
       return;
     }
     $scopeIndicesThisCloses = array_reduce($this->scopeStartEndPairs, function ($found, $scope) use ($stackPtr) {
