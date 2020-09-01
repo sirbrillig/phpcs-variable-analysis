@@ -5,6 +5,7 @@ use VariableAnalysis\Tests\BaseTestCase;
 
 class IfConditionTest extends BaseTestCase {
   public function testIfConditionWarnings() {
+    // Testing
     $fixtureFile = $this->getFixture('FunctionWithIfConditionFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
     $phpcsFile->ruleset->setSniffProperty(
