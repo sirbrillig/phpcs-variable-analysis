@@ -200,6 +200,7 @@ class VariableAnalysisSniff implements Sniff {
     if (empty($this->scopeStartEndPairs)) {
       $endOfFilePtr = Helpers::getScopeCloseForScopeOpen($phpcsFile, 0);
       $this->scopeStartEndPairs[] = new ScopeInfo(0, $endOfFilePtr);
+      $this->scopeEndIndices[] = $endOfFilePtr;
     }
 
     $tokens = $phpcsFile->getTokens();
@@ -209,9 +210,7 @@ class VariableAnalysisSniff implements Sniff {
       T_CLOSURE,
     ];
 
-    if (in_array($stackPtr, $this->scopeEndIndices, true)) {
-      $this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
-    }
+    $this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
 
     $token = $tokens[$stackPtr];
 
@@ -254,9 +253,14 @@ class VariableAnalysisSniff implements Sniff {
    * @return void
    */
   private function searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr) {
+    if (! in_array($stackPtr, $this->scopeEndIndices, true)) {
+      Helpers::debug('this is not in scopeEndIndices', $stackPtr, $this->scopeEndIndices);
+      return;
+    }
     $scopeIndicesThisCloses = array_reduce($this->scopeStartEndPairs, function ($found, $scope) use ($stackPtr) {
-      if (!$scope->scopeEndIndex) {
+      if (! is_int($scope->scopeEndIndex)) {
         Helpers::debug('No scope closer found for scope start', $scope->scopeStartIndex);
+        return $found;
       }
 
       if ($stackPtr === $scope->scopeEndIndex) {
