@@ -40,6 +40,13 @@ class VariableAnalysisSniff implements Sniff {
   private $scopeStartEndPairs = [];
 
   /**
+   * A cache of scope end indices in the current file to improve performance.
+   *
+   * @var int[]
+   */
+  private $scopeEndIndexCache = [];
+
+  /**
    * A list of custom functions which pass in variables to be initialized by
    * reference (eg `preg_match()`) and therefore should not require those
    * variables to be defined ahead of time. The list is space separated and
@@ -204,6 +211,7 @@ class VariableAnalysisSniff implements Sniff {
 
     if ($this->currentFile !== $phpcsFile) {
       $this->currentFile = $phpcsFile;
+      $this->scopeEndIndexCache = [];
     }
 
     // Add the global scope
@@ -253,6 +261,7 @@ class VariableAnalysisSniff implements Sniff {
     }
     Helpers::debug('recording scope for file', $filename, 'start/end', $scopeStartIndex, $scopeEndIndex);
     $this->scopeStartEndPairs[$filename][] = new ScopeInfo($scopeStartIndex, $scopeEndIndex);
+    $this->scopeEndIndexCache[] = $scopeEndIndex;
   }
 
   /**
@@ -262,6 +271,9 @@ class VariableAnalysisSniff implements Sniff {
    * @return void
    */
   private function searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr) {
+    if (! in_array($stackPtr, $this->scopeEndIndexCache, true)) {
+      return;
+    }
     $scopePairsForFile = isset($this->scopeStartEndPairs[$this->getFilename()]) ? $this->scopeStartEndPairs[$this->getFilename()] : [];
     $scopeIndicesThisCloses = array_reduce($scopePairsForFile, function ($found, $scope) use ($stackPtr) {
       if (! is_int($scope->scopeEndIndex)) {
