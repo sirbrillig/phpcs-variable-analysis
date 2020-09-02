@@ -727,7 +727,7 @@ class Helpers {
       $indexToStartSearch = $varInfo->firstInitialized;
     }
     $tokens = $phpcsFile->getTokens();
-    $indexToStopSearch = isset($tokens[$scopeInfo->owner]['scope_closer']) ? $tokens[$scopeInfo->owner]['scope_closer'] : null;
+    $indexToStopSearch = isset($tokens[$scopeInfo->scopeStartIndex]['scope_closer']) ? $tokens[$scopeInfo->scopeStartIndex]['scope_closer'] : null;
     if (! is_int($indexToStartSearch) || ! is_int($indexToStopSearch)) {
       return false;
     }

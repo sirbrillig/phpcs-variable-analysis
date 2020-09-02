@@ -332,7 +332,7 @@ class VariableAnalysisSniff implements Sniff {
       if (isset($this->ignoreUnusedRegexp) && preg_match($this->ignoreUnusedRegexp, $varName) === 1) {
         $scopeInfo->variables[$varName]->ignoreUnused = true;
       }
-      if ($scopeInfo->owner === 0 && $this->allowUndefinedVariablesInFileScope) {
+      if ($scopeInfo->scopeStartIndex === 0 && $this->allowUndefinedVariablesInFileScope) {
         $scopeInfo->variables[$varName]->ignoreUndefined = true;
       }
       if (in_array($varName, $validUndefinedVariableNames)) {
@@ -530,7 +530,7 @@ class VariableAnalysisSniff implements Sniff {
     $count = count($scopeInfo->variables);
     Helpers::debug("marking all $count variables in scope as read");
     foreach ($scopeInfo->variables as $varInfo) {
-      $this->markVariableRead($varInfo->name, $stackPtr, $scopeInfo->owner);
+      $this->markVariableRead($varInfo->name, $stackPtr, $scopeInfo->scopeStartIndex);
     }
   }
 

@@ -11,7 +11,7 @@ class ScopeInfo {
    *
    * @var int
    */
-  public $owner;
+  public $scopeStartIndex;
 
   /**
    * The variables defined in this scope.
@@ -21,6 +21,6 @@ class ScopeInfo {
   public $variables = [];
 
   public function __construct($scopeStartIndex) {
-    $this->owner = $scopeStartIndex;
+    $this->scopeStartIndex = $scopeStartIndex;
   }
 }
