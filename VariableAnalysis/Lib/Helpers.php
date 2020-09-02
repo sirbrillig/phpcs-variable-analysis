@@ -295,11 +295,12 @@ class Helpers {
     $tokens = $phpcsFile->getTokens();
     $token = $tokens[$stackPtr];
 
-    if (self::isTokenInsideArrowFunctionBody($phpcsFile, $stackPtr)) {
+    $arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
+    $isTokenInsideArrowFunctionBody = (bool) $arrowFunctionIndex;
+    if ($isTokenInsideArrowFunctionBody) {
       // Get the list of variables defined by the arrow function
       // If this matches any of them, the scope is the arrow function,
       // otherwise, it uses the enclosing scope.
-      $arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
       if ($arrowFunctionIndex) {
         $variableNames = self::getVariablesDefinedByArrowFunction($phpcsFile, $arrowFunctionIndex);
         if (in_array($token['content'], $variableNames, true)) {
@@ -436,16 +437,6 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return bool
-   */
-  public static function isTokenInsideArrowFunctionBody(File $phpcsFile, $stackPtr) {
-    return (bool) self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
-  }
-
-  /**
-   * @param File $phpcsFile
-   * @param int $stackPtr
-   *
    * @return ?int
    */
   public static function getContainingArrowFunctionIndex(File $phpcsFile, $stackPtr) {
@@ -472,9 +463,11 @@ class Helpers {
    * @return ?int
    */
   private static function getPreviousArrowFunctionIndex(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
     $enclosingScopeIndex = self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
     for ($index = $stackPtr - 1; $index > $enclosingScopeIndex; $index--) {
-      if (FunctionDeclarations::isArrowFunction($phpcsFile, $index)) {
+      $token = $tokens[$index];
+      if ($token['content'] === 'fn' && FunctionDeclarations::isArrowFunction($phpcsFile, $index)) {
         return $index;
       }
     }
@@ -727,7 +720,7 @@ class Helpers {
       $indexToStartSearch = $varInfo->firstInitialized;
     }
     $tokens = $phpcsFile->getTokens();
-    $indexToStopSearch = isset($tokens[$scopeInfo->owner]['scope_closer']) ? $tokens[$scopeInfo->owner]['scope_closer'] : null;
+    $indexToStopSearch = isset($tokens[$scopeInfo->scopeStartIndex]['scope_closer']) ? $tokens[$scopeInfo->scopeStartIndex]['scope_closer'] : null;
     if (! is_int($indexToStartSearch) || ! is_int($indexToStopSearch)) {
       return false;
     }
