@@ -759,10 +759,11 @@ class Helpers {
     }
 
     $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
-    $nonFunctionTokenTypes[] = T_STRING;
-    $nonFunctionTokenTypes[] = T_BITWISE_AND;
     $functionPtr = self::getIntOrNull($phpcsFile->findPrevious($nonFunctionTokenTypes, $startOfArguments - 1, null, true, null, true));
-    if (! is_int($functionPtr)) {
+    if (! is_int($functionPtr) || ! isset($tokens[$functionPtr]['code'])) {
+      return null;
+    }
+    if ($tokens[$functionPtr]['code'] === 'function' || ($tokens[$functionPtr]['content'] === 'fn' && FunctionDeclarations::isArrowFunction($phpcsFile, $functionPtr))) {
       return null;
     }
     return $functionPtr;
