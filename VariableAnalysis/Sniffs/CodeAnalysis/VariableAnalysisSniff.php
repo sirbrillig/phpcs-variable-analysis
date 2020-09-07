@@ -1440,6 +1440,13 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
 
+    // Are we an isset or empty call?
+    if (Helpers::isVariableInsideIssetOrEmpty($phpcsFile, $stackPtr)) {
+      Helpers::debug('found isset or empty');
+      $this->markVariableRead($varName, $stackPtr, $currScope);
+      return;
+    }
+
     // OK, we don't appear to be a write to the var, assume we're a read.
     Helpers::debug('looks like a variable read');
     $this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $stackPtr, $currScope);

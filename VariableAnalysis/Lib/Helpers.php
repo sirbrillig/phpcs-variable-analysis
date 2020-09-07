@@ -107,6 +107,9 @@ class Helpers {
    *
    * Will also work for the parenthesis that make up the function definition's arguments list.
    *
+   * For arguments inside a function call, rather than a definition, use
+   * `getFunctionIndexForFunctionCallArgument`.
+   *
    * @param File $phpcsFile
    * @param int $stackPtr
    *
@@ -128,6 +131,10 @@ class Helpers {
       }
       $startingParenthesis = array_keys($token['nested_parenthesis']);
       $startOfArguments = end($startingParenthesis);
+    }
+
+    if (! is_int($startOfArguments)) {
+      return null;
     }
 
     $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
@@ -726,6 +733,62 @@ class Helpers {
     }
     $requireTokenIndex = $phpcsFile->findNext($requireTokens, $indexToStartSearch + 1, $indexToStopSearch);
     if (is_int($requireTokenIndex)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Find the index of the function keyword for a token in a function call's arguments
+   *
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return ?int
+   */
+  public static function getFunctionIndexForFunctionCallArgument(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $token = $tokens[$stackPtr];
+    if (empty($token['nested_parenthesis'])) {
+      return null;
+    }
+    $startingParenthesis = array_keys($token['nested_parenthesis']);
+    $startOfArguments = end($startingParenthesis);
+    if (! is_int($startOfArguments)) {
+      return null;
+    }
+
+    $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
+    $functionPtr = self::getIntOrNull($phpcsFile->findPrevious($nonFunctionTokenTypes, $startOfArguments - 1, null, true, null, true));
+    if (! is_int($functionPtr) || ! isset($tokens[$functionPtr]['code'])) {
+      return null;
+    }
+    if ($tokens[$functionPtr]['code'] === 'function' || ($tokens[$functionPtr]['content'] === 'fn' && FunctionDeclarations::isArrowFunction($phpcsFile, $functionPtr))) {
+      return null;
+    }
+    return $functionPtr;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isVariableInsideIssetOrEmpty(File $phpcsFile, $stackPtr) {
+    $functionIndex = self::getFunctionIndexForFunctionCallArgument($phpcsFile, $stackPtr);
+    if (! is_int($functionIndex)) {
+      return false;
+    }
+    $tokens = $phpcsFile->getTokens();
+    if (! isset($tokens[$functionIndex])) {
+      return false;
+    }
+    $allowedFunctionNames = [
+      'isset',
+      'empty',
+    ];
+    if (in_array($tokens[$functionIndex]['content'], $allowedFunctionNames, true)) {
       return true;
     }
     return false;
