@@ -133,6 +133,10 @@ class Helpers {
       $startOfArguments = end($startingParenthesis);
     }
 
+    if (! is_int($startOfArguments)) {
+      return null;
+    }
+
     $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
     $nonFunctionTokenTypes[] = T_STRING;
     $nonFunctionTokenTypes[] = T_BITWISE_AND;
@@ -750,6 +754,9 @@ class Helpers {
     }
     $startingParenthesis = array_keys($token['nested_parenthesis']);
     $startOfArguments = end($startingParenthesis);
+    if (! is_int($startOfArguments)) {
+      return null;
+    }
 
     $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
     $nonFunctionTokenTypes[] = T_STRING;
