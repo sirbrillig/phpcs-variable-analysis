@@ -1363,12 +1363,6 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
 
-    // Are we an isset or empty call?
-    if (Helpers::isVariableInsideIssetOrEmpty($phpcsFile, $stackPtr)) {
-      Helpers::debug('found isset or empty');
-      return;
-    }
-
     // Are we a $GLOBALS, $_REQUEST, etc superglobal?
     if ($this->processVariableAsSuperGlobal($varName)) {
       Helpers::debug('found superglobal');
@@ -1443,6 +1437,13 @@ class VariableAnalysisSniff implements Sniff {
     if (Helpers::isVariableInsideElseCondition($phpcsFile, $stackPtr) || Helpers::isVariableInsideElseBody($phpcsFile, $stackPtr)) {
       Helpers::debug('found variable inside else condition or body');
       $this->processVaribleInsideElse($phpcsFile, $stackPtr, $varName, $currScope);
+      return;
+    }
+
+    // Are we an isset or empty call?
+    if (Helpers::isVariableInsideIssetOrEmpty($phpcsFile, $stackPtr)) {
+      Helpers::debug('found isset or empty');
+      $this->markVariableRead($varName, $stackPtr, $currScope);
       return;
     }
 
