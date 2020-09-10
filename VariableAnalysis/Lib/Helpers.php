@@ -793,4 +793,41 @@ class Helpers {
     }
     return false;
   }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isVariableArrayPushShortcut(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    $nonFunctionTokenTypes = array_values(Tokens::$emptyTokens);
+
+    $arrayPushOperatorIndex1 = self::getIntOrNull($phpcsFile->findNext($nonFunctionTokenTypes, $stackPtr + 1, null, true, null, true));
+    if (! is_int($arrayPushOperatorIndex1)) {
+      return false;
+    }
+    if (! isset($tokens[$arrayPushOperatorIndex1]['content']) || $tokens[$arrayPushOperatorIndex1]['content'] !== '[') {
+      return false;
+    }
+
+    $arrayPushOperatorIndex2 = self::getIntOrNull($phpcsFile->findNext($nonFunctionTokenTypes, $arrayPushOperatorIndex1 + 1, null, true, null, true));
+    if (! is_int($arrayPushOperatorIndex2)) {
+      return false;
+    }
+    if (! isset($tokens[$arrayPushOperatorIndex2]['content']) || $tokens[$arrayPushOperatorIndex2]['content'] !== ']') {
+      return false;
+    }
+
+    $arrayPushOperatorIndex3 = self::getIntOrNull($phpcsFile->findNext($nonFunctionTokenTypes, $arrayPushOperatorIndex2 + 1, null, true, null, true));
+    if (! is_int($arrayPushOperatorIndex3)) {
+      return false;
+    }
+    if (! isset($tokens[$arrayPushOperatorIndex3]['content']) || $tokens[$arrayPushOperatorIndex3]['content'] !== '=') {
+      return false;
+    }
+
+    return true;
+  }
 }
