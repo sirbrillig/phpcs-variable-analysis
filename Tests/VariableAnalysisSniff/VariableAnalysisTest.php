@@ -617,6 +617,26 @@ class VariableAnalysisTest extends BaseTestCase {
     $this->assertEquals($expectedWarnings, $lines);
   }
 
+  public function testUnusedParamsHaveCorrectSniffCodes() {
+    $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedParametersBeforeUsed',
+      'false'
+    );
+    $phpcsFile->process();
+
+    $warnings = $phpcsFile->getWarnings();
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameterBeforeUsed', $warnings[4][43][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[16][52][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[27][60][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[39][42][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[39][51][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[72][5][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[73][5][0]['source']);
+  }
+
   public function testValidUnusedVariableNamesIgnoresUnusedVariables() {
     $fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
     $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
