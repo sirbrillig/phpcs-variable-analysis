@@ -560,6 +560,10 @@ class VariableAnalysisSniff implements Sniff {
     $this->markVariableRead($varName, $stackPtr, $currScope);
     if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
       Helpers::debug("variable $varName looks undefined");
+      if (Helpers::isVariableArrayPushShortcut($phpcsFile, $stackPtr)) {
+        $this->warnAboutUndefinedArrayPushShortcut($phpcsFile, $varName, $stackPtr);
+        return;
+      }
       $this->warnAboutUndefinedVariable($phpcsFile, $varName, $stackPtr);
     }
   }
@@ -1761,6 +1765,21 @@ class VariableAnalysisSniff implements Sniff {
         "Variable %s is undefined.",
         $stackPtr,
         'UndefinedVariable',
+        ["\${$varName}"]
+      );
+  }
+  /**
+   * @param File $phpcsFile
+   * @param string $varName
+   * @param int $stackPtr
+   *
+   * @return void
+   */
+  protected function warnAboutUndefinedArrayPushShortcut(File $phpcsFile, $varName, $stackPtr) {
+      $phpcsFile->addWarning(
+        "Array variable %s is undefined.",
+        $stackPtr,
+        'UndefinedArrayVariable',
         ["\${$varName}"]
       );
   }
