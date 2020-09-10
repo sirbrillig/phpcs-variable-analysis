@@ -560,12 +560,7 @@ class VariableAnalysisSniff implements Sniff {
     $this->markVariableRead($varName, $stackPtr, $currScope);
     if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
       Helpers::debug("variable $varName looks undefined");
-      $phpcsFile->addWarning(
-        "Variable %s is undefined.",
-        $stackPtr,
-        'UndefinedVariable',
-        ["\${$varName}"]
-      );
+      $this->warnAboutUndefinedVariable($phpcsFile, $varName, $stackPtr);
     }
   }
 
@@ -654,7 +649,7 @@ class VariableAnalysisSniff implements Sniff {
     // If it's undefined in the enclosing scope, the use is wrong
     if ($this->isVariableUndefined($varName, $stackPtr, $outerScope) === true) {
       Helpers::debug("variable '{$varName}' in function definition looks undefined in scope", $outerScope);
-      $phpcsFile->addWarning("Variable %s is undefined.", $stackPtr, 'UndefinedVariable', ["\${$varName}"]);
+      $this->warnAboutUndefinedVariable($phpcsFile, $varName, $stackPtr);
       return;
     }
 
@@ -1494,12 +1489,7 @@ class VariableAnalysisSniff implements Sniff {
 
     if (count($assignmentsInsideAttachedBlocks) === count($allAssignmentIndices)) {
       Helpers::debug("variable $varName inside else looks undefined");
-      $phpcsFile->addWarning(
-        "Variable %s is undefined.",
-        $stackPtr,
-        'UndefinedVariable',
-        ["\${$varName}"]
-      );
+      $this->warnAboutUndefinedVariable($phpcsFile, $varName, $stackPtr);
       return;
     }
 
@@ -1757,5 +1747,21 @@ class VariableAnalysisSniff implements Sniff {
         ]
       );
     }
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param string $varName
+   * @param int $stackPtr
+   *
+   * @return void
+   */
+  protected function warnAboutUndefinedVariable(File $phpcsFile, $varName, $stackPtr) {
+      $phpcsFile->addWarning(
+        "Variable %s is undefined.",
+        $stackPtr,
+        'UndefinedVariable',
+        ["\${$varName}"]
+      );
   }
 }
