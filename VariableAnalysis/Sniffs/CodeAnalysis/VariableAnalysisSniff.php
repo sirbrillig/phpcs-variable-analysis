@@ -562,6 +562,8 @@ class VariableAnalysisSniff implements Sniff {
       Helpers::debug("variable $varName looks undefined");
       if (Helpers::isVariableArrayPushShortcut($phpcsFile, $stackPtr)) {
         $this->warnAboutUndefinedArrayPushShortcut($phpcsFile, $varName, $stackPtr);
+        // Mark the variable as defined if it's of the form `$x[] = 1;`
+        $this->markVariableAssignment($varName, $stackPtr, $currScope);
         return;
       }
       $this->warnAboutUndefinedVariable($phpcsFile, $varName, $stackPtr);
