@@ -173,7 +173,7 @@ class Helpers {
    * @return bool
    */
   public static function isTokenInsideFunctionUseImport(File $phpcsFile, $stackPtr) {
-    return (bool) self::getUseIndexForUseImport($phpcsFile, $stackPtr);
+    return is_int(self::getUseIndexForUseImport($phpcsFile, $stackPtr));
   }
 
   /**
@@ -313,7 +313,7 @@ class Helpers {
     $token = $tokens[$stackPtr];
 
     $arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
-    $isTokenInsideArrowFunctionBody = (bool) $arrowFunctionIndex;
+    $isTokenInsideArrowFunctionBody = is_int($arrowFunctionIndex);
     if ($isTokenInsideArrowFunctionBody) {
       // Get the list of variables defined by the arrow function
       // If this matches any of them, the scope is the arrow function,
