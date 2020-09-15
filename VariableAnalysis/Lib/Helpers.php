@@ -830,4 +830,25 @@ class Helpers {
 
     return true;
   }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isVariableInsideUnset(File $phpcsFile, $stackPtr) {
+    $functionIndex = self::getFunctionIndexForFunctionCallArgument($phpcsFile, $stackPtr);
+    if (! is_int($functionIndex)) {
+      return false;
+    }
+    $tokens = $phpcsFile->getTokens();
+    if (! isset($tokens[$functionIndex])) {
+      return false;
+    }
+    if ($tokens[$functionIndex]['content'] === 'unset') {
+      return true;
+    }
+    return false;
+  }
 }

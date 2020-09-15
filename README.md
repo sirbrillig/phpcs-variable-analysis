@@ -8,6 +8,7 @@ Please note that this README is for VariableAnalysis v3. For documentation about
 
 - Warns if variables are used without being defined. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable`)
 - Warns if variables are used for an array push shortcut without being defined. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedArrayVariable`)
+- Warns if variables are used inside `unset()` without being defined. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedUnsetVariable`)
 - Warns if variables are set or declared but never used. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable`)
 - Warns if function parameters are declared but never used. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter`)
 - Warns if function parameters are declared but never used before other parameters that are used. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameterBeforeUsed`)
