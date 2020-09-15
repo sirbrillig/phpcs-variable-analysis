@@ -65,3 +65,10 @@ function concatAndAssignAndPush3($parts) {
   }
   return $suggestions;
 }
+
+function concatAndAssignAndPush4($parts) {
+  $suggestion = 'block';
+  while ($part = array_shift($parts)) {
+    addToSuggestion($suggestion .= $part);
+  }
+}
