@@ -28,6 +28,8 @@ class IfConditionTest extends BaseTestCase {
       87,
       98,
       101,
+      159,
+      161,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
