@@ -851,4 +851,19 @@ class Helpers {
     }
     return false;
   }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isInsideSubExpression(File $phpcsFile, $stackPtr) {
+    $previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
+    $previousTokenPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, $previousStatementPtr, true);
+    if (is_int($previousTokenPtr)) {
+      return true;
+    }
+    return false;
+  }
 }
