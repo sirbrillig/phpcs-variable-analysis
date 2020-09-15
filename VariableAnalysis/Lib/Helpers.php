@@ -858,9 +858,12 @@ class Helpers {
    *
    * @return bool
    */
-  public static function isInsideSubExpression(File $phpcsFile, $stackPtr) {
-    $previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
-    $previousTokenPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, $previousStatementPtr, true);
+  public static function isTokenInsideAssignmentRHS(File $phpcsFile, $stackPtr) {
+    $previousStatementPtr = $phpcsFile->findPrevious([T_SEMICOLON, T_CLOSE_CURLY_BRACKET, T_OPEN_CURLY_BRACKET, T_COMMA], $stackPtr - 1);
+    if (! is_int($previousStatementPtr)) {
+      $previousStatementPtr = 1;
+    }
+    $previousTokenPtr = $phpcsFile->findPrevious([T_EQUAL], $stackPtr - 1, $previousStatementPtr);
     if (is_int($previousTokenPtr)) {
       return true;
     }
