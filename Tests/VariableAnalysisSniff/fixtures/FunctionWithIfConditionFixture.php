@@ -160,3 +160,10 @@ function ifConditionWithUndefinedArrayAssignment($first) {
   }
   return $things; // undefined variable
 }
+
+function loopAndPushWithUndefinedArray($parts) {
+  while ($part = array_shift($parts)) {
+    $suggestions[] = $part; // undefined array variable
+  }
+  return $suggestions; // undefined variable
+}
