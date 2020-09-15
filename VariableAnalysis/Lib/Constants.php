@@ -8,6 +8,10 @@ class Constants {
    *  by reference, the arguments are numbered starting from 1 and an elipsis '...'
    *  means all argument numbers after the previous should be considered pass-by-reference.
    *
+   *  This does not need to cover all pass-by-reference arguments, only the
+   *  ones which can be passed an undefined variable (eg: `$matches` in
+   *  `preg_match`) and will define that variable.
+   *
    *  @return array[]
    */
   public static function getPassByReferenceFunctions() {
@@ -28,16 +32,6 @@ class Constants {
       'apcu_fetch' => [2],
       'apcu_inc' => [3],
       'areConfusable' => [3],
-      'array_multisort' => [1],
-      'array_pop' => [1],
-      'array_push' => [1],
-      'array_replace' => [1],
-      'array_replace_recursive' => [1, 2, 3, '...'],
-      'array_shift' => [1],
-      'array_splice' => [1],
-      'array_unshift' => [1],
-      'array_walk' => [1],
-      'array_walk_recursive' => [1],
       'arsort' => [1],
       'asort' => [1],
       'bindColumn' => [2],

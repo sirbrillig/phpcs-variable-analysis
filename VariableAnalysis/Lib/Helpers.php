@@ -97,7 +97,17 @@ class Helpers {
    * @return bool
    */
   public static function isTokenInsideFunctionDefinitionArgumentList(File $phpcsFile, $stackPtr) {
-    return (bool) self::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr);
+    return is_int(self::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr));
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isTokenInsideFunctionCall(File $phpcsFile, $stackPtr) {
+    return is_int(self::getFunctionIndexForFunctionCallArgument($phpcsFile, $stackPtr));
   }
 
   /**
@@ -163,7 +173,7 @@ class Helpers {
    * @return bool
    */
   public static function isTokenInsideFunctionUseImport(File $phpcsFile, $stackPtr) {
-    return (bool) self::getUseIndexForUseImport($phpcsFile, $stackPtr);
+    return is_int(self::getUseIndexForUseImport($phpcsFile, $stackPtr));
   }
 
   /**
@@ -303,7 +313,7 @@ class Helpers {
     $token = $tokens[$stackPtr];
 
     $arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
-    $isTokenInsideArrowFunctionBody = (bool) $arrowFunctionIndex;
+    $isTokenInsideArrowFunctionBody = is_int($arrowFunctionIndex);
     if ($isTokenInsideArrowFunctionBody) {
       // Get the list of variables defined by the arrow function
       // If this matches any of them, the scope is the arrow function,
@@ -847,6 +857,24 @@ class Helpers {
       return false;
     }
     if ($tokens[$functionIndex]['content'] === 'unset') {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isTokenInsideAssignmentRHS(File $phpcsFile, $stackPtr) {
+    $previousStatementPtr = $phpcsFile->findPrevious([T_SEMICOLON, T_CLOSE_CURLY_BRACKET, T_OPEN_CURLY_BRACKET, T_COMMA], $stackPtr - 1);
+    if (! is_int($previousStatementPtr)) {
+      $previousStatementPtr = 1;
+    }
+    $previousTokenPtr = $phpcsFile->findPrevious([T_EQUAL], $stackPtr - 1, $previousStatementPtr);
+    if (is_int($previousTokenPtr)) {
       return true;
     }
     return false;
