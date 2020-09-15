@@ -560,12 +560,19 @@ class VariableAnalysisSniff implements Sniff {
     $this->markVariableRead($varName, $stackPtr, $currScope);
     if ($this->isVariableUndefined($varName, $stackPtr, $currScope) === true) {
       Helpers::debug("variable $varName looks undefined");
+
       if (Helpers::isVariableArrayPushShortcut($phpcsFile, $stackPtr)) {
         $this->warnAboutUndefinedArrayPushShortcut($phpcsFile, $varName, $stackPtr);
         // Mark the variable as defined if it's of the form `$x[] = 1;`
         $this->markVariableAssignment($varName, $stackPtr, $currScope);
         return;
       }
+
+      if (Helpers::isVariableInsideUnset($phpcsFile, $stackPtr)) {
+        $this->warnAboutUndefinedUnset($phpcsFile, $varName, $stackPtr);
+        return;
+      }
+
       $this->warnAboutUndefinedVariable($phpcsFile, $varName, $stackPtr);
     }
   }
@@ -1773,6 +1780,7 @@ class VariableAnalysisSniff implements Sniff {
         ["\${$varName}"]
       );
   }
+
   /**
    * @param File $phpcsFile
    * @param string $varName
@@ -1785,6 +1793,22 @@ class VariableAnalysisSniff implements Sniff {
         "Array variable %s is undefined.",
         $stackPtr,
         'UndefinedArrayVariable',
+        ["\${$varName}"]
+      );
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param string $varName
+   * @param int $stackPtr
+   *
+   * @return void
+   */
+  protected function warnAboutUndefinedUnset(File $phpcsFile, $varName, $stackPtr) {
+      $phpcsFile->addWarning(
+        "Variable %s inside unset call is undefined.",
+        $stackPtr,
+        'UndefinedUnsetVariable',
         ["\${$varName}"]
       );
   }
