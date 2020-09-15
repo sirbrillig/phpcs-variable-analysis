@@ -57,3 +57,17 @@ function globalWithUnusedFunctionArg($user_type, $text, $testvar) { // should wa
 }
 
 echo $sunday;
+
+function function_with_reserved_variables() {
+  $opts = [];
+  $url  = 'https://example.com/';
+  $context = stream_context_create($opts);
+  $response = @file_get_contents($url, false, $context);
+  $response_headers = handle_response_headers($http_response_header);
+  return [
+    $response,
+    $response_headers,
+    $php_errormsg,
+    $HTTP_RAW_POST_DATA,
+  ];
+}
