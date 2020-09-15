@@ -47,3 +47,21 @@ function loopAndPushWithUndefinedArray($parts) {
   }
   return $suggestions; // undefined variable suggestions
 }
+
+function concatAndAssignAndPush2($parts) {
+  $suggestions = [];
+  $suggestion = 'block';
+  while ($part = array_shift($parts)) {
+    $suggestions[] = ( $suggestion .= '__' . strtr($part, '-', '_') );
+  }
+  return $suggestions;
+}
+
+function concatAndAssignAndPush3($parts) {
+  $suggestions = [];
+  $suggestion = 'block';
+  while ($part = array_shift($parts)) {
+    $suggestions[] = getPrefix() . $suggestion .= '__' . strtr($part, '-', '_');
+  }
+  return $suggestions;
+}
