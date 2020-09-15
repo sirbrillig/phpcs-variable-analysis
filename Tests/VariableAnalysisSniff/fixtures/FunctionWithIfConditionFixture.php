@@ -145,3 +145,25 @@ function ifConditionWithPossibleUse($first) {
     echo $name;
   }
 }
+
+function ifConditionWithArrayAssignment($first) {
+  $things = [];
+  if ($first) {
+    $things[] = 'person';
+  }
+  return $things;
+}
+
+function ifConditionWithUndefinedArrayAssignment($first) {
+  if ($first) {
+    $things[] = 'person'; // undefined array variable
+  }
+  return $things;
+}
+
+function loopAndPushWithUndefinedArray($parts) {
+  while ($part = array_shift($parts)) {
+    $suggestions[] = $part; // undefined array variable
+  }
+  return $suggestions;
+}

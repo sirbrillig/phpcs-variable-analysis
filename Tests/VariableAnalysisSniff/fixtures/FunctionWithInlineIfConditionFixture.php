@@ -124,3 +124,15 @@ function ifConditionWithPossibleUse($first) {
   if ($first)
     echo $name;
 }
+
+function ifConditionWithUndefinedArrayAssignment($first) {
+  if ($first)
+    $things[] = 'person'; // undefined array variable
+  return $things;
+}
+
+function loopAndPushWithUndefinedArray($parts) {
+  while ($part = array_shift($parts))
+    $suggestions[] = $part; // undefined array variable
+  return $suggestions;
+}
