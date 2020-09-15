@@ -45,7 +45,7 @@ function loopAndPushWithUndefinedArray($parts) {
   while ($part = array_shift($parts)) {
     $suggestions[] = $part; // undefined variable suggestions
   }
-  return $suggestions; // undefined variable suggestions
+  return $suggestions;
 }
 
 function concatAndAssignAndPush2($parts) {

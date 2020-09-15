@@ -12,7 +12,6 @@ class WhileLoopTest extends BaseTestCase {
     $expectedWarnings = [
       38,
       46,
-      48,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
