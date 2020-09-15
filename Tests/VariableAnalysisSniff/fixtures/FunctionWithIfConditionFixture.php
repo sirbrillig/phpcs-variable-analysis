@@ -158,12 +158,12 @@ function ifConditionWithUndefinedArrayAssignment($first) {
   if ($first) {
     $things[] = 'person'; // undefined array variable
   }
-  return $things; // undefined variable
+  return $things;
 }
 
 function loopAndPushWithUndefinedArray($parts) {
   while ($part = array_shift($parts)) {
     $suggestions[] = $part; // undefined array variable
   }
-  return $suggestions; // undefined variable
+  return $suggestions;
 }
