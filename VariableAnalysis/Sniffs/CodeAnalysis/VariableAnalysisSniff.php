@@ -1399,7 +1399,7 @@ class VariableAnalysisSniff implements Sniff {
 
     // Is the next non-whitespace an assignment?
     if ($this->processVariableAsAssignment($phpcsFile, $stackPtr, $varName, $currScope)) {
-      if (Helpers::isTokenInsideAssignmentRHS($phpcsFile, $stackPtr)) {
+      if (Helpers::isTokenInsideAssignmentRHS($phpcsFile, $stackPtr) || Helpers::isTokenInsideFunctionCall($phpcsFile, $stackPtr)) {
         Helpers::debug("found assignment that's also inside an expression");
         $this->markVariableRead($varName, $stackPtr, $currScope);
         return;

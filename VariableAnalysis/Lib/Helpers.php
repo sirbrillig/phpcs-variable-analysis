@@ -97,7 +97,17 @@ class Helpers {
    * @return bool
    */
   public static function isTokenInsideFunctionDefinitionArgumentList(File $phpcsFile, $stackPtr) {
-    return (bool) self::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr);
+    return is_int(self::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr));
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isTokenInsideFunctionCall(File $phpcsFile, $stackPtr) {
+    return is_int(self::getFunctionIndexForFunctionCallArgument($phpcsFile, $stackPtr));
   }
 
   /**
