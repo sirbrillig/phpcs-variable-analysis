@@ -4,7 +4,7 @@
 
 Plugin for PHP_CodeSniffer static analysis tool that adds analysis of problematic variable use.
 
-Please note that this README is for VariableAnalysis v3. For documentation about v2, [see this page](https://github.com/sirbrillig/phpcs-variable-analysis/blob/2.8.2/README.md).
+**Please note that this README is for VariableAnalysis v3. For documentation about v2, [see this page](https://github.com/sirbrillig/phpcs-variable-analysis/blob/2.x-legacy/README.md).**
 
 - Warns if variables are used without being defined. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable`)
 - Warns if variables are used for an array push shortcut without being defined. (Sniff code: `VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedArrayVariable`)
