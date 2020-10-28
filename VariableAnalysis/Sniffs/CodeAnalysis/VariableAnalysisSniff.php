@@ -10,8 +10,6 @@ use VariableAnalysis\Lib\Helpers;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PHPCSUtils\Utils\Lists;
-use PHPCSUtils\Utils\FunctionDeclarations;
 
 class VariableAnalysisSniff implements Sniff {
   /**

@@ -7,7 +7,6 @@ use VariableAnalysis\Lib\ScopeInfo;
 use VariableAnalysis\Lib\ScopeType;
 use VariableAnalysis\Lib\VariableInfo;
 use PHP_CodeSniffer\Util\Tokens;
-use PHPCSUtils\Utils\FunctionDeclarations;
 
 class Helpers {
   /**
