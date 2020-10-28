@@ -574,6 +574,61 @@ class Helpers {
   }
 
   /**
+   * Return a list of indices for variables assigned within a list assignment
+   *
+   * @param File $phpcsFile
+   * @param int $listOpenerIndex
+   *
+   * @return ?int[]
+   */
+  public static function getListAssignments(File $phpcsFile, $listOpenerIndex) {
+    $tokens = $phpcsFile->getTokens();
+    self::debug('getListAssignments', $listOpenerIndex, $tokens[$listOpenerIndex]);
+    $closePtr = null;
+    if (isset($tokens[$listOpenerIndex]['parenthesis_closer'])) {
+      $closePtr = $tokens[$listOpenerIndex]['parenthesis_closer'];
+    }
+    if (isset($tokens[$listOpenerIndex]['bracket_closer'])) {
+      $closePtr = $tokens[$listOpenerIndex]['bracket_closer'];
+    }
+    if (! $closePtr) {
+      return null;
+    }
+
+    $assignPtr = $phpcsFile->findNext(Tokens::$emptyTokens, $closePtr + 1, null, true);
+    if (! is_int($assignPtr) || $tokens[$assignPtr]['code'] !== T_EQUAL) {
+      // If we are nested inside a destructured assignment, we are also an assignment
+      $parents = isset($tokens[$listOpenerIndex]['nested_parenthesis']) ? $tokens[$listOpenerIndex]['nested_parenthesis'] : [];
+      // There's no record of nested brackets for short lists; we'll have to find the parent ourselves
+      $parentSquareBracket = Helpers::findContainingOpeningSquareBracket($phpcsFile, $listOpenerIndex);
+      if (is_int($parentSquareBracket)) {
+        $parents[$parentSquareBracket] = 0; // We don't actually need the closing paren
+      }
+      $nestedAssignments = null;
+      foreach (array_reverse($parents, true) as $openParen => $closeParen) {
+        $nestedAssignments = self::getListAssignments($phpcsFile, $openParen);
+      }
+      if ($nestedAssignments === null) {
+        return null;
+      }
+    }
+
+    $variablePtrs = [];
+
+    $currentPtr = $listOpenerIndex;
+    $variablePtr = 0;
+    while ($currentPtr < $closePtr && is_int($variablePtr)) {
+      $variablePtr = $phpcsFile->findNext([T_VARIABLE], $currentPtr + 1, $closePtr);
+      if (is_int($variablePtr)) {
+        $variablePtrs[] = $variablePtr;
+      }
+      $currentPtr++;
+    }
+
+    return $variablePtrs;
+  }
+
+  /**
    * @param File $phpcsFile
    * @param int $stackPtr
    *

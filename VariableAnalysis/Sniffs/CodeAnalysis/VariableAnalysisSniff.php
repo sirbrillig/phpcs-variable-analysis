@@ -987,13 +987,12 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // OK, we're a [ ... ] construct... are we being assigned to?
-    try {
-      $assignments = Lists::getAssignments($phpcsFile, $openPtr);
-    } catch (\Exception $error) {
+    $assignments = Helpers::getListAssignments($phpcsFile, $openPtr);
+    if (! $assignments) {
       return false;
     }
-    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, array $assignment) use ($stackPtr) {
-      if (isset($assignment['assignment_token']) && $assignment['assignment_token'] === $stackPtr) {
+    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, $assignment) use ($stackPtr) {
+      if ($assignment === $stackPtr) {
         return $assignment;
       }
       return $thisAssignment;
@@ -1030,13 +1029,12 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // OK, we're a list (...) construct... are we being assigned to?
-    try {
-      $assignments = Lists::getAssignments($phpcsFile, $prevPtr);
-    } catch (\Exception $error) {
+    $assignments = Helpers::getListAssignments($phpcsFile, $prevPtr);
+    if (! $assignments) {
       return false;
     }
-    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, array $assignment) use ($stackPtr) {
-      if (isset($assignment['assignment_token']) && $assignment['assignment_token'] === $stackPtr) {
+    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, $assignment) use ($stackPtr) {
+      if ($assignment === $stackPtr) {
         return $assignment;
       }
       return $thisAssignment;
