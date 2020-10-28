@@ -160,7 +160,7 @@ class Helpers {
       T_FUNCTION,
       T_CLOSURE,
     ];
-    if (!in_array($functionToken['code'], $functionTokenTypes, true) && ! FunctionDeclarations::isArrowFunction($phpcsFile, $functionPtr)) {
+    if (!in_array($functionToken['code'], $functionTokenTypes, true) && ! self::isArrowFunction($phpcsFile, $functionPtr)) {
       return null;
     }
     return $functionPtr;
@@ -412,7 +412,7 @@ class Helpers {
       T_CLOSURE,
     ];
     foreach (array_reverse($conditions, true) as $scopePtr => $scopeCode) {
-      if (in_array($scopeCode, $functionTokenTypes, true) || FunctionDeclarations::isArrowFunction($phpcsFile, $scopePtr)) {
+      if (in_array($scopeCode, $functionTokenTypes, true) || self::isArrowFunction($phpcsFile, $scopePtr)) {
         return $scopePtr;
       }
       if (isset(Tokens::$ooScopeTokens[$scopeCode]) === true) {
@@ -447,7 +447,7 @@ class Helpers {
       return false;
     }
     $openParenPtr = $openParenIndices[0];
-    return FunctionDeclarations::isArrowFunction($phpcsFile, $openParenPtr - 1);
+    return self::isArrowFunction($phpcsFile, $openParenPtr - 1);
   }
 
   /**
@@ -461,7 +461,7 @@ class Helpers {
     if (! is_int($arrowFunctionIndex)) {
       return null;
     }
-    $arrowFunctionInfo = FunctionDeclarations::getArrowFunctionOpenClose($phpcsFile, $arrowFunctionIndex);
+    $arrowFunctionInfo = self::getArrowFunctionOpenClose($phpcsFile, $arrowFunctionIndex);
     if (! $arrowFunctionInfo) {
       return null;
     }
@@ -484,11 +484,93 @@ class Helpers {
     $enclosingScopeIndex = self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
     for ($index = $stackPtr - 1; $index > $enclosingScopeIndex; $index--) {
       $token = $tokens[$index];
-      if ($token['content'] === 'fn' && FunctionDeclarations::isArrowFunction($phpcsFile, $index)) {
+      if ($token['content'] === 'fn' && self::isArrowFunction($phpcsFile, $index)) {
         return $index;
       }
     }
     return null;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isArrowFunction(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    if (defined('T_FN') && $tokens[$stackPtr]['code'] === T_FN) {
+      return true;
+    }
+    if ($tokens[$stackPtr]['content'] !== 'fn') {
+      return false;
+    }
+    // Make sure next non-space token is an open parenthesis
+    $openParenIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
+    if (! is_int($openParenIndex) || $tokens[$openParenIndex]['code'] !== T_OPEN_PARENTHESIS) {
+      return false;
+    }
+    // Find the associated close parenthesis
+    $closeParenIndex = $tokens[$openParenIndex]['parenthesis_closer'];
+    // Make sure the next token is a fat arrow
+    $fatArrowIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $closeParenIndex + 1, null, true);
+    if (! is_int($fatArrowIndex)) {
+      return false;
+    }
+    if ($tokens[$fatArrowIndex]['code'] !== T_DOUBLE_ARROW && $tokens[$fatArrowIndex]['type'] !== 'T_FN_ARROW') {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return ?array
+   */
+  public static function getArrowFunctionOpenClose(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+    if (defined('T_FN') && $tokens[$stackPtr]['code'] === T_FN) {
+      return [
+        'scope_opener' => $tokens[$stackPtr]['scope_opener'],
+        'scope_closer' => $tokens[$stackPtr]['scope_closer'],
+      ];
+    }
+    if ($tokens[$stackPtr]['content'] !== 'fn') {
+      return null;
+    }
+    // Make sure next non-space token is an open parenthesis
+    $openParenIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
+    if (! is_int($openParenIndex) || $tokens[$openParenIndex]['code'] !== T_OPEN_PARENTHESIS) {
+      return null;
+    }
+    // Find the associated close parenthesis
+    $closeParenIndex = $tokens[$openParenIndex]['parenthesis_closer'];
+    // Make sure the next token is a fat arrow
+    $fatArrowIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $closeParenIndex + 1, null, true);
+    if (! is_int($fatArrowIndex)) {
+      return null;
+    }
+    if ($tokens[$fatArrowIndex]['code'] !== T_DOUBLE_ARROW && $tokens[$fatArrowIndex]['type'] !== 'T_FN_ARROW') {
+      return null;
+    }
+    // Find the scope closer
+    $endScopeTokens = [
+      T_COMMA,
+      T_SEMICOLON,
+      T_CLOSE_PARENTHESIS,
+      T_CLOSE_CURLY_BRACKET,
+      T_CLOSE_SHORT_ARRAY,
+    ];
+    $scopeCloserIndex = $phpcsFile->findNext($endScopeTokens, $fatArrowIndex  + 1);
+    if (! is_int($scopeCloserIndex)) {
+      return null;
+    }
+    return [
+      'scope_opener' => $stackPtr,
+      'scope_closer' => $scopeCloserIndex,
+    ];
   }
 
   /**
@@ -665,8 +747,8 @@ class Helpers {
     $tokens = $phpcsFile->getTokens();
     $scopeCloserIndex = isset($tokens[$scopeStartIndex]['scope_closer']) ? $tokens[$scopeStartIndex]['scope_closer'] : null;
 
-    if (FunctionDeclarations::isArrowFunction($phpcsFile, $scopeStartIndex)) {
-      $arrowFunctionInfo = FunctionDeclarations::getArrowFunctionOpenClose($phpcsFile, $scopeStartIndex);
+    if (self::isArrowFunction($phpcsFile, $scopeStartIndex)) {
+      $arrowFunctionInfo = self::getArrowFunctionOpenClose($phpcsFile, $scopeStartIndex);
       $scopeCloserIndex = $arrowFunctionInfo ? $arrowFunctionInfo['scope_closer'] : $scopeCloserIndex;
     }
 
@@ -773,7 +855,7 @@ class Helpers {
     if (! is_int($functionPtr) || ! isset($tokens[$functionPtr]['code'])) {
       return null;
     }
-    if ($tokens[$functionPtr]['code'] === 'function' || ($tokens[$functionPtr]['content'] === 'fn' && FunctionDeclarations::isArrowFunction($phpcsFile, $functionPtr))) {
+    if ($tokens[$functionPtr]['code'] === 'function' || ($tokens[$functionPtr]['content'] === 'fn' && self::isArrowFunction($phpcsFile, $functionPtr))) {
       return null;
     }
     return $functionPtr;

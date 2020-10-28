@@ -239,7 +239,7 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     if (in_array($token['code'], $scopeStartTokenTypes, true)
-      || FunctionDeclarations::isArrowFunction($phpcsFile, $stackPtr)
+      || Helpers::isArrowFunction($phpcsFile, $stackPtr)
     ) {
       Helpers::debug('found scope condition', $token);
       $this->recordScopeStartAndEnd($phpcsFile, $stackPtr);
