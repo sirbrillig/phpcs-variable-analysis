@@ -578,7 +578,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $listOpenerIndex
    *
-   * @return ?int[]
+   * @return ?array
    */
   public static function getListAssignments(File $phpcsFile, $listOpenerIndex) {
     $tokens = $phpcsFile->getTokens();
