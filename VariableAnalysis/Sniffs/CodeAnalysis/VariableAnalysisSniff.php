@@ -1743,7 +1743,7 @@ class VariableAnalysisSniff implements Sniff {
       $phpcsFile->addWarning(
         "Array variable %s is undefined.",
         $stackPtr,
-        'UndefinedArrayVariable',
+        'UndefinedVariable',
         ["\${$varName}"]
       );
   }
