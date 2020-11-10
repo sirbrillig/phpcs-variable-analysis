@@ -2,6 +2,4 @@
 <ruleset name="VariableAnalysis">
   <description>Plugin for PHP_CodeSniffer static analysis tool that adds analysis of problematic variable use.</description>
    <rule ref="VariableAnalysis.CodeAnalysis.VariableAnalysis"/>
-   <!-- PHPCSUtils is required for this sniff to operate -->
-   <rule ref="PHPCSUtils"/>
 </ruleset>
