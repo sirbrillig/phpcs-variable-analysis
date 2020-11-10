@@ -10,8 +10,6 @@ use VariableAnalysis\Lib\Helpers;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PHPCSUtils\Utils\Lists;
-use PHPCSUtils\Utils\FunctionDeclarations;
 
 class VariableAnalysisSniff implements Sniff {
   /**
@@ -239,7 +237,7 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     if (in_array($token['code'], $scopeStartTokenTypes, true)
-      || FunctionDeclarations::isArrowFunction($phpcsFile, $stackPtr)
+      || Helpers::isArrowFunction($phpcsFile, $stackPtr)
     ) {
       Helpers::debug('found scope condition', $token);
       $this->recordScopeStartAndEnd($phpcsFile, $stackPtr);
@@ -987,13 +985,12 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // OK, we're a [ ... ] construct... are we being assigned to?
-    try {
-      $assignments = Lists::getAssignments($phpcsFile, $openPtr);
-    } catch (\Exception $error) {
+    $assignments = Helpers::getListAssignments($phpcsFile, $openPtr);
+    if (! $assignments) {
       return false;
     }
-    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, array $assignment) use ($stackPtr) {
-      if (isset($assignment['assignment_token']) && $assignment['assignment_token'] === $stackPtr) {
+    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, $assignment) use ($stackPtr) {
+      if ($assignment === $stackPtr) {
         return $assignment;
       }
       return $thisAssignment;
@@ -1030,13 +1027,12 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     // OK, we're a list (...) construct... are we being assigned to?
-    try {
-      $assignments = Lists::getAssignments($phpcsFile, $prevPtr);
-    } catch (\Exception $error) {
+    $assignments = Helpers::getListAssignments($phpcsFile, $prevPtr);
+    if (! $assignments) {
       return false;
     }
-    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, array $assignment) use ($stackPtr) {
-      if (isset($assignment['assignment_token']) && $assignment['assignment_token'] === $stackPtr) {
+    $matchingAssignment = array_reduce($assignments, function ($thisAssignment, $assignment) use ($stackPtr) {
+      if ($assignment === $stackPtr) {
         return $assignment;
       }
       return $thisAssignment;
