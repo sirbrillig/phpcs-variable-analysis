@@ -628,13 +628,13 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
 
     $warnings = $phpcsFile->getWarnings();
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameterBeforeUsed', $warnings[4][43][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[16][52][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[27][60][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[39][42][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[39][51][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[72][5][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedParameter', $warnings[73][5][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[4][43][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[16][52][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[27][60][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[39][42][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[39][51][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[72][5][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[73][5][0]['source']);
   }
 
   public function testValidUnusedVariableNamesIgnoresUnusedVariables() {

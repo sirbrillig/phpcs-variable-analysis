@@ -1696,14 +1696,6 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
 
-    if ($varInfo->scopeType === ScopeType::PARAM && Helpers::areFollowingArgumentsUsed($varInfo, $scopeInfo)) {
-      $this->warnAboutUnusedParameterBeforeUsed($phpcsFile, $varInfo);
-      return;
-    }
-    if ($varInfo->scopeType === ScopeType::PARAM) {
-      $this->warnAboutUnusedParameterAfterUsed($phpcsFile, $varInfo);
-      return;
-    }
     $this->warnAboutUnusedVariable($phpcsFile, $varInfo);
   }
 
@@ -1720,48 +1712,6 @@ class VariableAnalysisSniff implements Sniff {
         "Unused %s %s.",
         $indexForWarning,
         'UnusedVariable',
-        [
-          VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
-          "\${$varInfo->name}",
-        ]
-      );
-    }
-  }
-
-  /**
-   * @param File $phpcsFile
-   * @param VariableInfo $varInfo
-   *
-   * @return void
-   */
-  protected function warnAboutUnusedParameterAfterUsed(File $phpcsFile, VariableInfo $varInfo) {
-    foreach (array_unique($varInfo->allAssignments) as $indexForWarning) {
-      Helpers::debug("variable {$varInfo->name} at end of scope looks unused");
-      $phpcsFile->addWarning(
-        "Unused %s %s.",
-        $indexForWarning,
-        'UnusedParameter',
-        [
-          VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
-          "\${$varInfo->name}",
-        ]
-      );
-    }
-  }
-
-  /**
-   * @param File $phpcsFile
-   * @param VariableInfo $varInfo
-   *
-   * @return void
-   */
-  protected function warnAboutUnusedParameterBeforeUsed(File $phpcsFile, VariableInfo $varInfo) {
-    foreach (array_unique($varInfo->allAssignments) as $indexForWarning) {
-      Helpers::debug("variable {$varInfo->name} at end of scope looks unused");
-      $phpcsFile->addWarning(
-        "Unused %s %s.",
-        $indexForWarning,
-        'UnusedParameterBeforeUsed',
         [
           VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
           "\${$varInfo->name}",
