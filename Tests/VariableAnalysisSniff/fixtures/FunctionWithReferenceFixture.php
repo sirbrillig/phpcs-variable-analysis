@@ -63,3 +63,13 @@ function function_with_ignored_reference_call() {
 function function_with_wordpress_reference_calls() {
     wp_parse_str('foo=bar', $vars);
 }
+
+function function_with_array_walk($userNameParts) {
+  array_walk($userNameParts, function (string &$value): void {
+    if (strlen($value) <= 3) {
+      return;
+    }
+
+    $value = ucfirst($value);
+  });
+}
