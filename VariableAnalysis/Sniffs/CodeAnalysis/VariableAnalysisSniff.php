@@ -370,33 +370,36 @@ class VariableAnalysisSniff implements Sniff {
    * @return VariableInfo
    */
   protected function getOrCreateVariableInfo($varName, $currScope) {
+    Helpers::debug("getOrCreateVariableInfo: starting for '{$varName}'");
     $scopeInfo = $this->getOrCreateScopeInfo($currScope);
-    if (!isset($scopeInfo->variables[$varName])) {
-      Helpers::debug("creating a new variable for '{$varName}' in scope", $scopeInfo);
-      $scopeInfo->variables[$varName] = new VariableInfo($varName);
-      $validUnusedVariableNames = (empty($this->validUnusedVariableNames))
-        ? []
-        : Helpers::splitStringToArray('/\s+/', trim($this->validUnusedVariableNames));
-      $validUndefinedVariableNames = (empty($this->validUndefinedVariableNames))
-        ? []
-        : Helpers::splitStringToArray('/\s+/', trim($this->validUndefinedVariableNames));
-      if (in_array($varName, $validUnusedVariableNames)) {
-        $scopeInfo->variables[$varName]->ignoreUnused = true;
-      }
-      if (isset($this->ignoreUnusedRegexp) && preg_match($this->ignoreUnusedRegexp, $varName) === 1) {
-        $scopeInfo->variables[$varName]->ignoreUnused = true;
-      }
-      if ($scopeInfo->scopeStartIndex === 0 && $this->allowUndefinedVariablesInFileScope) {
-        $scopeInfo->variables[$varName]->ignoreUndefined = true;
-      }
-      if (in_array($varName, $validUndefinedVariableNames)) {
-        $scopeInfo->variables[$varName]->ignoreUndefined = true;
-      }
-      if (isset($this->validUndefinedVariableRegexp) && preg_match($this->validUndefinedVariableRegexp, $varName) === 1) {
-        $scopeInfo->variables[$varName]->ignoreUndefined = true;
-      }
+    if (isset($scopeInfo->variables[$varName])) {
+      Helpers::debug("getOrCreateVariableInfo: found scope for '{$varName}'", $scopeInfo);
+      return $scopeInfo->variables[$varName];
     }
-    Helpers::debug("scope for '{$varName}' is now", $scopeInfo);
+    Helpers::debug("getOrCreateVariableInfo: creating a new variable for '{$varName}' in scope", $scopeInfo);
+    $scopeInfo->variables[$varName] = new VariableInfo($varName);
+    $validUnusedVariableNames = (empty($this->validUnusedVariableNames))
+      ? []
+      : Helpers::splitStringToArray('/\s+/', trim($this->validUnusedVariableNames));
+    $validUndefinedVariableNames = (empty($this->validUndefinedVariableNames))
+      ? []
+      : Helpers::splitStringToArray('/\s+/', trim($this->validUndefinedVariableNames));
+    if (in_array($varName, $validUnusedVariableNames)) {
+      $scopeInfo->variables[$varName]->ignoreUnused = true;
+    }
+    if (isset($this->ignoreUnusedRegexp) && preg_match($this->ignoreUnusedRegexp, $varName) === 1) {
+      $scopeInfo->variables[$varName]->ignoreUnused = true;
+    }
+    if ($scopeInfo->scopeStartIndex === 0 && $this->allowUndefinedVariablesInFileScope) {
+      $scopeInfo->variables[$varName]->ignoreUndefined = true;
+    }
+    if (in_array($varName, $validUndefinedVariableNames)) {
+      $scopeInfo->variables[$varName]->ignoreUndefined = true;
+    }
+    if (isset($this->validUndefinedVariableRegexp) && preg_match($this->validUndefinedVariableRegexp, $varName) === 1) {
+      $scopeInfo->variables[$varName]->ignoreUndefined = true;
+    }
+    Helpers::debug("getOrCreateVariableInfo: scope for '{$varName}' is now", $scopeInfo);
     return $scopeInfo->variables[$varName];
   }
 
@@ -408,10 +411,12 @@ class VariableAnalysisSniff implements Sniff {
    * @return void
    */
   protected function markVariableAssignment($varName, $stackPtr, $currScope) {
+    Helpers::debug('markVariableAssignment: starting for', $varName);
     $this->markVariableAssignmentWithoutInitialization($varName, $stackPtr, $currScope);
+    Helpers::debug('markVariableAssignment: marked as assigned without initialization', $varName);
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
     if (isset($varInfo->firstInitialized) && ($varInfo->firstInitialized <= $stackPtr)) {
-      Helpers::debug('markVariableAssignment variable is already initialized', $varName);
+      Helpers::debug('markVariableAssignment: variable is already initialized', $varName);
       return;
     }
     $varInfo->firstInitialized = $stackPtr;
@@ -622,12 +627,14 @@ class VariableAnalysisSniff implements Sniff {
     // Are we pass-by-reference?
     $referencePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
     if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
+      Helpers::debug("processVariableAsFunctionDefinitionArgument found pass-by-reference to scope", $outerScope);
       $varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
       $varInfo->referencedVariableScope = $outerScope;
     }
 
     //  Are we optional with a default?
     if (Helpers::getNextAssignPointer($phpcsFile, $stackPtr) !== null) {
+      Helpers::debug("processVariableAsFunctionDefinitionArgument optional with default");
       $this->markVariableAssignment($varName, $stackPtr, $functionPtr);
     }
   }
