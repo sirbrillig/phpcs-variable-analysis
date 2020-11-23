@@ -434,7 +434,11 @@ class VariableAnalysisSniff implements Sniff {
 
     // Is the variable referencing another variable? If so, mark that variable used also.
     if ($varInfo->referencedVariableScope !== null && $varInfo->referencedVariableScope !== $currScope) {
-      $this->markVariableAssignment($varInfo->name, $stackPtr, $varInfo->referencedVariableScope);
+      // Don't do this if the referenced variable does not exist; eg: if it's going to be bound at runtime like in array_walk
+      if ($this->getVariableInfo($varInfo->name, $varInfo->referencedVariableScope)) {
+        Helpers::debug('markVariableAssignmentWithoutInitialization: marking referenced variable as assigned also', $varName);
+        $this->markVariableAssignment($varInfo->name, $stackPtr, $varInfo->referencedVariableScope);
+      }
     }
 
     if (!isset($varInfo->scopeType)) {
