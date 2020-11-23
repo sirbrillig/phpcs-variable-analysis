@@ -879,4 +879,52 @@ class Helpers {
     }
     return false;
   }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isTokenInsideAssignmentLHS(File $phpcsFile, $stackPtr) {
+    // Is the next non-whitespace an assignment?
+    $assignPtr = self::getNextAssignPointer($phpcsFile, $stackPtr);
+    if (! is_int($assignPtr)) {
+      return false;
+    }
+
+    // Is this a variable variable? If so, it's not an assignment to the current variable.
+    if (self::isTokenVariableVariable($phpcsFile, $stackPtr)) {
+      self::debug('found variable variable');
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param File $phpcsFile
+   * @param int $stackPtr
+   *
+   * @return bool
+   */
+  public static function isTokenVariableVariable(File $phpcsFile, $stackPtr) {
+    $tokens = $phpcsFile->getTokens();
+
+    $prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), null, true);
+    if ($prev === false) {
+      return false;
+    }
+    if ($tokens[$prev]['code'] === T_DOLLAR) {
+      return true;
+    }
+    if ($tokens[$prev]['code'] !== T_OPEN_CURLY_BRACKET) {
+      return false;
+    }
+
+    $prevPrev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prev - 1), null, true);
+    if ($prevPrev !== false && $tokens[$prevPrev]['code'] === T_DOLLAR) {
+      return true;
+    }
+    return false;
+  }
 }
