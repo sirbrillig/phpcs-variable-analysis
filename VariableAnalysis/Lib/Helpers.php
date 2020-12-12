@@ -583,6 +583,8 @@ class Helpers {
   public static function getListAssignments(File $phpcsFile, $listOpenerIndex) {
     $tokens = $phpcsFile->getTokens();
     self::debug('getListAssignments', $listOpenerIndex, $tokens[$listOpenerIndex]);
+
+    // First find the end of the list
     $closePtr = null;
     if (isset($tokens[$listOpenerIndex]['parenthesis_closer'])) {
       $closePtr = $tokens[$listOpenerIndex]['parenthesis_closer'];
@@ -594,20 +596,31 @@ class Helpers {
       return null;
     }
 
+    // Find the assignment (equals sign) which, if this is a list assignment, should be the next non-space token
     $assignPtr = $phpcsFile->findNext(Tokens::$emptyTokens, $closePtr + 1, null, true);
+
+    // If the next token isn't an assignment, check for nested brackets because we might be a nested assignment
     if (! is_int($assignPtr) || $tokens[$assignPtr]['code'] !== T_EQUAL) {
-      // If we are nested inside a destructured assignment, we are also an assignment
+      // Collect the enclosing list open/close tokens ($parents is an assoc array keyed by opener index and the value is the closer index)
       $parents = isset($tokens[$listOpenerIndex]['nested_parenthesis']) ? $tokens[$listOpenerIndex]['nested_parenthesis'] : [];
       // There's no record of nested brackets for short lists; we'll have to find the parent ourselves
-      $parentSquareBracket = Helpers::findContainingOpeningSquareBracket($phpcsFile, $listOpenerIndex);
-      if (is_int($parentSquareBracket)) {
-        $parents[$parentSquareBracket] = 0; // We don't actually need the closing paren
+      if (empty($parents)) {
+        $parentSquareBracket = Helpers::findContainingOpeningSquareBracket($phpcsFile, $listOpenerIndex);
+        if (is_int($parentSquareBracket)) {
+          // Collect the opening index, but we don't actually need the closing paren index so just make that 0
+          $parents[$parentSquareBracket] = 0;
+        }
       }
-      $nestedAssignments = null;
-      foreach (array_reverse($parents, true) as $openParen => $closeParen) {
-        $nestedAssignments = self::getListAssignments($phpcsFile, $openParen);
+      // If we have no parents, this is not a nested assignment and therefore is not an assignment
+      if (empty($parents)) {
+        return null;
       }
-      if ($nestedAssignments === null) {
+
+      // Recursively check to see if the parent is a list assignment (we only need to check one level due to the recursion)
+      $isNestedAssignment = null;
+      $parentListOpener = array_keys(array_reverse($parents, true))[0];
+      $isNestedAssignment = self::getListAssignments($phpcsFile, $parentListOpener);
+      if ($isNestedAssignment === null) {
         return null;
       }
     }
