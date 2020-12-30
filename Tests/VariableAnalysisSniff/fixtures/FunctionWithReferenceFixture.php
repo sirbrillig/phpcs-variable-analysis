@@ -78,5 +78,8 @@ function function_with_foreach_with_reference($derivatives, $base_plugin_definit
   foreach ($derivatives as &$entry) {
     $entry .= $base_plugin_definition;
   }
+  foreach ($derivatives as &$unused) { // unused variable
+    $base_plugin_definition .= '1';
+  }
   return $derivatives;
 }
