@@ -418,6 +418,7 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     $varInfo->firstInitialized = $stackPtr;
+    Helpers::debug('markVariableAssignment: marked as initialized', $varName);
   }
 
   /**
@@ -1162,6 +1163,13 @@ class VariableAnalysisSniff implements Sniff {
     // Is this the value of a key => value foreach?
     if ($phpcsFile->findPrevious(T_DOUBLE_ARROW, $stackPtr - 1, $openParenPtr) !== false) {
       $varInfo->isForeachLoopAssociativeValue = true;
+    }
+
+    // Are we pass-by-reference?
+    $referencePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
+    if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
+      Helpers::debug("processVariableAsForeachLoopVar: found foreach loop variable assigned by reference");
+      $varInfo->isDynamicReference = true;
     }
 
     return true;
