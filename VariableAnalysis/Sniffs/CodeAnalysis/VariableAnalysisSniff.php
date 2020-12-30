@@ -1528,12 +1528,9 @@ class VariableAnalysisSniff implements Sniff {
     }
     Helpers::debug("examining token for variable in string", $token);
 
-    $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
-    if ($currScope === null) {
-      return;
-    }
     foreach ($matches[1] as $varName) {
       $varName = Helpers::normalizeVarName($varName);
+
       // Are we $this within a class?
       if ($this->processVariableAsThisWithinClass($phpcsFile, $stackPtr, $varName)) {
         continue;
@@ -1545,6 +1542,11 @@ class VariableAnalysisSniff implements Sniff {
 
       // Are we a numeric variable used for constructs like preg_replace?
       if (Helpers::isVariableANumericVariable($varName)) {
+        continue;
+      }
+
+      $currScope = Helpers::findVariableScope($phpcsFile, $stackPtr, $varName);
+      if ($currScope === null) {
         continue;
       }
 

@@ -304,12 +304,14 @@ class Helpers {
   /**
    * @param File $phpcsFile
    * @param int $stackPtr
+   * @param string $varName (optional) if it differs from the normalized 'content' of the token at $stackPtr
    *
    * @return ?int
    */
-  public static function findVariableScope(File $phpcsFile, $stackPtr) {
+  public static function findVariableScope(File $phpcsFile, $stackPtr, $varName = null) {
     $tokens = $phpcsFile->getTokens();
     $token = $tokens[$stackPtr];
+    $varName = isset($varName) ? $varName : self::normalizeVarName($token['content']);
 
     $arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
     $isTokenInsideArrowFunctionBody = is_int($arrowFunctionIndex);
@@ -319,7 +321,8 @@ class Helpers {
       // otherwise, it uses the enclosing scope.
       if ($arrowFunctionIndex) {
         $variableNames = self::getVariablesDefinedByArrowFunction($phpcsFile, $arrowFunctionIndex);
-        if (in_array($token['content'], $variableNames, true)) {
+        self::debug('findVariableScope: looking for', $varName, 'in arrow function variables', $variableNames);
+        if (in_array($varName, $variableNames, true)) {
           return $arrowFunctionIndex;
         }
       }
@@ -654,9 +657,10 @@ class Helpers {
     for ($index = $arrowFunctionToken['parenthesis_opener']; $index < $arrowFunctionToken['parenthesis_closer']; $index++) {
       $token = $tokens[$index];
       if ($token['code'] === T_VARIABLE) {
-        $variableNames[] = $token['content'];
+        $variableNames[] = self::normalizeVarName($token['content']);
       }
     }
+    self::debug('found these variables in arrow function token', $variableNames);
     return $variableNames;
   }
 
