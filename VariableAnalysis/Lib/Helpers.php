@@ -311,7 +311,7 @@ class Helpers {
   public static function findVariableScope(File $phpcsFile, $stackPtr, $varName = null) {
     $tokens = $phpcsFile->getTokens();
     $token = $tokens[$stackPtr];
-    $varName = $varName ?? self::normalizeVarName($token['content']);
+    $varName = isset($varName) ? $varName : self::normalizeVarName($token['content']);
 
     $arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr);
     $isTokenInsideArrowFunctionBody = is_int($arrowFunctionIndex);
