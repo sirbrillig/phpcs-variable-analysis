@@ -31,6 +31,13 @@ class VariableInfo {
   public $referencedVariableScope;
 
   /**
+   * True if the variable is a reference but one created at runtime
+   *
+   * @var bool
+   */
+  public $isDynamicReference = false;
+
+  /**
    * Stack pointer of first declaration
    *
    * Declaration is when a variable is created but has no value assigned.
