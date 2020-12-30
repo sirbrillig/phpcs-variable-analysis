@@ -71,3 +71,9 @@ function arrowFunctionAsExpressionWithUnusedVariableOutsideArrow($subject) { //u
     echo $post; // undefined variable $post;
 }
 
+function arrowFunctionWithVariableUsedInsideQuotes($allowed_extensions) {
+    $data = array_map( fn($extension) => '.' . $extension, $allowed_extensions );
+    $data = array_map( fn($extension) => ".$extension", $allowed_extensions );
+    $data = array_map( fn($extension) => ".{$extension}", $allowed_extensions );
+    return $data;
+}
