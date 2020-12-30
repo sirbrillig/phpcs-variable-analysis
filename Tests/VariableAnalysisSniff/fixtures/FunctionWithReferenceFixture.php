@@ -73,3 +73,13 @@ function function_with_array_walk($userNameParts) {
     $value = ucfirst($value);
   });
 }
+
+function function_with_foreach_with_reference($derivatives, $base_plugin_definition) {
+  foreach ($derivatives as &$entry) {
+    $entry .= $base_plugin_definition;
+  }
+  foreach ($derivatives as &$unused) { // unused variable
+    $base_plugin_definition .= '1';
+  }
+  return $derivatives;
+}
