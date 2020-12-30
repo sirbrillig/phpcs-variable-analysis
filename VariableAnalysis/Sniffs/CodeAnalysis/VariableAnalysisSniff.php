@@ -945,6 +945,14 @@ class VariableAnalysisSniff implements Sniff {
 
     Helpers::debug('processVariableAsAssignment: marking as assignment in scope', $currScope);
     $this->markVariableAssignment($varName, $stackPtr, $currScope);
+
+    // If the left-hand-side of the assignment (the variable we are examining)
+    // is itself a reference, then that counts as a read as well as a write.
+    $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+    if ($varInfo->isDynamicReference) {
+      Helpers::debug('processVariableAsAssignment: also marking as a use because variable is a reference');
+      $this->markVariableRead($varName, $stackPtr, $currScope);
+    }
   }
 
   /**
