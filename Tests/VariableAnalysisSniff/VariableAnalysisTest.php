@@ -502,8 +502,31 @@ class VariableAnalysisTest extends BaseTestCase {
       19,
       23,
       26,
+      36,
     ];
     $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testCompactWarningsHaveCorrectSniffCodes() {
+    $fixtureFile = $this->getFixture('CompactFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedParametersBeforeUsed',
+      'false'
+    );
+    $phpcsFile->process();
+
+    $warnings = $phpcsFile->getWarnings();
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[2][49][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[7][23][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[10][54][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[14][52][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[19][5][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[23][23][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[26][66][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[36][5][0]['source']);
+    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[36][23][0]['source']);
   }
 
   public function testTraitAllowsThis() {
