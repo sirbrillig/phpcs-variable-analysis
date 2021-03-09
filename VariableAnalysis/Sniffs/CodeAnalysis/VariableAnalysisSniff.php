@@ -89,6 +89,14 @@ class VariableAnalysisSniff implements Sniff {
   public $allowUndefinedVariablesInFileScope = false;
 
   /**
+   *  If set, ignores unused variables in the file scope (the top-level
+   *  scope of a file).
+   *
+   *  @var bool
+   */
+  public $allowUnusedVariablesInFileScope = false;
+
+  /**
    *  A space-separated list of names of placeholder variables that you want to
    *  ignore from unused variable warnings. For example, to ignore the variables
    *  `$junk` and `$unused`, this could be set to `'junk unused'`.
@@ -1685,6 +1693,9 @@ class VariableAnalysisSniff implements Sniff {
       return;
     }
     if ($this->allowUnusedVariablesBeforeRequire && Helpers::isRequireInScopeAfter($phpcsFile, $varInfo, $scopeInfo)) {
+      return;
+    }
+    if ($scopeInfo->scopeStartIndex === 0 && $this->allowUnusedVariablesInFileScope) {
       return;
     }
 
