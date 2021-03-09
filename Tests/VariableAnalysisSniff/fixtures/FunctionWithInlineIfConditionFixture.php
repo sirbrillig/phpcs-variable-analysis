@@ -136,3 +136,10 @@ function loopAndPushWithUndefinedArray($parts) {
     $suggestions[] = $part; // undefined array variable
   return $suggestions;
 }
+
+function ifElseConditionWithInlineAssignAndUseInsideElse() {
+  if($q = getData())
+    echo $q;
+  else
+    echo $q;
+}
