@@ -1487,19 +1487,21 @@ class VariableAnalysisSniff implements Sniff {
     foreach ($allAssignmentIndices as $index) {
       foreach ($blockIndices as $blockIndex) {
         $blockToken = $tokens[$blockIndex];
-        Helpers::debug('looking at assignment', $index, 'at block index', $blockIndex, 'which is token', $blockToken);
+        Helpers::debug('for variable inside else, looking at assignment', $index, 'at block index', $blockIndex, 'which is token', $blockToken);
         if (isset($blockToken['scope_opener']) && isset($blockToken['scope_closer'])) {
           $scopeOpener = $blockToken['scope_opener'];
           $scopeCloser = $blockToken['scope_closer'];
         } else {
-          // If the `if` statement has no scope, it is probably inline, which means its scope is up until the next semicolon
-          $scopeOpener = $blockIndex + 1;
+          // If the `if` statement has no scope, it is probably inline, which
+          // means its scope is from the end of the condition up until the next
+          // semicolon
+          $scopeOpener = isset($blockToken['parenthesis_closer']) ? $blockToken['parenthesis_closer'] : $blockIndex + 1;
           $scopeCloser = $phpcsFile->findNext([T_SEMICOLON], $scopeOpener);
           if (! $scopeCloser) {
             throw new \Exception("Cannot find scope for if condition block at index {$stackPtr} while examining variable {$varName}");
           }
         }
-        Helpers::debug('looking at scope', $index, 'between', $scopeOpener, 'and', $scopeCloser);
+        Helpers::debug('for variable inside else, looking at scope', $index, 'between', $scopeOpener, 'and', $scopeCloser);
         if (Helpers::isIndexInsideScope($index, $scopeOpener, $scopeCloser)) {
           $assignmentsInsideAttachedBlocks[] = $index;
         }
