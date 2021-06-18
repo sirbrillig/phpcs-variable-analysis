@@ -103,6 +103,25 @@ class Helpers {
   }
 
   /**
+   * @param (int|string)[] $conditions
+   *
+   * @return bool
+   */
+  public static function areConditionsWithinIfBeforeOthers(array $conditions) {
+    // Return true if the token conditions are within an if block before
+    // they are within a class or function.
+    $conditionsInsideOut = array_reverse($conditions, true);
+    if (empty($conditions)) {
+      return false;
+    }
+    $scopeCode = reset($conditionsInsideOut);
+    if ($scopeCode === T_IF) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * @param File $phpcsFile
    * @param int $stackPtr
    *
