@@ -54,3 +54,13 @@ function doubleUsedThenUsedAssignmentByReference() {
   $var = &$bee;
   return $var;
 }
+
+function somefunc($choice, &$arr1, &$arr_default) {
+  $var = &$arr_default;
+
+  if ($choice) {
+    $var = &$arr1;
+  }
+
+  echo $var;
+}
