@@ -105,7 +105,7 @@ class Helpers {
   /**
    * @param (int|string)[] $conditions
    *
-   * @return int|null
+   * @return int|string|null
    */
   public static function getClosestIfPositionIfBeforeOtherConditions(array $conditions) {
     // Return true if the token conditions are within an if block before
