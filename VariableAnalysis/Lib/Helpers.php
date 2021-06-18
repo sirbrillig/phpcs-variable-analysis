@@ -103,6 +103,25 @@ class Helpers {
   }
 
   /**
+   * @param (int|string)[] $conditions
+   *
+   * @return int|string|null
+   */
+  public static function getClosestIfPositionIfBeforeOtherConditions(array $conditions) {
+    // Return true if the token conditions are within an if block before
+    // they are within a class or function.
+    $conditionsInsideOut = array_reverse($conditions, true);
+    if (empty($conditions)) {
+      return null;
+    }
+    $scopeCode = reset($conditionsInsideOut);
+    if ($scopeCode === T_IF) {
+      return key($conditionsInsideOut);
+    }
+    return null;
+  }
+
+  /**
    * @param File $phpcsFile
    * @param int $stackPtr
    *

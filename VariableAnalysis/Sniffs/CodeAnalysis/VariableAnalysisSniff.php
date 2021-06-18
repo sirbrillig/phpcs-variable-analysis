@@ -937,9 +937,18 @@ class VariableAnalysisSniff implements Sniff {
       Helpers::debug('processVariableAsAssignment: found reference variable');
       $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
       // If the variable was already declared, but was not yet read, it is
-      // unused because we're about to change the binding.
+      // unused because we're about to change the binding; that is, unless we
+      // are inside a conditional block because in that case the condition may
+      // never activate.
       $scopeInfo = $this->getOrCreateScopeInfo($currScope);
-      $this->processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo);
+      $ifPtr = Helpers::getClosestIfPositionIfBeforeOtherConditions($tokens[$referencePtr]['conditions']);
+      $lastAssignmentPtr = $varInfo->firstDeclared;
+      if (! $ifPtr && $lastAssignmentPtr) {
+        $this->processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo);
+      }
+      if ($ifPtr && $lastAssignmentPtr && $ifPtr <= $lastAssignmentPtr) {
+        $this->processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo);
+      }
       // The referenced variable may have a different name, but we don't
       // actually need to mark it as used in this case because the act of this
       // assignment will mark it used on the next token.
