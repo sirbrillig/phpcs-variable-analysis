@@ -12,7 +12,7 @@ class Helpers {
   /**
    * return int[]
    */
-  public static function getEmptyTokens() {
+  public static function getPossibleEndOfFileTokens() {
     return array_merge(
       array_values(Tokens::$emptyTokens),
       [
@@ -159,7 +159,7 @@ class Helpers {
       return null;
     }
 
-    $nonFunctionTokenTypes = self::getEmptyTokens();
+    $nonFunctionTokenTypes = Tokens::$emptyTokens;
     $nonFunctionTokenTypes[] = T_STRING;
     $nonFunctionTokenTypes[] = T_BITWISE_AND;
     $functionPtr = self::getIntOrNull($phpcsFile->findPrevious($nonFunctionTokenTypes, $startOfArguments - 1, null, true, null, true));
@@ -199,7 +199,7 @@ class Helpers {
   public static function getUseIndexForUseImport(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
-    $nonUseTokenTypes = self::getEmptyTokens();
+    $nonUseTokenTypes = Tokens::$emptyTokens;
     $nonUseTokenTypes[] = T_VARIABLE;
     $nonUseTokenTypes[] = T_ELLIPSIS;
     $nonUseTokenTypes[] = T_COMMA;
@@ -228,7 +228,7 @@ class Helpers {
     $openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
     if (is_int($openPtr)) {
       // First non-whitespace thing and see if it's a T_STRING function name
-      $functionPtr = $phpcsFile->findPrevious(self::getEmptyTokens(), $openPtr - 1, null, true, null, true);
+      $functionPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $openPtr - 1, null, true, null, true);
       if (is_int($functionPtr) && $tokens[$functionPtr]['code'] === T_STRING) {
         return $functionPtr;
       }
@@ -255,7 +255,7 @@ class Helpers {
     }
 
     // $stackPtr is the function name, find our brackets after it
-    $openPtr = $phpcsFile->findNext(self::getEmptyTokens(), $stackPtr + 1, null, true, null, true);
+    $openPtr = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true, null, true);
     if (($openPtr === false) || ($tokens[$openPtr]['code'] !== T_OPEN_PARENTHESIS)) {
         return [];
     }
@@ -293,7 +293,7 @@ class Helpers {
     $tokens = $phpcsFile->getTokens();
 
     // Is the next non-whitespace an assignment?
-    $nextPtr = $phpcsFile->findNext(self::getEmptyTokens(), $stackPtr + 1, null, true, null, true);
+    $nextPtr = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true, null, true);
     if (is_int($nextPtr)
       && isset(Tokens::$assignmentTokens[$tokens[$nextPtr]['code']])
       // Ignore double arrow to prevent triggering on `foreach ( $array as $k => $v )`.
@@ -521,14 +521,14 @@ class Helpers {
       return false;
     }
     // Make sure next non-space token is an open parenthesis
-    $openParenIndex = $phpcsFile->findNext(self::getEmptyTokens(), $stackPtr + 1, null, true);
+    $openParenIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
     if (! is_int($openParenIndex) || $tokens[$openParenIndex]['code'] !== T_OPEN_PARENTHESIS) {
       return false;
     }
     // Find the associated close parenthesis
     $closeParenIndex = $tokens[$openParenIndex]['parenthesis_closer'];
     // Make sure the next token is a fat arrow
-    $fatArrowIndex = $phpcsFile->findNext(self::getEmptyTokens(), $closeParenIndex + 1, null, true);
+    $fatArrowIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $closeParenIndex + 1, null, true);
     if (! is_int($fatArrowIndex)) {
       return false;
     }
@@ -556,14 +556,14 @@ class Helpers {
       return null;
     }
     // Make sure next non-space token is an open parenthesis
-    $openParenIndex = $phpcsFile->findNext(self::getEmptyTokens(), $stackPtr + 1, null, true);
+    $openParenIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
     if (! is_int($openParenIndex) || $tokens[$openParenIndex]['code'] !== T_OPEN_PARENTHESIS) {
       return null;
     }
     // Find the associated close parenthesis
     $closeParenIndex = $tokens[$openParenIndex]['parenthesis_closer'];
     // Make sure the next token is a fat arrow
-    $fatArrowIndex = $phpcsFile->findNext(self::getEmptyTokens(), $closeParenIndex + 1, null, true);
+    $fatArrowIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $closeParenIndex + 1, null, true);
     if (! is_int($fatArrowIndex)) {
       return null;
     }
@@ -613,7 +613,7 @@ class Helpers {
     }
 
     // Find the assignment (equals sign) which, if this is a list assignment, should be the next non-space token
-    $assignPtr = $phpcsFile->findNext(self::getEmptyTokens(), $closePtr + 1, null, true);
+    $assignPtr = $phpcsFile->findNext(Tokens::$emptyTokens, $closePtr + 1, null, true);
 
     // If the next token isn't an assignment, check for nested brackets because we might be a nested assignment
     if (! is_int($assignPtr) || $tokens[$assignPtr]['code'] !== T_EQUAL) {
@@ -728,8 +728,10 @@ class Helpers {
    */
   public static function isVariableInsideElseCondition(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
-    $nonFunctionTokenTypes = self::getEmptyTokens();
+    $nonFunctionTokenTypes = Tokens::$emptyTokens;
     $nonFunctionTokenTypes[] = T_OPEN_PARENTHESIS;
+    $nonFunctionTokenTypes[] = T_INLINE_HTML;
+    $nonFunctionTokenTypes[] = T_CLOSE_TAG;
     $nonFunctionTokenTypes[] = T_VARIABLE;
     $nonFunctionTokenTypes[] = T_ELLIPSIS;
     $nonFunctionTokenTypes[] = T_COMMA;
@@ -850,7 +852,7 @@ class Helpers {
   public static function getLastNonEmptyTokenIndexInFile(File $phpcsFile) {
     $tokens = $phpcsFile->getTokens();
     foreach (array_reverse($tokens, true) as $index => $token) {
-      if (! in_array($token['code'], self::getEmptyTokens(), true)) {
+      if (! in_array($token['code'], self::getPossibleEndOfFileTokens(), true)) {
         return $index;
       }
     }
@@ -934,7 +936,7 @@ class Helpers {
       return null;
     }
 
-    $nonFunctionTokenTypes = self::getEmptyTokens();
+    $nonFunctionTokenTypes = Tokens::$emptyTokens;
     $functionPtr = self::getIntOrNull($phpcsFile->findPrevious($nonFunctionTokenTypes, $startOfArguments - 1, null, true, null, true));
     if (! is_int($functionPtr) || ! isset($tokens[$functionPtr]['code'])) {
       return null;
@@ -978,7 +980,7 @@ class Helpers {
    */
   public static function isVariableArrayPushShortcut(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
-    $nonFunctionTokenTypes = self::getEmptyTokens();
+    $nonFunctionTokenTypes = Tokens::$emptyTokens;
 
     $arrayPushOperatorIndex1 = self::getIntOrNull($phpcsFile->findNext($nonFunctionTokenTypes, $stackPtr + 1, null, true, null, true));
     if (! is_int($arrayPushOperatorIndex1)) {
@@ -1076,7 +1078,7 @@ class Helpers {
   public static function isTokenVariableVariable(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
 
-    $prev = $phpcsFile->findPrevious(self::getEmptyTokens(), ($stackPtr - 1), null, true);
+    $prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), null, true);
     if ($prev === false) {
       return false;
     }
@@ -1087,7 +1089,7 @@ class Helpers {
       return false;
     }
 
-    $prevPrev = $phpcsFile->findPrevious(self::getEmptyTokens(), ($prev - 1), null, true);
+    $prevPrev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prev - 1), null, true);
     if ($prevPrev !== false && $tokens[$prevPrev]['code'] === T_DOLLAR) {
       return true;
     }
