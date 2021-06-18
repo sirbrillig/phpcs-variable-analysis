@@ -941,7 +941,12 @@ class VariableAnalysisSniff implements Sniff {
       // are inside a conditional block because in that case the condition may
       // never activate.
       $scopeInfo = $this->getOrCreateScopeInfo($currScope);
-      if (! Helpers::areConditionsWithinIfBeforeOthers($tokens[$referencePtr]['conditions'])) {
+      $ifPtr = Helpers::getClosestIfPositionIfBeforeOtherConditions($tokens[$referencePtr]['conditions']);
+      $lastAssignmentPtr = $varInfo->firstDeclared;
+      if (! $ifPtr && $lastAssignmentPtr) {
+        $this->processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo);
+      }
+      if ($ifPtr && $lastAssignmentPtr && $ifPtr <= $lastAssignmentPtr) {
         $this->processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo);
       }
       // The referenced variable may have a different name, but we don't
