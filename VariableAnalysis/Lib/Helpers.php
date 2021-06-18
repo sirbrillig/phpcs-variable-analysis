@@ -12,7 +12,7 @@ class Helpers {
   /**
    * return int[]
    */
-  public static function getEmptyTokens(): array {
+  public static function getEmptyTokens() {
     return array_merge(
       array_values(Tokens::$emptyTokens),
       [
