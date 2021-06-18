@@ -64,3 +64,11 @@ function somefunc($choice, &$arr1, &$arr_default) {
 
   echo $var;
 }
+
+function somefunc($choice, &$arr1, &$arr_default) {
+  if ($choice) {
+    $var = &$arr_default; // unused variable $var
+    $var = &$arr1;
+    echo $var;
+  }
+}
