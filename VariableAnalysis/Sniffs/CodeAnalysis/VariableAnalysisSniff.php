@@ -1518,8 +1518,10 @@ class VariableAnalysisSniff implements Sniff {
     }
 
     if (count($assignmentsInsideAttachedBlocks) === count($allAssignmentIndices)) {
-      Helpers::debug("variable $varName inside else looks undefined");
-      $this->warnAboutUndefinedVariable($phpcsFile, $varName, $stackPtr);
+      if (! $varInfo->ignoreUndefined) {
+        Helpers::debug("variable $varName inside else looks undefined");
+        $this->warnAboutUndefinedVariable($phpcsFile, $varName, $stackPtr);
+      }
       return;
     }
 

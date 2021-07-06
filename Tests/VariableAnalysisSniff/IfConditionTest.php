@@ -30,6 +30,39 @@ class IfConditionTest extends BaseTestCase {
       101,
       159,
       166,
+      176,
+      179,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testIfConditionWarningsWithValidUndefinedVariableNames() {
+    $fixtureFile = $this->getFixture('FunctionWithIfConditionFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'validUndefinedVariableNames',
+      'second'
+    );
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedParametersBeforeUsed',
+      'true'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      15,
+      36,
+      47,
+      58,
+      70,
+      82,
+      98,
+      159,
+      166,
+      176,
+      179,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }
@@ -60,6 +93,39 @@ class IfConditionTest extends BaseTestCase {
       88,
       130,
       136,
+      152,
+      154,
+    ];
+    $this->assertEquals($expectedWarnings, $lines);
+  }
+
+  public function testInlineIfConditionWarningsWithValidUndefinedVariableNames() {
+    $fixtureFile = $this->getFixture('FunctionWithInlineIfConditionFixture.php');
+    $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'validUndefinedVariableNames',
+      'second'
+    );
+    $phpcsFile->ruleset->setSniffProperty(
+      'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+      'allowUnusedParametersBeforeUsed',
+      'true'
+    );
+    $phpcsFile->process();
+    $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+    $expectedWarnings = [
+      14,
+      34,
+      44,
+      54,
+      64,
+      74,
+      86,
+      130,
+      136,
+      152,
+      154,
     ];
     $this->assertEquals($expectedWarnings, $lines);
   }

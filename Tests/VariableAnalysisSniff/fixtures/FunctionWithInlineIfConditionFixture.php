@@ -143,3 +143,14 @@ function ifElseConditionWithInlineAssignAndUseInsideElse() {
   else
     echo $q;
 }
+
+function definedInsideElseIfBlockUndefinedInsideElseBlockDifferentName($first) {
+  $name = 'human';
+  if ($first)
+    $words = "hello {$name}";
+  elseif ($name)
+    $third = true; // unused variable $third
+  else
+    echo $third; // undefined variable $third
+  echo $words;
+}

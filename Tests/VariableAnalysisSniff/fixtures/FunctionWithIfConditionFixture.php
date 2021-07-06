@@ -167,3 +167,16 @@ function loopAndPushWithUndefinedArray($parts) {
   }
   return $suggestions;
 }
+
+function definedInsideElseIfBlockUndefinedInsideElseBlockDifferentName($first) {
+  $name = 'human';
+  if ($first) {
+    $words = "hello {$name}";
+  } elseif ($name) {
+    $third = true; // unused variable $third
+  } else {
+    $words = "bye {$name}";
+    echo $third; // undefined variable $third
+  }
+  echo $words;
+}
