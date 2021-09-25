@@ -1,6 +1,10 @@
 <phpunit
 	bootstrap="Tests/bootstrap.php"
 	printerClass="LimeDeck\Testing\Printer"
+	convertErrorsToExceptions="true"
+	convertWarningsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertDeprecationsToExceptions="true"
 	>
 	<testsuites>
 		<testsuite name="VariableAnalysis">
