@@ -1,5 +1,9 @@
 <phpunit
 	bootstrap="Tests/bootstrap.php"
+	convertErrorsToExceptions="true"
+	convertWarningsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertDeprecationsToExceptions="true"
 	>
 	<testsuites>
 		<testsuite name="VariableAnalysis">
