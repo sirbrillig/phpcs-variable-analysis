@@ -19,7 +19,10 @@
         "source": "https://github.com/sirbrillig/phpcs-variable-analysis"
     },
     "config": {
-        "sort-order": true
+        "sort-order": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     },
     "autoload": {
         "psr-4": {

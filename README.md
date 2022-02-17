@@ -19,9 +19,10 @@ VariableAnalysis requires PHP 5.4 or higher and [PHP CodeSniffer](https://github
 
 This is the easiest method.
 
-First, install [phpcodesniffer-composer-installer](https://github.com/DealerDirect/phpcodesniffer-composer-installer) for your project if you have not already. This will also install PHPCS.
+First, install [phpcodesniffer-composer-installer](https://github.com/PHPCSStandards/composer-installer) for your project if you have not already. This will also install PHPCS.
 
 ```
+composer config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
 composer require --dev dealerdirect/phpcodesniffer-composer-installer
 ```
 
