@@ -13,6 +13,6 @@ class WhileLoopTest extends BaseTestCase {
       38,
       46,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 }

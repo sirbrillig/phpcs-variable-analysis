@@ -14,7 +14,7 @@ class UnsetTest extends BaseTestCase {
       6,
       11,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testUnsetHasCorrectSniffCodes() {
@@ -23,7 +23,7 @@ class UnsetTest extends BaseTestCase {
     $phpcsFile->process();
 
     $warnings = $phpcsFile->getWarnings();
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedUnsetVariable', $warnings[6][7][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedUnsetVariable', $warnings[11][9][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedUnsetVariable', $warnings[6][7][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedUnsetVariable', $warnings[11][9][0]['source']);
   }
 }

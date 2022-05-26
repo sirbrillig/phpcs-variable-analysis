@@ -21,7 +21,7 @@ class VariableArgumentListTest extends BaseTestCase {
       33,
       38,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testVariableArgumentListWithoutUnusedBeforeUsed() {
@@ -43,6 +43,6 @@ class VariableArgumentListTest extends BaseTestCase {
       38,
       43,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 }

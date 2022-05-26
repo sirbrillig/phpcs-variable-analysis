@@ -23,7 +23,7 @@ class UnusedFollowedByRequire extends BaseTestCase {
       21,
       22,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testUnusedFollowedByRequireDoesNotWarnWhenSet() {
@@ -42,7 +42,7 @@ class UnusedFollowedByRequire extends BaseTestCase {
       16,
       22,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testUnusedFollowedByRequireDoesNotBreakOtherThingsWhenSet() {
@@ -69,6 +69,6 @@ class UnusedFollowedByRequire extends BaseTestCase {
       18,
       19,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 }
