@@ -12,7 +12,7 @@ class Constants {
    *  ones which can be passed an undefined variable (eg: `$matches` in
    *  `preg_match`) and will define that variable.
    *
-   *  @return array[]
+   *  @return array<string, array<int|string>>
    */
   public static function getPassByReferenceFunctions() {
     return [
@@ -236,7 +236,7 @@ class Constants {
   }
 
   /**
-   * @return array[]
+   * @return array<string, array<int>>
    */
   public static function getWordPressPassByReferenceFunctions() {
     return [

@@ -10,7 +10,7 @@ use PHP_CodeSniffer\Util\Tokens;
 
 class Helpers {
   /**
-   * return int[]
+   * @return array<int|string>
    */
   public static function getPossibleEndOfFileTokens() {
     return array_merge(
@@ -477,7 +477,7 @@ class Helpers {
     $tokens = $phpcsFile->getTokens();
     $token = $tokens[$stackPtr];
     $openParenIndices = isset($token['nested_parenthesis']) ? $token['nested_parenthesis'] : [];
-    if ($openParenIndices) {
+    if ($openParenIndices === []) {
       return false;
     }
     $openParenPtr = $openParenIndices[0];
@@ -561,7 +561,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return ?array
+   * @return ?array<string, int>
    */
   public static function getArrowFunctionOpenClose(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -613,7 +613,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $listOpenerIndex
    *
-   * @return ?array
+   * @return ?array<int>
    */
   public static function getListAssignments(File $phpcsFile, $listOpenerIndex) {
     $tokens = $phpcsFile->getTokens();

@@ -182,7 +182,7 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * @param string $functionName
    *
-   * @return string[]
+   * @return array<int|string>
    */
   private function getPassByReferenceFunction($functionName) {
     $passByRefFunctions = Constants::getPassByReferenceFunctions();
@@ -620,6 +620,7 @@ class VariableAnalysisSniff implements Sniff {
    * @param File $phpcsFile
    * @param int $stackPtr
    * @param string $varName
+   * @param int $outerScope
    *
    * @return void
    */

@@ -26,7 +26,7 @@ class VariableInfo {
   public $typeHint;
 
   /**
-   * @var int | null
+   * @var int|null
    */
   public $referencedVariableScope;
 
@@ -98,6 +98,9 @@ class VariableInfo {
     ScopeType::BOUND  => 'bound variable',
   );
 
+  /**
+   * @param string $varName
+   */
   public function __construct($varName) {
     $this->name = $varName;
   }
