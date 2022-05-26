@@ -485,7 +485,7 @@ class Helpers {
     $tokens = $phpcsFile->getTokens();
     $token = $tokens[$stackPtr];
     $openParenIndices = isset($token['nested_parenthesis']) ? $token['nested_parenthesis'] : [];
-    if ($openParenIndices === []) {
+    if (empty($openParenIndices)) {
       return false;
     }
     $openParenPtr = $openParenIndices[0];
