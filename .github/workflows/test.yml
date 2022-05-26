@@ -1,0 +1,97 @@
+name: Test
+
+on:
+  # Run on all pushes and pull requests.
+  push:
+  pull_request:
+  # Allow manually triggering the workflow.
+  workflow_dispatch:
+
+# Cancels all previous workflow runs for the same branch that have not yet completed.
+concurrency:
+  # The concurrency group contains the workflow name and the branch name.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # The GHA matrix works different from Travis.
+        # You can define jobs here and then augment them with extra variables in `include`,
+        # as well as add extra jobs in `include`.
+        # @link https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix
+        #
+        # IMPORTANT: test runs shouldn't fail because of PHPCS being incompatible with a PHP version.
+        # - PHPCS will run without errors on PHP 5.4 - 7.4 on all supported PHPCS versions.
+        # - PHP 8.0 needs PHPCS 3.5.7+ to run without errors.
+        # - PHP 8.1 needs PHPCS 3.6.1+ to run without errors.
+        php: ['5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4']
+        phpcs_version: ['3.5.6', 'dev-master']
+
+        include:
+          # Complete the matrix.
+          - php: '8.1'
+            phpcs_version: 'dev-master'
+          - php: '8.1'
+            phpcs_version: '3.6.1'
+
+          - php: '8.0'
+            phpcs_version: 'dev-master'
+          - php: '8.0'
+            phpcs_version: '3.5.7'
+
+          # Experimental builds.
+          - php: '8.2' # Nightly.
+            phpcs_version: 'dev-master'
+
+    name: "Test: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
+
+    continue-on-error: ${{ matrix.php == '8.2' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup ini config
+        id: set_ini
+        run: |
+          # On stable PHPCS versions, allow for PHP deprecation notices.
+          # Unit tests don't need to fail on those for stable releases where those issues won't get fixed anymore.
+          if [ "${{ matrix.phpcs_version }}" != "dev-master" ]; then
+            echo '::set-output name=PHP_INI::error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, zend.assertions=1'
+          else
+            echo '::set-output name=PHP_INI::error_reporting=-1, display_errors=On, zend.assertions=1'
+          fi
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          ini-values: ${{ steps.set_ini.outputs.PHP_INI }}
+          coverage: none
+
+      - name: 'Composer: adjust dependencies'
+        run: |
+          # Remove dev dependencies which are not compatible with all supported PHP versions.
+          composer remove --dev --no-update sirbrillig/phpcs-import-detection phpstan/phpstan
+          # Set the PHPCS version for this test run.
+          composer require --no-update squizlabs/php_codesniffer:"${{ matrix.phpcs_version }}"
+
+      # Install dependencies and handle caching in one go.
+      # @link https://github.com/marketplace/actions/install-composer-dependencies
+      - name: Install Composer dependencies - normal
+        if: ${{ matrix.php != '8.2' }}
+        uses: "ramsey/composer-install@v2"
+
+      # For the PHP "nightly", we need to install with ignore platform reqs as not all dependencies allow it yet.
+      - name: Install Composer dependencies - with ignore platform
+        if: ${{ matrix.php == '8.2' }}
+        uses: "ramsey/composer-install@v2"
+        with:
+          composer-options: --ignore-platform-req=php
+
+      - name: Run the unit tests
+        run: composer test

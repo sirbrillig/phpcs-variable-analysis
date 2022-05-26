@@ -1,5 +1,7 @@
 # PHP_CodeSniffer VariableAnalysis
 
+[![CS and QA Build Status](https://github.com/sirbrillig/phpcs-variable-analysis/actions/workflows/csqa.yml/badge.svg)](https://github.com/sirbrillig/phpcs-variable-analysis/actions/workflows/csqa.yml)
+[![Test Build Status](https://github.com/sirbrillig/phpcs-variable-analysis/actions/workflows/test.yml/badge.svg)](https://github.com/sirbrillig/phpcs-variable-analysis/actions/workflows/test.yml)
 
 Plugin for PHP_CodeSniffer static analysis tool that adds analysis of problematic variable use.
 
