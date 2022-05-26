@@ -44,21 +44,21 @@ class VariableInfo {
    *
    * Assignment by reference is also a declaration and not an initialization.
    *
-   * @var int
+   * @var int|null
    */
   public $firstDeclared;
 
   /**
    * Stack pointer of first initialization
    *
-   * @var int
+   * @var int|null
    */
   public $firstInitialized;
 
   /**
    * Stack pointer of first read
    *
-   * @var int
+   * @var int|null
    */
   public $firstRead;
 

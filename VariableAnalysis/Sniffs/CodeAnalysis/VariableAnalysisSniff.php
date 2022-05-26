@@ -448,7 +448,7 @@ class VariableAnalysisSniff implements Sniff {
       }
     }
 
-    if (!isset($varInfo->scopeType)) {
+    if (empty($varInfo->scopeType)) {
       $varInfo->scopeType = ScopeType::LOCAL;
     }
     $varInfo->allAssignments[] = $stackPtr;
@@ -475,7 +475,7 @@ class VariableAnalysisSniff implements Sniff {
     Helpers::debug("marking variable '{$varName}' declared in scope starting at token", $currScope);
     $varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
 
-    if (isset($varInfo->scopeType)) {
+    if (! empty($varInfo->scopeType)) {
       if (($permitMatchingRedeclaration === false) || ($varInfo->scopeType !== $scopeType)) {
         //  Issue redeclaration/reuse warning
         //  Note: we check off scopeType not firstDeclared, this is so that
@@ -1579,7 +1579,7 @@ class VariableAnalysisSniff implements Sniff {
   /**
    * @param File $phpcsFile
    * @param int $stackPtr
-   * @param array[] $arguments The stack pointers of each argument
+   * @param array<int, array<int>> $arguments The stack pointers of each argument
    * @param int $currScope
    *
    * @return void

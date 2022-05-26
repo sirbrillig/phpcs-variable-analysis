@@ -259,7 +259,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return array[]
+   * @return array<int, array<int>>
    */
   public static function findFunctionCallArguments(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -291,13 +291,21 @@ class Helpers {
     while (is_int($nextPtr)) {
       if (Helpers::findContainingOpeningBracket($phpcsFile, $nextPtr) == $openPtr) {
         // Comma is at our level of brackets, it's an argument delimiter.
-        array_push($argPtrs, range($lastArgComma + 1, $nextPtr - 1));
+        $range = range($lastArgComma + 1, $nextPtr - 1);
+        $range = array_filter($range, function($element) {
+          return is_int($element);
+        });
+        array_push($argPtrs, $range);
         $lastArgComma = $nextPtr;
       }
       $lastPtr = $nextPtr;
       $nextPtr = $phpcsFile->findNext([T_COMMA], $lastPtr + 1, $closePtr);
     }
-    array_push($argPtrs, range($lastArgComma + 1, $closePtr - 1));
+    $range = range($lastArgComma + 1, $closePtr - 1);
+    $range = array_filter($range, function($element) {
+      return is_int($element);
+    });
+    array_push($argPtrs, $range);
 
     return $argPtrs;
   }
