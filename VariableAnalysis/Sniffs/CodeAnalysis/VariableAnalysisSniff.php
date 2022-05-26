@@ -919,7 +919,7 @@ class VariableAnalysisSniff implements Sniff {
    * @return void
    */
   protected function processVariableAsAssignment(File $phpcsFile, $stackPtr, $varName, $currScope) {
-    Helpers::debug("processVariableAsAssignment: starting for '${varName}'");
+    Helpers::debug("processVariableAsAssignment: starting for '{$varName}'");
     $assignPtr = Helpers::getNextAssignPointer($phpcsFile, $stackPtr);
     if (! is_int($assignPtr)) {
       return;
