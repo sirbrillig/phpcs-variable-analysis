@@ -1,6 +1,5 @@
 # PHP_CodeSniffer VariableAnalysis
 
-[![CircleCI](https://circleci.com/gh/sirbrillig/phpcs-variable-analysis.svg?style=svg)](https://circleci.com/gh/sirbrillig/phpcs-variable-analysis)
 
 Plugin for PHP_CodeSniffer static analysis tool that adds analysis of problematic variable use.
 
