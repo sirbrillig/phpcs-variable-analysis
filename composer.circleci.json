@@ -34,7 +34,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "test": "./vendor/bin/phpunit --configuration phpunit.circleci.xml"
+        "test": "./vendor/bin/phpunit
     },
     "require" : {
         "php" : ">=5.4.0",
