@@ -1,11 +1,11 @@
 parameters:
   level: 7
   reportUnmatchedIgnoredErrors: false
-  autoload_files:
+  bootstrapFiles:
     - %currentWorkingDirectory%/vendor/squizlabs/php_codesniffer/autoload.php
   paths:
     - %currentWorkingDirectory%/VariableAnalysis/
-  excludes_analyse:
+  excludePaths:
     - %currentWorkingDirectory%/Tests/
   ignoreErrors:
     - '~^Constant T_\w+ not found.$~'

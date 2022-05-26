@@ -10,7 +10,7 @@ use PHP_CodeSniffer\Util\Tokens;
 
 class Helpers {
   /**
-   * return int[]
+   * @return array<int|string>
    */
   public static function getPossibleEndOfFileTokens() {
     return array_merge(
@@ -259,7 +259,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return array[]
+   * @return array<int, array<int>>
    */
   public static function findFunctionCallArguments(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -291,13 +291,21 @@ class Helpers {
     while (is_int($nextPtr)) {
       if (Helpers::findContainingOpeningBracket($phpcsFile, $nextPtr) == $openPtr) {
         // Comma is at our level of brackets, it's an argument delimiter.
-        array_push($argPtrs, range($lastArgComma + 1, $nextPtr - 1));
+        $range = range($lastArgComma + 1, $nextPtr - 1);
+        $range = array_filter($range, function($element) {
+          return is_int($element);
+        });
+        array_push($argPtrs, $range);
         $lastArgComma = $nextPtr;
       }
       $lastPtr = $nextPtr;
       $nextPtr = $phpcsFile->findNext([T_COMMA], $lastPtr + 1, $closePtr);
     }
-    array_push($argPtrs, range($lastArgComma + 1, $closePtr - 1));
+    $range = range($lastArgComma + 1, $closePtr - 1);
+    $range = array_filter($range, function($element) {
+      return is_int($element);
+    });
+    array_push($argPtrs, $range);
 
     return $argPtrs;
   }
@@ -477,7 +485,7 @@ class Helpers {
     $tokens = $phpcsFile->getTokens();
     $token = $tokens[$stackPtr];
     $openParenIndices = isset($token['nested_parenthesis']) ? $token['nested_parenthesis'] : [];
-    if ($openParenIndices) {
+    if (empty($openParenIndices)) {
       return false;
     }
     $openParenPtr = $openParenIndices[0];
@@ -561,7 +569,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $stackPtr
    *
-   * @return ?array
+   * @return ?array<string, int>
    */
   public static function getArrowFunctionOpenClose(File $phpcsFile, $stackPtr) {
     $tokens = $phpcsFile->getTokens();
@@ -613,7 +621,7 @@ class Helpers {
    * @param File $phpcsFile
    * @param int $listOpenerIndex
    *
-   * @return ?array
+   * @return ?array<int>
    */
   public static function getListAssignments(File $phpcsFile, $listOpenerIndex) {
     $tokens = $phpcsFile->getTokens();

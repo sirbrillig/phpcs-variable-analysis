@@ -26,7 +26,7 @@ class VariableInfo {
   public $typeHint;
 
   /**
-   * @var int | null
+   * @var int|null
    */
   public $referencedVariableScope;
 
@@ -44,21 +44,21 @@ class VariableInfo {
    *
    * Assignment by reference is also a declaration and not an initialization.
    *
-   * @var int
+   * @var int|null
    */
   public $firstDeclared;
 
   /**
    * Stack pointer of first initialization
    *
-   * @var int
+   * @var int|null
    */
   public $firstInitialized;
 
   /**
    * Stack pointer of first read
    *
-   * @var int
+   * @var int|null
    */
   public $firstRead;
 
@@ -98,6 +98,9 @@ class VariableInfo {
     ScopeType::BOUND  => 'bound variable',
   );
 
+  /**
+   * @param string $varName
+   */
   public function __construct($varName) {
     $this->name = $varName;
   }

@@ -27,6 +27,10 @@ class ScopeInfo {
    */
   public $variables = [];
 
+  /**
+   * @param int      $scopeStartIndex
+   * @param int|null $scopeEndIndex
+   */
   public function __construct($scopeStartIndex, $scopeEndIndex = null) {
     $this->scopeStartIndex = $scopeStartIndex;
     $this->scopeEndIndex = $scopeEndIndex;
