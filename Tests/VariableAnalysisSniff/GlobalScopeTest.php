@@ -20,7 +20,7 @@ class GlobalScopeTest extends BaseTestCase {
       10,
       13,
     ];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testGlobalScopeWarningsWithAllowUndefinedVariablesInFileScope() {
@@ -38,7 +38,7 @@ class GlobalScopeTest extends BaseTestCase {
       10,
       13,
     ];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testGlobalScopeWarningsWithAllowUnusedVariablesInFileScope() {
@@ -55,6 +55,6 @@ class GlobalScopeTest extends BaseTestCase {
       7,
       10,
     ];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 }

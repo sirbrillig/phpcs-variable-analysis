@@ -33,7 +33,7 @@ class IfConditionTest extends BaseTestCase {
       176,
       179,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testIfConditionWarningsWithValidUndefinedVariableNames() {
@@ -64,7 +64,7 @@ class IfConditionTest extends BaseTestCase {
       176,
       179,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testInlineIfConditionWarnings() {
@@ -96,7 +96,7 @@ class IfConditionTest extends BaseTestCase {
       152,
       154,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testInlineIfConditionWarningsWithValidUndefinedVariableNames() {
@@ -127,6 +127,6 @@ class IfConditionTest extends BaseTestCase {
       152,
       154,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 }

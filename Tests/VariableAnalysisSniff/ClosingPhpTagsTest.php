@@ -15,7 +15,7 @@ class ClosingPhpTagsTest extends BaseTestCase {
       13,
       16,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testVariableWarningsHaveCorrectSniffCodesWhenClosingTagsAreUsed() {
@@ -23,9 +23,9 @@ class ClosingPhpTagsTest extends BaseTestCase {
     $phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
     $phpcsFile->process();
     $warnings = $phpcsFile->getWarnings();
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[6][1][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[8][6][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[13][1][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[16][6][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[6][1][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[8][6][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[13][1][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[16][6][0]['source']);
   }
 }

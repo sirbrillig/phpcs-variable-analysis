@@ -10,7 +10,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionWithoutParamsWarnings() {
@@ -32,7 +32,7 @@ class VariableAnalysisTest extends BaseTestCase {
       18,
       19,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionWithUseReferenceWarnings() {
@@ -41,7 +41,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionWithDefaultParamErrors() {
@@ -55,7 +55,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionWithDefaultParamWarnings() {
@@ -72,7 +72,7 @@ class VariableAnalysisTest extends BaseTestCase {
       3,
       14,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionWithGlobalVarErrors() {
@@ -81,7 +81,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionWithGlobalVarWarnings() {
@@ -99,7 +99,7 @@ class VariableAnalysisTest extends BaseTestCase {
       39,
       54,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionWithForeachErrors() {
@@ -108,7 +108,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionWithForeachWarnings() {
@@ -136,7 +136,7 @@ class VariableAnalysisTest extends BaseTestCase {
       54,
       67,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testClassWithMembersErrors() {
@@ -145,7 +145,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testTraitWithMembersWarnings() {
@@ -167,7 +167,7 @@ class VariableAnalysisTest extends BaseTestCase {
       19,
       64,
     ];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testClassWithMembersWarnings() {
@@ -189,7 +189,7 @@ class VariableAnalysisTest extends BaseTestCase {
       19,
       66,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionsOutsideClassErrors() {
@@ -198,7 +198,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionsOutsideClassWarnings() {
@@ -209,7 +209,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $expectedWarnings = [
       3,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionWithClosureErrors() {
@@ -226,7 +226,7 @@ class VariableAnalysisTest extends BaseTestCase {
       58,
       70,
     ];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionWithClosureWarnings() {
@@ -255,7 +255,7 @@ class VariableAnalysisTest extends BaseTestCase {
       35,
       64,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionWithReferenceErrors() {
@@ -264,7 +264,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionWithReferenceWarnings() {
@@ -288,7 +288,7 @@ class VariableAnalysisTest extends BaseTestCase {
       64,
       81,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionWithReferenceWarningsAllowsCustomFunctions() {
@@ -315,7 +315,7 @@ class VariableAnalysisTest extends BaseTestCase {
       64,
       81,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionWithReferenceWarningsAllowsWordPressFunctionsIfSet() {
@@ -343,7 +343,7 @@ class VariableAnalysisTest extends BaseTestCase {
       60,
       81,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionWithTryCatchErrors() {
@@ -352,7 +352,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionWithTryCatchWarnings() {
@@ -364,7 +364,7 @@ class VariableAnalysisTest extends BaseTestCase {
       3,
       7,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionWithInlineAssignErrors() {
@@ -373,7 +373,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionWithInlineAssignWarnings() {
@@ -385,7 +385,7 @@ class VariableAnalysisTest extends BaseTestCase {
       3,
       6,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testFunctionWithRedeclarationsErrors() {
@@ -394,7 +394,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testFunctionWithRedeclarationsWarnings() {
@@ -417,7 +417,7 @@ class VariableAnalysisTest extends BaseTestCase {
       36,
       37,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testHeredocErrors() {
@@ -426,7 +426,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testHeredocWarnings() {
@@ -440,7 +440,7 @@ class VariableAnalysisTest extends BaseTestCase {
       10,
       12,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testClassReferenceErrors() {
@@ -449,7 +449,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testClassReferenceWarnings() {
@@ -467,7 +467,7 @@ class VariableAnalysisTest extends BaseTestCase {
       24,
       25
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testCompactErrors() {
@@ -481,7 +481,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testCompactWarnings() {
@@ -504,7 +504,7 @@ class VariableAnalysisTest extends BaseTestCase {
       26,
       36,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testCompactWarningsHaveCorrectSniffCodes() {
@@ -518,15 +518,15 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
 
     $warnings = $phpcsFile->getWarnings();
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[2][49][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[7][23][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[10][54][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[14][52][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[19][5][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[23][23][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[26][66][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[36][5][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[36][23][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[2][49][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[7][23][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[10][54][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[14][52][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[19][5][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[23][23][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[26][66][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[36][5][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[36][23][0]['source']);
   }
 
   public function testTraitAllowsThis() {
@@ -535,10 +535,10 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testAnonymousClassAllowsThis() {
@@ -547,10 +547,10 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testVariableFunctionCallsCountAsUsage() {
@@ -564,10 +564,10 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [18];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testVariableVariables() {
@@ -588,10 +588,10 @@ class VariableAnalysisTest extends BaseTestCase {
       52,
       53,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testTraitsAllowPropertyDefinitions() {
@@ -600,10 +600,10 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testAnonymousClassAllowPropertyDefinitions() {
@@ -616,10 +616,10 @@ class VariableAnalysisTest extends BaseTestCase {
       26,
       38,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
     $lines = $this->getErrorLineNumbersFromFile($phpcsFile);
     $expectedErrors = [];
-    $this->assertEquals($expectedErrors, $lines);
+    $this->assertSame($expectedErrors, $lines);
   }
 
   public function testUnusedParamsAreReported() {
@@ -640,7 +640,7 @@ class VariableAnalysisTest extends BaseTestCase {
       72,
       73,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testUnusedParamsHaveCorrectSniffCodes() {
@@ -654,13 +654,13 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
 
     $warnings = $phpcsFile->getWarnings();
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[4][43][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[16][52][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[27][60][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[39][42][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[39][51][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[72][5][0]['source']);
-    $this->assertEquals('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[73][5][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[4][43][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[16][52][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[27][60][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[39][42][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[39][51][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[72][5][0]['source']);
+    $this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[73][5][0]['source']);
   }
 
   public function testValidUnusedVariableNamesIgnoresUnusedVariables() {
@@ -685,7 +685,7 @@ class VariableAnalysisTest extends BaseTestCase {
       72,
       73,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testAllowUnusedFunctionParametersIgnoresUnusedVariables() {
@@ -704,7 +704,7 @@ class VariableAnalysisTest extends BaseTestCase {
     $phpcsFile->process();
     $lines = $this->getWarningLineNumbersFromFile($phpcsFile);
     $expectedWarnings = [];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testAllowUnusedCaughtExceptionsIgnoresUnusedVariablesIfSet() {
@@ -730,7 +730,7 @@ class VariableAnalysisTest extends BaseTestCase {
       72,
       73,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testAllowUnusedCaughtExceptionsDoesNotIgnoreUnusedVariablesIfFalse() {
@@ -757,7 +757,7 @@ class VariableAnalysisTest extends BaseTestCase {
       72,
       73,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testIgnoreUnusedRegexpIgnoresUnusedVariables() {
@@ -782,7 +782,7 @@ class VariableAnalysisTest extends BaseTestCase {
       39,
       72,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testAllowDestructuringAssignment() {
@@ -798,7 +798,7 @@ class VariableAnalysisTest extends BaseTestCase {
       43,
       45,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testValidUndefinedVariableNamesIgnoresVarsInGlobalScope() {
@@ -818,7 +818,7 @@ class VariableAnalysisTest extends BaseTestCase {
       39,
       54,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testValidUndefinedVariableNamesIgnoresUndefinedProperties() {
@@ -839,7 +839,7 @@ class VariableAnalysisTest extends BaseTestCase {
       24,
       25
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testValidUndefinedVariableRegexpIgnoresUndefinedProperties() {
@@ -858,7 +858,7 @@ class VariableAnalysisTest extends BaseTestCase {
       24,
       25
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testUnusedArgumentsBeforeUsedArgumentsAreFoundIfFalse() {
@@ -879,7 +879,7 @@ class VariableAnalysisTest extends BaseTestCase {
       28,
       34,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testUnusedArgumentsBeforeUsedArgumentsAreIgnoredByDefault() {
@@ -893,7 +893,7 @@ class VariableAnalysisTest extends BaseTestCase {
       28,
       34,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testPregReplaceIgnoresNumericVariables() {
@@ -905,7 +905,7 @@ class VariableAnalysisTest extends BaseTestCase {
       15,
       20,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testUnusedForeachVariablesAreIgnoredByDefault() {
@@ -926,7 +926,7 @@ class VariableAnalysisTest extends BaseTestCase {
       33,
       34,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testUnusedForeachVariablesAreNotIgnoredIfDisabled() {
@@ -953,7 +953,7 @@ class VariableAnalysisTest extends BaseTestCase {
       33,
       34,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testUnusedForeachVariablesAreIgnoredIfSet() {
@@ -979,7 +979,7 @@ class VariableAnalysisTest extends BaseTestCase {
       33,
       34,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testGetDefinedVarsCountsAsRead() {
@@ -993,7 +993,7 @@ class VariableAnalysisTest extends BaseTestCase {
       22,
       29,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testThisWithinNestedClosedScope() {
@@ -1011,7 +1011,7 @@ class VariableAnalysisTest extends BaseTestCase {
       47,
       61,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testUnusedVarWithValueChange() {
@@ -1027,7 +1027,7 @@ class VariableAnalysisTest extends BaseTestCase {
       11,
       12,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testAssignmentByReference() {
@@ -1042,7 +1042,7 @@ class VariableAnalysisTest extends BaseTestCase {
       43,
       70,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testAssignmentByReferenceWithIgnoreUnusedMatch() {
@@ -1061,6 +1061,6 @@ class VariableAnalysisTest extends BaseTestCase {
       35,
       70,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 }

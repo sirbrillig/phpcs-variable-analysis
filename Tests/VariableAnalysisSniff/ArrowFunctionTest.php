@@ -27,7 +27,7 @@ class ArrowFunctionTest extends BaseTestCase {
       67,
       71,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 
   public function testArrowFunctionsWithoutUnusedBeforeUsed() {
@@ -55,6 +55,6 @@ class ArrowFunctionTest extends BaseTestCase {
       67,
       71,
     ];
-    $this->assertEquals($expectedWarnings, $lines);
+    $this->assertSame($expectedWarnings, $lines);
   }
 }
