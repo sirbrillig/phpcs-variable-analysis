@@ -14,6 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  #### TEST STAGE ####
   test:
     runs-on: ubuntu-latest
 
@@ -28,13 +29,13 @@ jobs:
         # - PHPCS will run without errors on PHP 5.4 - 7.4 on all supported PHPCS versions.
         # - PHP 8.0 needs PHPCS 3.5.7+ to run without errors.
         # - PHP 8.1 needs PHPCS 3.6.1+ to run without errors.
-        php: ['5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4']
+        #
+        # The matrix is set up so as not to duplicate the builds which are run for code coverage.
+        php: ['5.5', '5.6', '7.0', '7.1', '7.2', '7.3']
         phpcs_version: ['3.5.6', 'dev-master']
 
         include:
-          # Complete the matrix.
-          - php: '8.1'
-            phpcs_version: 'dev-master'
+          # Make the matrix complete without duplicating builds run in code coverage.
           - php: '8.1'
             phpcs_version: '3.6.1'
 
@@ -42,6 +43,9 @@ jobs:
             phpcs_version: 'dev-master'
           - php: '8.0'
             phpcs_version: '3.5.7'
+
+          - php: '7.4'
+            phpcs_version: 'dev-master'
 
           # Experimental builds.
           - php: '8.2' # Nightly.
@@ -95,3 +99,111 @@ jobs:
 
       - name: Run the unit tests
         run: composer test
+
+  #### CODE COVERAGE STAGE ####
+  # N.B.: Coverage is only checked on the lowest and highest stable PHP versions
+  # and low/high for PHPCS.
+  coverage:
+    # No use running the coverage builds if there are failing test builds.
+    needs: test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - php: '8.1'
+            phpcs_version: 'dev-master'
+          - php: '7.4'
+            phpcs_version: '3.5.6'
+
+          - php: '5.4'
+            phpcs_version: 'dev-master'
+          - php: '5.4'
+            phpcs_version: '3.5.6'
+
+    name: "Coverage: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup ini config
+        id: set_ini
+        run: |
+          # On stable PHPCS versions, allow for PHP deprecation notices.
+          # Unit tests don't need to fail on those for stable releases where those issues won't get fixed anymore.
+          if [ "${{ matrix.phpcs_version }}" != "dev-master" ]; then
+            echo '::set-output name=PHP_INI::error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, zend.assertions=1'
+          else
+            echo '::set-output name=PHP_INI::error_reporting=-1, display_errors=On, zend.assertions=1'
+          fi
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          ini-values: ${{ steps.set_ini.outputs.PHP_INI }}
+          coverage: xdebug
+
+      - name: 'Composer: adjust dependencies'
+        run: |
+          # Remove dev dependencies which are not compatible with all supported PHP versions.
+          composer remove --dev --no-update sirbrillig/phpcs-import-detection phpstan/phpstan
+          composer require --no-update squizlabs/php_codesniffer:"${{ matrix.phpcs_version }}"
+
+      - name: Install Composer dependencies
+        uses: "ramsey/composer-install@v2"
+
+      - name: Grab PHPUnit version
+        id: phpunit_version
+        run: echo ::set-output name=VERSION::$(vendor/bin/phpunit --version | grep --only-matching --max-count=1 --extended-regexp '\b[0-9]+\.[0-9]+')
+
+      - name: "DEBUG: Show grabbed version"
+        run: echo ${{ steps.phpunit_version.outputs.VERSION }}
+
+      # PHPUnit 9.3 started using PHP-Parser for code coverage which can cause interference.
+      # As of PHPUnit 9.3.4, a cache warming option is available.
+      # Using that option prevents issues with PHP-Parser backfilling PHP tokens when PHPCS does not (yet),
+      # which would otherwise cause tests to fail on tokens being available when they shouldn't be.
+      - name: "Warm the PHPUnit cache (PHPUnit 9.3+)"
+        if: ${{ steps.phpunit_version.outputs.VERSION >= '9.3' }}
+        run: vendor/bin/phpunit --coverage-cache ./build/phpunit-cache --warm-coverage-cache
+
+      - name: "Run the unit tests with code coverage (PHPUnit < 9.3)"
+        if: ${{ steps.phpunit_version.outputs.VERSION < '9.3' }}
+        run: composer coverage
+
+      - name: "Run the unit tests with code coverage (PHPUnit 9.3+)"
+        if: ${{ steps.phpunit_version.outputs.VERSION >= '9.3' }}
+        run: composer coverage -- --coverage-cache ./build/phpunit-cache
+
+      # PHP Coveralls v2 has a PHP 5.5 minimum and is not yet fully compatible with PHP 8.0+, so switch the PHP version.
+      - name: Switch to PHP 7.4
+        if: ${{ success() && matrix.php != '7.4' }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          coverage: none
+
+      - name: Install Coveralls
+        if: ${{ success() }}
+        run: composer require php-coveralls/php-coveralls:"^2.5.2" --no-interaction
+
+      - name: Upload coverage results to Coveralls
+        if: ${{ success() }}
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_PARALLEL: true
+          COVERALLS_FLAG_NAME: php-${{ matrix.php }}-phpcs-${{ matrix.phpcs_version }}
+        run: vendor/bin/php-coveralls -v -x build/logs/clover.xml
+
+  coveralls-finish:
+    needs: coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true

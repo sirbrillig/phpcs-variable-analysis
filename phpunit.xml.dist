@@ -13,4 +13,15 @@
 			<directory>Tests</directory>
 		</testsuite>
 	</testsuites>
+
+	<filter>
+		<whitelist addUncoveredFilesFromWhitelist="true" processUncoveredFilesFromWhitelist="false">
+			<directory>./VariableAnalysis/</directory>
+		</whitelist>
+	</filter>
+
+	<logging>
+		<log type="coverage-text" target="php://stdout" showOnlySummary="true"/>
+		<log type="coverage-clover" target="build/logs/clover.xml"/>
+	</logging>
 </phpunit>

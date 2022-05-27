@@ -37,7 +37,8 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
-        "test": "./vendor/bin/phpunit",
+        "test": "./vendor/bin/phpunit --no-coverage",
+        "coverage": "./vendor/bin/phpunit",
         "lint": "./vendor/bin/phpcs",
         "phpstan": "./vendor/bin/phpstan analyse"
     },
