@@ -289,7 +289,7 @@ class Helpers {
 		$lastArgComma = $openPtr;
 		$nextPtr = $phpcsFile->findNext([T_COMMA], $lastPtr + 1, $closePtr);
 		while (is_int($nextPtr)) {
-			if (self::findContainingOpeningBracket($phpcsFile, $nextPtr) == $openPtr) {
+			if (self::findContainingOpeningBracket($phpcsFile, $nextPtr) === $openPtr) {
 				// Comma is at our level of brackets, it's an argument delimiter.
 				$range = range($lastArgComma + 1, $nextPtr - 1);
 				$range = array_filter($range, function ($element) {
