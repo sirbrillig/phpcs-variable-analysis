@@ -838,8 +838,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	protected function processVariableAsSuperGlobal($varName)
 	{
-		// Are we a superglobal variable?
-		if (in_array($varName, [
+		$superglobals = [
 			'GLOBALS',
 			'_SERVER',
 			'_GET',
@@ -854,12 +853,9 @@ class VariableAnalysisSniff implements Sniff
 			'php_errormsg',
 			'http_response_header',
 			'HTTP_RAW_POST_DATA',
-			])
-		) {
-			return true;
-		}
-
-		return false;
+		];
+		// Are we a superglobal variable?
+		return (in_array($varName, $superglobals, true));
 	}
 
 	/**
