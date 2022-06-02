@@ -677,7 +677,7 @@ class Helpers {
 			if (is_int($variablePtr)) {
 				$variablePtrs[] = $variablePtr;
 			}
-			$currentPtr++;
+			++$currentPtr;
 		}
 
 		return $variablePtrs;
