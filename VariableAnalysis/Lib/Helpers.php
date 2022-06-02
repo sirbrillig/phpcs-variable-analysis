@@ -447,7 +447,7 @@ class Helpers {
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 
-		$in_class = false;
+		$inClass = false;
 		$conditions = isset($token['conditions']) ? $token['conditions'] : [];
 		$functionTokenTypes = [
 			T_FUNCTION,
@@ -458,11 +458,11 @@ class Helpers {
 				return $scopePtr;
 			}
 			if (isset(Tokens::$ooScopeTokens[$scopeCode]) === true) {
-				$in_class = true;
+				$inClass = true;
 			}
 		}
 
-		if ($in_class) {
+		if ($inClass) {
 			// If this is inside a class and not inside a function, this is either a
 			// class member variable definition, or a function argument. If it is a
 			// variable definition, it has no scope on its own (it can only be used
