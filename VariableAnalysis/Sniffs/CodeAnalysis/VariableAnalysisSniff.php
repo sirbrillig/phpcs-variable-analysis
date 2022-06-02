@@ -482,7 +482,7 @@ class VariableAnalysisSniff implements Sniff {
 				//    we catch declarations that come after implicit declarations like
 				//    use of a variable as a local.
 				$this->addWarning(
-					"Redeclaration of %s %s as %s.",
+					'Redeclaration of %s %s as %s.',
 					$stackPtr,
 					'VariableRedeclaration',
 					[
@@ -625,7 +625,7 @@ class VariableAnalysisSniff implements Sniff {
 	 * @return void
 	 */
 	protected function processVariableAsFunctionDefinitionArgument(File $phpcsFile, $stackPtr, $varName, $outerScope) {
-		Helpers::debug("processVariableAsFunctionDefinitionArgument", $stackPtr, $varName);
+		Helpers::debug('processVariableAsFunctionDefinitionArgument', $stackPtr, $varName);
 		$tokens = $phpcsFile->getTokens();
 
 		$functionPtr = Helpers::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr);
@@ -633,20 +633,20 @@ class VariableAnalysisSniff implements Sniff {
 			throw new \Exception("Function index not found for function argument index {$stackPtr}");
 		}
 
-		Helpers::debug("processVariableAsFunctionDefinitionArgument found function definition", $tokens[$functionPtr]);
+		Helpers::debug('processVariableAsFunctionDefinitionArgument found function definition', $tokens[$functionPtr]);
 		$this->markVariableDeclaration($varName, ScopeType::PARAM, null, $stackPtr, $functionPtr);
 
 		// Are we pass-by-reference?
 		$referencePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
 		if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
-			Helpers::debug("processVariableAsFunctionDefinitionArgument found pass-by-reference to scope", $outerScope);
+			Helpers::debug('processVariableAsFunctionDefinitionArgument found pass-by-reference to scope', $outerScope);
 			$varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
 			$varInfo->referencedVariableScope = $outerScope;
 		}
 
 		//  Are we optional with a default?
 		if (Helpers::getNextAssignPointer($phpcsFile, $stackPtr) !== null) {
-			Helpers::debug("processVariableAsFunctionDefinitionArgument optional with default");
+			Helpers::debug('processVariableAsFunctionDefinitionArgument optional with default');
 			$this->markVariableAssignment($varName, $stackPtr, $functionPtr);
 		}
 	}
@@ -664,7 +664,7 @@ class VariableAnalysisSniff implements Sniff {
 	protected function processVariableAsUseImportDefinition(File $phpcsFile, $stackPtr, $varName, $outerScope) {
 		$tokens = $phpcsFile->getTokens();
 
-		Helpers::debug("processVariableAsUseImportDefinition", $stackPtr, $varName, $outerScope);
+		Helpers::debug('processVariableAsUseImportDefinition', $stackPtr, $varName, $outerScope);
 
 		$endOfArgsPtr = $phpcsFile->findPrevious([T_CLOSE_PARENTHESIS], $stackPtr - 1, null);
 		if (! is_int($endOfArgsPtr)) {
@@ -1194,7 +1194,7 @@ class VariableAnalysisSniff implements Sniff {
 		// Are we pass-by-reference?
 		$referencePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
 		if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
-			Helpers::debug("processVariableAsForeachLoopVar: found foreach loop variable assigned by reference");
+			Helpers::debug('processVariableAsForeachLoopVar: found foreach loop variable assigned by reference');
 			$varInfo->isDynamicReference = true;
 		}
 
@@ -1548,7 +1548,7 @@ class VariableAnalysisSniff implements Sniff {
 		if (!preg_match_all(Constants::getDoubleQuotedVarRegexp(), $token['content'], $matches)) {
 			return;
 		}
-		Helpers::debug("examining token for variable in string", $token);
+		Helpers::debug('examining token for variable in string', $token);
 
 		foreach ($matches[1] as $varName) {
 			$varName = Helpers::normalizeVarName($varName);
@@ -1726,7 +1726,7 @@ class VariableAnalysisSniff implements Sniff {
 		foreach (array_unique($varInfo->allAssignments) as $indexForWarning) {
 			Helpers::debug("variable {$varInfo->name} at end of scope looks unused");
 			$phpcsFile->addWarning(
-				"Unused %s %s.",
+				'Unused %s %s.',
 				$indexForWarning,
 				'UnusedVariable',
 				[
@@ -1746,7 +1746,7 @@ class VariableAnalysisSniff implements Sniff {
 	 */
 	protected function warnAboutUndefinedVariable(File $phpcsFile, $varName, $stackPtr) {
 		$phpcsFile->addWarning(
-			"Variable %s is undefined.",
+			'Variable %s is undefined.',
 			$stackPtr,
 			'UndefinedVariable',
 			["\${$varName}"]
@@ -1762,7 +1762,7 @@ class VariableAnalysisSniff implements Sniff {
 	 */
 	protected function warnAboutUndefinedArrayPushShortcut(File $phpcsFile, $varName, $stackPtr) {
 		$phpcsFile->addWarning(
-			"Array variable %s is undefined.",
+			'Array variable %s is undefined.',
 			$stackPtr,
 			'UndefinedVariable',
 			["\${$varName}"]
@@ -1778,7 +1778,7 @@ class VariableAnalysisSniff implements Sniff {
 	 */
 	protected function warnAboutUndefinedUnset(File $phpcsFile, $varName, $stackPtr) {
 		$phpcsFile->addWarning(
-			"Variable %s inside unset call is undefined.",
+			'Variable %s inside unset call is undefined.',
 			$stackPtr,
 			'UndefinedUnsetVariable',
 			["\${$varName}"]

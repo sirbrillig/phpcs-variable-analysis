@@ -715,7 +715,7 @@ class Helpers {
 		if (PHP_CODESNIFFER_VERBOSITY <= 3) {
 			return;
 		}
-		$output = PHP_EOL . "VariableAnalysisSniff: DEBUG:";
+		$output = PHP_EOL . 'VariableAnalysisSniff: DEBUG:';
 		foreach ($messages as $message) {
 			if (is_string($message) || is_numeric($message)) {
 				$output .= ' "' . $message . '"';
