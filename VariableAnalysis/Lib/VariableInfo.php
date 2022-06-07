@@ -90,13 +90,13 @@ class VariableInfo {
 	/**
 	 * @var string[]
 	 */
-	public static $scopeTypeDescriptions = array(
+	public static $scopeTypeDescriptions = [
 		ScopeType::LOCAL  => 'variable',
 		ScopeType::PARAM  => 'function parameter',
 		ScopeType::STATICSCOPE => 'static variable',
 		ScopeType::GLOBALSCOPE => 'global variable',
 		ScopeType::BOUND  => 'bound variable',
-	);
+	];
 
 	/**
 	 * @param string $varName

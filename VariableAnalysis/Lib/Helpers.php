@@ -244,7 +244,7 @@ class Helpers {
 	public static function findFunctionCall(File $phpcsFile, $stackPtr) {
 		$tokens = $phpcsFile->getTokens();
 
-		$openPtr = Helpers::findContainingOpeningBracket($phpcsFile, $stackPtr);
+		$openPtr = self::findContainingOpeningBracket($phpcsFile, $stackPtr);
 		if (is_int($openPtr)) {
 			// First non-whitespace thing and see if it's a T_STRING function name
 			$functionPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $openPtr - 1, null, true, null, true);
@@ -267,7 +267,7 @@ class Helpers {
 		// Slight hack: also allow this to find args for array constructor.
 		if (($tokens[$stackPtr]['code'] !== T_STRING) && ($tokens[$stackPtr]['code'] !== T_ARRAY)) {
 			// Assume $stackPtr is something within the brackets, find our function call
-			$stackPtr = Helpers::findFunctionCall($phpcsFile, $stackPtr);
+			$stackPtr = self::findFunctionCall($phpcsFile, $stackPtr);
 			if ($stackPtr === null) {
 				return [];
 			}
@@ -289,7 +289,7 @@ class Helpers {
 		$lastArgComma = $openPtr;
 		$nextPtr = $phpcsFile->findNext([T_COMMA], $lastPtr + 1, $closePtr);
 		while (is_int($nextPtr)) {
-			if (Helpers::findContainingOpeningBracket($phpcsFile, $nextPtr) == $openPtr) {
+			if (self::findContainingOpeningBracket($phpcsFile, $nextPtr) === $openPtr) {
 				// Comma is at our level of brackets, it's an argument delimiter.
 				$range = range($lastArgComma + 1, $nextPtr - 1);
 				$range = array_filter($range, function ($element) {
@@ -648,7 +648,7 @@ class Helpers {
 			$parents = isset($tokens[$listOpenerIndex]['nested_parenthesis']) ? $tokens[$listOpenerIndex]['nested_parenthesis'] : [];
 			// There's no record of nested brackets for short lists; we'll have to find the parent ourselves
 			if (empty($parents)) {
-				$parentSquareBracket = Helpers::findContainingOpeningSquareBracket($phpcsFile, $listOpenerIndex);
+				$parentSquareBracket = self::findContainingOpeningSquareBracket($phpcsFile, $listOpenerIndex);
 				if (is_int($parentSquareBracket)) {
 					// Collect the opening index, but we don't actually need the closing paren index so just make that 0
 					$parents[$parentSquareBracket] = 0;
@@ -677,7 +677,7 @@ class Helpers {
 			if (is_int($variablePtr)) {
 				$variablePtrs[] = $variablePtr;
 			}
-			$currentPtr++;
+			++$currentPtr;
 		}
 
 		return $variablePtrs;
@@ -715,7 +715,7 @@ class Helpers {
 		if (PHP_CODESNIFFER_VERBOSITY <= 3) {
 			return;
 		}
-		$output = PHP_EOL . "VariableAnalysisSniff: DEBUG:";
+		$output = PHP_EOL . 'VariableAnalysisSniff: DEBUG:';
 		foreach ($messages as $message) {
 			if (is_string($message) || is_numeric($message)) {
 				$output .= ' "' . $message . '"';
@@ -866,7 +866,7 @@ class Helpers {
 		}
 
 		if ($scopeStartIndex === 0) {
-			$scopeCloserIndex = Helpers::getLastNonEmptyTokenIndexInFile($phpcsFile);
+			$scopeCloserIndex = self::getLastNonEmptyTokenIndexInFile($phpcsFile);
 		}
 		return $scopeCloserIndex;
 	}
