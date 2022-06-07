@@ -1597,32 +1597,32 @@ class VariableAnalysisSniff implements Sniff {
 			if (!isset($tokens[$argumentPtrs[0]])) {
 				continue;
 			}
-			$argument_first_token = $tokens[$argumentPtrs[0]];
-			if ($argument_first_token['code'] === T_ARRAY) {
+			$argumentFirstToken = $tokens[$argumentPtrs[0]];
+			if ($argumentFirstToken['code'] === T_ARRAY) {
 				// It's an array argument, recurse.
-				$array_arguments = Helpers::findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
-				$this->processCompactArguments($phpcsFile, $stackPtr, $array_arguments, $currScope);
+				$arrayArguments = Helpers::findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
+				$this->processCompactArguments($phpcsFile, $stackPtr, $arrayArguments, $currScope);
 				continue;
 			}
 			if (count($argumentPtrs) > 1) {
 				// Complex argument, we can't handle it, ignore.
 				continue;
 			}
-			if ($argument_first_token['code'] === T_CONSTANT_ENCAPSED_STRING) {
+			if ($argumentFirstToken['code'] === T_CONSTANT_ENCAPSED_STRING) {
 				// Single-quoted string literal, ie compact('whatever').
 				// Substr is to strip the enclosing single-quotes.
-				$varName = substr($argument_first_token['content'], 1, -1);
+				$varName = substr($argumentFirstToken['content'], 1, -1);
 				$this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $argumentPtrs[0], $currScope);
 				continue;
 			}
-			if ($argument_first_token['code'] === T_DOUBLE_QUOTED_STRING) {
+			if ($argumentFirstToken['code'] === T_DOUBLE_QUOTED_STRING) {
 				// Double-quoted string literal.
-				if (preg_match(Constants::getDoubleQuotedVarRegexp(), $argument_first_token['content'])) {
+				if (preg_match(Constants::getDoubleQuotedVarRegexp(), $argumentFirstToken['content'])) {
 					// Bail if the string needs variable expansion, that's runtime stuff.
 					continue;
 				}
 				// Substr is to strip the enclosing double-quotes.
-				$varName = substr($argument_first_token['content'], 1, -1);
+				$varName = substr($argumentFirstToken['content'], 1, -1);
 				$this->markVariableReadAndWarnIfUndefined($phpcsFile, $varName, $argumentPtrs[0], $currScope);
 				continue;
 			}
