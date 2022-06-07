@@ -201,7 +201,7 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return void
 	 */
@@ -255,7 +255,7 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $scopeStartIndex
+	 * @param int  $scopeStartIndex
 	 *
 	 * @return void
 	 */
@@ -272,7 +272,7 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return void
 	 */
@@ -301,7 +301,7 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -360,7 +360,7 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return VariableInfo|null
 	 */
@@ -371,7 +371,7 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return VariableInfo
 	 */
@@ -411,8 +411,8 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param string $varName
-	 * @param int $stackPtr
-	 * @param int $currScope
+	 * @param int    $stackPtr
+	 * @param int    $currScope
 	 *
 	 * @return void
 	 */
@@ -431,8 +431,8 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param string $varName
-	 * @param int $stackPtr
-	 * @param int $currScope
+	 * @param int    $stackPtr
+	 * @param int    $currScope
 	 *
 	 * @return void
 	 */
@@ -455,12 +455,12 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param string $varName
-	 * @param string $scopeType
+	 * @param string  $varName
+	 * @param string  $scopeType
 	 * @param ?string $typeHint
-	 * @param int $stackPtr
-	 * @param int $currScope
-	 * @param ?bool $permitMatchingRedeclaration
+	 * @param int     $stackPtr
+	 * @param int     $currScope
+	 * @param ?bool   $permitMatchingRedeclaration
 	 *
 	 * @return void
 	 */
@@ -508,9 +508,9 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param string $message
-	 * @param int $stackPtr
-	 * @param string $code
+	 * @param string   $message
+	 * @param int      $stackPtr
+	 * @param string   $code
 	 * @param string[] $data
 	 *
 	 * @return void
@@ -529,8 +529,8 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param string $varName
-	 * @param int $stackPtr
-	 * @param int $currScope
+	 * @param int    $stackPtr
+	 * @param int    $currScope
 	 *
 	 * @return void
 	 */
@@ -544,8 +544,8 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param string $varName
-	 * @param int $stackPtr
-	 * @param int $currScope
+	 * @param int    $stackPtr
+	 * @param int    $currScope
 	 *
 	 * @return bool
 	 */
@@ -565,10 +565,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
+	 * @param File   $phpcsFile
 	 * @param string $varName
-	 * @param int $stackPtr
-	 * @param int $currScope
+	 * @param int    $stackPtr
+	 * @param int    $currScope
 	 *
 	 * @return void
 	 */
@@ -595,7 +595,7 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return void
 	 */
@@ -617,10 +617,10 @@ class VariableAnalysisSniff implements Sniff {
 	 *
 	 * This does not include variables imported by a "use" statement.
 	 *
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $outerScope
+	 * @param int    $outerScope
 	 *
 	 * @return void
 	 */
@@ -654,10 +654,10 @@ class VariableAnalysisSniff implements Sniff {
 	/**
 	 * Process a variable if it is inside a function's "use" import
 	 *
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $outerScope The start of the scope outside the function definition
+	 * @param int    $outerScope The start of the scope outside the function definition
 	 *
 	 * @return void
 	 */
@@ -700,7 +700,7 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -737,10 +737,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return bool
 	 */
@@ -768,8 +768,8 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
 	 *
 	 * @return bool
@@ -837,7 +837,7 @@ class VariableAnalysisSniff implements Sniff {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -869,8 +869,8 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
 	 *
 	 * @return bool
@@ -912,10 +912,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return void
 	 */
@@ -974,10 +974,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return bool
 	 */
@@ -1009,10 +1009,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return bool
 	 */
@@ -1051,10 +1051,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return bool
 	 */
@@ -1078,10 +1078,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return bool
 	 */
@@ -1146,10 +1146,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return bool
 	 */
@@ -1202,10 +1202,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return bool
 	 */
@@ -1269,10 +1269,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return bool
 	 */
@@ -1312,7 +1312,7 @@ class VariableAnalysisSniff implements Sniff {
 	 * `processCompact`. They have the same purpose as this function, though.
 	 *
 	 * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
-	 * @param int $stackPtr  The position where the token was found.
+	 * @param int  $stackPtr  The position where the token was found.
 	 *
 	 * @return void
 	 */
@@ -1477,10 +1477,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
 	 * @param string $varName
-	 * @param int $currScope
+	 * @param int    $currScope
 	 *
 	 * @return void
 	 */
@@ -1537,7 +1537,7 @@ class VariableAnalysisSniff implements Sniff {
 	 * result only in one call for the string.
 	 *
 	 * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
-	 * @param int $stackPtr  The position where the double quoted string was found.
+	 * @param int  $stackPtr  The position where the double quoted string was found.
 	 *
 	 * @return void
 	 */
@@ -1577,10 +1577,10 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param File                   $phpcsFile
+	 * @param int                    $stackPtr
 	 * @param array<int, array<int>> $arguments The stack pointers of each argument
-	 * @param int $currScope
+	 * @param int                    $currScope
 	 *
 	 * @return void
 	 */
@@ -1633,7 +1633,7 @@ class VariableAnalysisSniff implements Sniff {
 	 * Called to process variables named in a call to compact().
 	 *
 	 * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
-	 * @param int $stackPtr  The position where the call to compact() was found.
+	 * @param int  $stackPtr  The position where the call to compact() was found.
 	 *
 	 * @return void
 	 */
@@ -1654,7 +1654,7 @@ class VariableAnalysisSniff implements Sniff {
 	 * $stackPtr is the scope conditional, not the closing curly brace.
 	 *
 	 * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
-	 * @param int $stackPtr  The position of the scope conditional.
+	 * @param int  $stackPtr  The position of the scope conditional.
 	 *
 	 * @return void
 	 */
@@ -1669,9 +1669,9 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
+	 * @param File         $phpcsFile
 	 * @param VariableInfo $varInfo
-	 * @param ScopeInfo $scopeInfo
+	 * @param ScopeInfo    $scopeInfo
 	 *
 	 * @return void
 	 */
@@ -1717,7 +1717,7 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
+	 * @param File         $phpcsFile
 	 * @param VariableInfo $varInfo
 	 *
 	 * @return void
@@ -1738,9 +1738,9 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
+	 * @param File   $phpcsFile
 	 * @param string $varName
-	 * @param int $stackPtr
+	 * @param int    $stackPtr
 	 *
 	 * @return void
 	 */
@@ -1754,9 +1754,9 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
+	 * @param File   $phpcsFile
 	 * @param string $varName
-	 * @param int $stackPtr
+	 * @param int    $stackPtr
 	 *
 	 * @return void
 	 */
@@ -1770,9 +1770,9 @@ class VariableAnalysisSniff implements Sniff {
 	}
 
 	/**
-	 * @param File $phpcsFile
+	 * @param File   $phpcsFile
 	 * @param string $varName
-	 * @param int $stackPtr
+	 * @param int    $stackPtr
 	 *
 	 * @return void
 	 */

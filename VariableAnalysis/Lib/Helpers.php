@@ -33,7 +33,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -44,7 +44,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return int
 	 */
@@ -55,7 +55,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -123,7 +123,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -133,7 +133,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -152,7 +152,7 @@ class Helpers {
 	 * `getFunctionIndexForFunctionCallArgument`.
 	 *
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -199,7 +199,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -211,7 +211,7 @@ class Helpers {
 	 * Find the token index of the "use" for a token inside a function use import
 	 *
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -237,7 +237,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -257,7 +257,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return array<int, array<int>>
 	 */
@@ -312,7 +312,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -342,9 +342,9 @@ class Helpers {
 	}
 
 	/**
-	 * @param File $phpcsFile
-	 * @param int $stackPtr
-	 * @param string $varName (optional) if it differs from the normalized 'content' of the token at $stackPtr
+	 * @param File   $phpcsFile
+	 * @param int    $stackPtr
+	 * @param string $varName   (optional) if it differs from the normalized 'content' of the token at $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -395,7 +395,7 @@ class Helpers {
 	 * arrow function and also check its enclosing scope separately.
 	 *
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -439,7 +439,7 @@ class Helpers {
 	 * enclosing function's scope, which may be incorrect.
 	 *
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -477,7 +477,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -494,7 +494,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -517,7 +517,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -535,7 +535,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -567,7 +567,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?array<string, int>
 	 */
@@ -619,7 +619,7 @@ class Helpers {
 	 * Return a list of indices for variables assigned within a list assignment
 	 *
 	 * @param File $phpcsFile
-	 * @param int $listOpenerIndex
+	 * @param int  $listOpenerIndex
 	 *
 	 * @return ?array<int>
 	 */
@@ -685,7 +685,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return string[]
 	 */
@@ -749,7 +749,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -777,7 +777,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -811,7 +811,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return int[]
 	 */
@@ -852,7 +852,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $scopeStartIndex
+	 * @param int  $scopeStartIndex
 	 *
 	 * @return int
 	 */
@@ -889,7 +889,7 @@ class Helpers {
 
 	/**
 	 * @param VariableInfo $varInfo
-	 * @param ScopeInfo $scopeInfo
+	 * @param ScopeInfo    $scopeInfo
 	 *
 	 * @return bool
 	 */
@@ -914,9 +914,9 @@ class Helpers {
 	}
 
 	/**
-	 * @param File $phpcsFile
+	 * @param File         $phpcsFile
 	 * @param VariableInfo $varInfo
-	 * @param ScopeInfo $scopeInfo
+	 * @param ScopeInfo    $scopeInfo
 	 *
 	 * @return bool
 	 */
@@ -947,7 +947,7 @@ class Helpers {
 	 * Find the index of the function keyword for a token in a function call's arguments
 	 *
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return ?int
 	 */
@@ -976,7 +976,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -1001,7 +1001,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -1038,7 +1038,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -1059,7 +1059,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -1077,7 +1077,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
@@ -1098,7 +1098,7 @@ class Helpers {
 
 	/**
 	 * @param File $phpcsFile
-	 * @param int $stackPtr
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
