@@ -31,7 +31,7 @@ class Helpers
 	 */
 	public static function getIntOrNull($value)
 	{
-		return is_int($value) ? $value: null;
+		return is_int($value) ? $value : null;
 	}
 
 	/**

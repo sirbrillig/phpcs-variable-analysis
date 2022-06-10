@@ -378,7 +378,7 @@ class VariableAnalysisSniff implements Sniff
 	protected function getVariableInfo($varName, $currScope)
 	{
 		$scopeInfo = $this->getScopeInfo($currScope);
-		return ( $scopeInfo && isset($scopeInfo->variables[$varName]) ) ? $scopeInfo->variables[$varName] : null;
+		return ($scopeInfo && isset($scopeInfo->variables[$varName])) ? $scopeInfo->variables[$varName] : null;
 	}
 
 	/**
@@ -854,7 +854,8 @@ class VariableAnalysisSniff implements Sniff
 			'php_errormsg',
 			'http_response_header',
 			'HTTP_RAW_POST_DATA',
-		])) {
+			])
+		) {
 			return true;
 		}
 
