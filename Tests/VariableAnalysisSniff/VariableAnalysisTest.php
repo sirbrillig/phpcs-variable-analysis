@@ -3,8 +3,10 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class VariableAnalysisTest extends BaseTestCase {
-	public function testFunctionWithoutParamsErrors() {
+class VariableAnalysisTest extends BaseTestCase
+{
+	public function testFunctionWithoutParamsErrors()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithoutParamFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -13,7 +15,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionWithoutParamsWarnings() {
+	public function testFunctionWithoutParamsWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithoutParamFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -35,7 +38,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionWithUseReferenceWarnings() {
+	public function testFunctionWithUseReferenceWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithUseReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -44,7 +48,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionWithDefaultParamErrors() {
+	public function testFunctionWithDefaultParamErrors()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithDefaultParamFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -58,7 +63,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionWithDefaultParamWarnings() {
+	public function testFunctionWithDefaultParamWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithDefaultParamFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -75,7 +81,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionWithGlobalVarErrors() {
+	public function testFunctionWithGlobalVarErrors()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithGlobalVarFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -84,7 +91,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionWithGlobalVarWarnings() {
+	public function testFunctionWithGlobalVarWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithGlobalVarFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -102,7 +110,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionWithForeachErrors() {
+	public function testFunctionWithForeachErrors()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithForeachFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -111,7 +120,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionWithForeachWarnings() {
+	public function testFunctionWithForeachWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithForeachFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -139,7 +149,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testClassWithMembersErrors() {
+	public function testClassWithMembersErrors()
+	{
 		$fixtureFile = $this->getFixture('ClassWithMembersFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -148,7 +159,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testTraitWithMembersWarnings() {
+	public function testTraitWithMembersWarnings()
+	{
 		$fixtureFile = $this->getFixture('TraitWithMembersFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -170,7 +182,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testClassWithMembersWarnings() {
+	public function testClassWithMembersWarnings()
+	{
 		$fixtureFile = $this->getFixture('ClassWithMembersFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -192,7 +205,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionsOutsideClassErrors() {
+	public function testFunctionsOutsideClassErrors()
+	{
 		$fixtureFile = $this->getFixture('FunctionsOutsideClassFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -201,7 +215,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionsOutsideClassWarnings() {
+	public function testFunctionsOutsideClassWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionsOutsideClassFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -212,7 +227,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionWithClosureErrors() {
+	public function testFunctionWithClosureErrors()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithClosureFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -229,7 +245,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionWithClosureWarnings() {
+	public function testFunctionWithClosureWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithClosureFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -258,7 +275,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionWithReferenceErrors() {
+	public function testFunctionWithReferenceErrors()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -267,7 +285,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionWithReferenceWarnings() {
+	public function testFunctionWithReferenceWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -291,7 +310,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionWithReferenceWarningsAllowsCustomFunctions() {
+	public function testFunctionWithReferenceWarningsAllowsCustomFunctions()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -318,7 +338,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionWithReferenceWarningsAllowsWordPressFunctionsIfSet() {
+	public function testFunctionWithReferenceWarningsAllowsWordPressFunctionsIfSet()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -346,7 +367,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionWithTryCatchErrors() {
+	public function testFunctionWithTryCatchErrors()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithTryCatchFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -355,7 +377,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionWithTryCatchWarnings() {
+	public function testFunctionWithTryCatchWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithTryCatchFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -367,7 +390,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionWithInlineAssignErrors() {
+	public function testFunctionWithInlineAssignErrors()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithInlineAssignFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -376,7 +400,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionWithInlineAssignWarnings() {
+	public function testFunctionWithInlineAssignWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithInlineAssignFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -388,7 +413,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testFunctionWithRedeclarationsErrors() {
+	public function testFunctionWithRedeclarationsErrors()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithRedeclarationsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -397,7 +423,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testFunctionWithRedeclarationsWarnings() {
+	public function testFunctionWithRedeclarationsWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithRedeclarationsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -420,7 +447,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testHeredocErrors() {
+	public function testHeredocErrors()
+	{
 		$fixtureFile = $this->getFixture('HeredocFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -429,7 +457,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testHeredocWarnings() {
+	public function testHeredocWarnings()
+	{
 		$fixtureFile = $this->getFixture('HeredocFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -443,7 +472,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testClassReferenceErrors() {
+	public function testClassReferenceErrors()
+	{
 		$fixtureFile = $this->getFixture('ClassReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -452,7 +482,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testClassReferenceWarnings() {
+	public function testClassReferenceWarnings()
+	{
 		$fixtureFile = $this->getFixture('ClassReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -470,7 +501,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testCompactErrors() {
+	public function testCompactErrors()
+	{
 		$fixtureFile = $this->getFixture('CompactFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -484,7 +516,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testCompactWarnings() {
+	public function testCompactWarnings()
+	{
 		$fixtureFile = $this->getFixture('CompactFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -507,7 +540,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testCompactWarningsHaveCorrectSniffCodes() {
+	public function testCompactWarningsHaveCorrectSniffCodes()
+	{
 		$fixtureFile = $this->getFixture('CompactFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -529,7 +563,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[36][23][0]['source']);
 	}
 
-	public function testTraitAllowsThis() {
+	public function testTraitAllowsThis()
+	{
 		$fixtureFile = $this->getFixture('TraitFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -541,7 +576,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testAnonymousClassAllowsThis() {
+	public function testAnonymousClassAllowsThis()
+	{
 		$fixtureFile = $this->getFixture('AnonymousClassFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -553,7 +589,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testVariableFunctionCallsCountAsUsage() {
+	public function testVariableFunctionCallsCountAsUsage()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithVariableCallFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -570,7 +607,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testVariableVariables() {
+	public function testVariableVariables()
+	{
 		$fixtureFile = $this->getFixture('VariableVariablesFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -594,7 +632,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testTraitsAllowPropertyDefinitions() {
+	public function testTraitsAllowPropertyDefinitions()
+	{
 		$fixtureFile = $this->getFixture('TraitWithPropertiesFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -606,7 +645,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testAnonymousClassAllowPropertyDefinitions() {
+	public function testAnonymousClassAllowPropertyDefinitions()
+	{
 		$fixtureFile = $this->getFixture('AnonymousClassWithPropertiesFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -622,7 +662,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testUnusedParamsAreReported() {
+	public function testUnusedParamsAreReported()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -643,7 +684,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testUnusedParamsHaveCorrectSniffCodes() {
+	public function testUnusedParamsHaveCorrectSniffCodes()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -663,7 +705,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[73][5][0]['source']);
 	}
 
-	public function testValidUnusedVariableNamesIgnoresUnusedVariables() {
+	public function testValidUnusedVariableNamesIgnoresUnusedVariables()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -688,7 +731,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testAllowUnusedFunctionParametersIgnoresUnusedVariables() {
+	public function testAllowUnusedFunctionParametersIgnoresUnusedVariables()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -707,7 +751,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testAllowUnusedCaughtExceptionsIgnoresUnusedVariablesIfSet() {
+	public function testAllowUnusedCaughtExceptionsIgnoresUnusedVariablesIfSet()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -733,7 +778,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testAllowUnusedCaughtExceptionsDoesNotIgnoreUnusedVariablesIfFalse() {
+	public function testAllowUnusedCaughtExceptionsDoesNotIgnoreUnusedVariablesIfFalse()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -760,7 +806,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testIgnoreUnusedRegexpIgnoresUnusedVariables() {
+	public function testIgnoreUnusedRegexpIgnoresUnusedVariables()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithUnusedParamsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -785,7 +832,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testAllowDestructuringAssignment() {
+	public function testAllowDestructuringAssignment()
+	{
 		$fixtureFile = $this->getFixture('DestructuringFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -801,7 +849,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testValidUndefinedVariableNamesIgnoresVarsInGlobalScope() {
+	public function testValidUndefinedVariableNamesIgnoresVarsInGlobalScope()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithGlobalVarFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -821,7 +870,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testValidUndefinedVariableNamesIgnoresUndefinedProperties() {
+	public function testValidUndefinedVariableNamesIgnoresUndefinedProperties()
+	{
 		$fixtureFile = $this->getFixture('ClassReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -842,7 +892,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testValidUndefinedVariableRegexpIgnoresUndefinedProperties() {
+	public function testValidUndefinedVariableRegexpIgnoresUndefinedProperties()
+	{
 		$fixtureFile = $this->getFixture('ClassReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -861,7 +912,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testUnusedArgumentsBeforeUsedArgumentsAreFoundIfFalse() {
+	public function testUnusedArgumentsBeforeUsedArgumentsAreFoundIfFalse()
+	{
 		$fixtureFile = $this->getFixture('UnusedAfterUsedFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -882,7 +934,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testUnusedArgumentsBeforeUsedArgumentsAreIgnoredByDefault() {
+	public function testUnusedArgumentsBeforeUsedArgumentsAreIgnoredByDefault()
+	{
 		$fixtureFile = $this->getFixture('UnusedAfterUsedFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -896,7 +949,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testPregReplaceIgnoresNumericVariables() {
+	public function testPregReplaceIgnoresNumericVariables()
+	{
 		$fixtureFile = $this->getFixture('PregReplaceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -908,7 +962,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testUnusedForeachVariablesAreIgnoredByDefault() {
+	public function testUnusedForeachVariablesAreIgnoredByDefault()
+	{
 		$fixtureFile = $this->getFixture('UnusedForeachFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -929,7 +984,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testUnusedForeachVariablesAreNotIgnoredIfDisabled() {
+	public function testUnusedForeachVariablesAreNotIgnoredIfDisabled()
+	{
 		$fixtureFile = $this->getFixture('UnusedForeachFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -956,7 +1012,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testUnusedForeachVariablesAreIgnoredIfSet() {
+	public function testUnusedForeachVariablesAreIgnoredIfSet()
+	{
 		$fixtureFile = $this->getFixture('UnusedForeachFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -982,7 +1039,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testGetDefinedVarsCountsAsRead() {
+	public function testGetDefinedVarsCountsAsRead()
+	{
 		$fixtureFile = $this->getFixture('GetDefinedVarsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -996,7 +1054,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testThisWithinNestedClosedScope() {
+	public function testThisWithinNestedClosedScope()
+	{
 		$fixtureFile = $this->getFixture('ThisWithinNestedClosedScopeFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -1014,7 +1073,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testUnusedVarWithValueChange() {
+	public function testUnusedVarWithValueChange()
+	{
 		$fixtureFile = $this->getFixture('UnusedVarWithValueChangeFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -1030,7 +1090,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testAssignmentByReference() {
+	public function testAssignmentByReference()
+	{
 		$fixtureFile = $this->getFixture('AssignmentByReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -1045,7 +1106,8 @@ class VariableAnalysisTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testAssignmentByReferenceWithIgnoreUnusedMatch() {
+	public function testAssignmentByReferenceWithIgnoreUnusedMatch()
+	{
 		$fixtureFile = $this->getFixture('AssignmentByReferenceFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(

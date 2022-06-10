@@ -21,8 +21,6 @@
 
     <!-- Rules -->
     <rule ref="PSR2">
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnSameLine" />
-        <exclude name="PSR2.Classes.ClassDeclaration.OpenBraceNewLine" />
         <exclude name="Generic.WhiteSpace.DisallowTabIndent"/>
         <exclude name="Generic.Files.LineLength.TooLong" />
     </rule>
@@ -34,8 +32,6 @@
         </properties>
     </rule>
 
-    <rule ref="Generic.Functions.OpeningFunctionBraceKernighanRitchie" />
-    <rule ref="Generic.Classes.OpeningBraceSameLine"/>
     <rule ref="ImportDetection" />
     <rule ref="VariableAnalysis"/>
 </ruleset>

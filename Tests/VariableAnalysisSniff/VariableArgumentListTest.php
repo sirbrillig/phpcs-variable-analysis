@@ -3,8 +3,10 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class VariableArgumentListTest extends BaseTestCase {
-	public function testVariableArgumentList() {
+class VariableArgumentListTest extends BaseTestCase
+{
+	public function testVariableArgumentList()
+	{
 		$fixtureFile = $this->getFixture('VariableArgumentListFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -24,7 +26,8 @@ class VariableArgumentListTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testVariableArgumentListWithoutUnusedBeforeUsed() {
+	public function testVariableArgumentListWithoutUnusedBeforeUsed()
+	{
 		$fixtureFile = $this->getFixture('VariableArgumentListFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(

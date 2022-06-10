@@ -3,8 +3,10 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class ArrowFunctionTest extends BaseTestCase {
-	public function testArrowFunctions() {
+class ArrowFunctionTest extends BaseTestCase
+{
+	public function testArrowFunctions()
+	{
 		$fixtureFile = $this->getFixture('ArrowFunctionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -30,7 +32,8 @@ class ArrowFunctionTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testArrowFunctionsWithoutUnusedBeforeUsed() {
+	public function testArrowFunctionsWithoutUnusedBeforeUsed()
+	{
 		$fixtureFile = $this->getFixture('ArrowFunctionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(

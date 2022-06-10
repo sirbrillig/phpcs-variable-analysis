@@ -8,11 +8,13 @@ use VariableAnalysis\Lib\ScopeType;
 use VariableAnalysis\Lib\VariableInfo;
 use PHP_CodeSniffer\Util\Tokens;
 
-class Helpers {
+class Helpers
+{
 	/**
 	 * @return array<int|string>
 	 */
-	public static function getPossibleEndOfFileTokens() {
+	public static function getPossibleEndOfFileTokens()
+	{
 		return array_merge(
 			array_values(Tokens::$emptyTokens),
 			[
@@ -27,7 +29,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function getIntOrNull($value) {
+	public static function getIntOrNull($value)
+	{
 		return is_int($value) ? $value: null;
 	}
 
@@ -37,7 +40,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr) {
+	public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr)
+	{
 		$previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
 		return self::getIntOrNull($phpcsFile->findPrevious([T_OPEN_SHORT_ARRAY], $stackPtr - 1, $previousStatementPtr));
 	}
@@ -48,7 +52,8 @@ class Helpers {
 	 *
 	 * @return int
 	 */
-	public static function getPreviousStatementPtr(File $phpcsFile, $stackPtr) {
+	public static function getPreviousStatementPtr(File $phpcsFile, $stackPtr)
+	{
 		$result = $phpcsFile->findPrevious([T_SEMICOLON, T_CLOSE_CURLY_BRACKET], $stackPtr - 1);
 		return is_bool($result) ? 1 : $result;
 	}
@@ -59,7 +64,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function findContainingOpeningBracket(File $phpcsFile, $stackPtr) {
+	public static function findContainingOpeningBracket(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
 			$openPtrs = array_keys($tokens[$stackPtr]['nested_parenthesis']);
@@ -73,7 +79,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function areAnyConditionsAClass(array $conditions) {
+	public static function areAnyConditionsAClass(array $conditions)
+	{
 		foreach (array_reverse($conditions, true) as $scopeCode) {
 			if ($scopeCode === T_CLASS || $scopeCode === T_ANON_CLASS || $scopeCode === T_TRAIT) {
 				return true;
@@ -87,7 +94,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function areConditionsWithinFunctionBeforeClass(array $conditions) {
+	public static function areConditionsWithinFunctionBeforeClass(array $conditions)
+	{
 		// Return true if the token conditions are within a function before
 		// they are within a class.
 		$classTypes = [T_CLASS, T_ANON_CLASS, T_TRAIT];
@@ -107,7 +115,8 @@ class Helpers {
 	 *
 	 * @return int|string|null
 	 */
-	public static function getClosestIfPositionIfBeforeOtherConditions(array $conditions) {
+	public static function getClosestIfPositionIfBeforeOtherConditions(array $conditions)
+	{
 		// Return true if the token conditions are within an if block before
 		// they are within a class or function.
 		$conditionsInsideOut = array_reverse($conditions, true);
@@ -127,7 +136,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isTokenInsideFunctionDefinitionArgumentList(File $phpcsFile, $stackPtr) {
+	public static function isTokenInsideFunctionDefinitionArgumentList(File $phpcsFile, $stackPtr)
+	{
 		return is_int(self::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr));
 	}
 
@@ -137,7 +147,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isTokenInsideFunctionCall(File $phpcsFile, $stackPtr) {
+	public static function isTokenInsideFunctionCall(File $phpcsFile, $stackPtr)
+	{
 		return is_int(self::getFunctionIndexForFunctionCallArgument($phpcsFile, $stackPtr));
 	}
 
@@ -156,7 +167,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function getFunctionIndexForFunctionArgument(File $phpcsFile, $stackPtr) {
+	public static function getFunctionIndexForFunctionArgument(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 		if ($token['code'] === 'PHPCS_T_OPEN_PARENTHESIS') {
@@ -203,7 +215,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isTokenInsideFunctionUseImport(File $phpcsFile, $stackPtr) {
+	public static function isTokenInsideFunctionUseImport(File $phpcsFile, $stackPtr)
+	{
 		return is_int(self::getUseIndexForUseImport($phpcsFile, $stackPtr));
 	}
 
@@ -215,7 +228,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function getUseIndexForUseImport(File $phpcsFile, $stackPtr) {
+	public static function getUseIndexForUseImport(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 
 		$nonUseTokenTypes = Tokens::$emptyTokens;
@@ -241,7 +255,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function findFunctionCall(File $phpcsFile, $stackPtr) {
+	public static function findFunctionCall(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 
 		$openPtr = self::findContainingOpeningBracket($phpcsFile, $stackPtr);
@@ -261,7 +276,8 @@ class Helpers {
 	 *
 	 * @return array<int, array<int>>
 	 */
-	public static function findFunctionCallArguments(File $phpcsFile, $stackPtr) {
+	public static function findFunctionCallArguments(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 
 		// Slight hack: also allow this to find args for array constructor.
@@ -316,7 +332,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function getNextAssignPointer(File $phpcsFile, $stackPtr) {
+	public static function getNextAssignPointer(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 
 		// Is the next non-whitespace an assignment?
@@ -336,7 +353,8 @@ class Helpers {
 	 *
 	 * @return string
 	 */
-	public static function normalizeVarName($varName) {
+	public static function normalizeVarName($varName)
+	{
 		$result = preg_replace('/[{}$]/', '', $varName);
 		return $result ? $result : $varName;
 	}
@@ -348,7 +366,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function findVariableScope(File $phpcsFile, $stackPtr, $varName = null) {
+	public static function findVariableScope(File $phpcsFile, $stackPtr, $varName = null)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 		$varName = isset($varName) ? $varName : self::normalizeVarName($token['content']);
@@ -399,7 +418,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function findVariableScopeExceptArrowFunctions(File $phpcsFile, $stackPtr) {
+	public static function findVariableScopeExceptArrowFunctions(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$allowedTypes = [
 			T_VARIABLE,
@@ -443,7 +463,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	private static function getStartOfTokenScope(File $phpcsFile, $stackPtr) {
+	private static function getStartOfTokenScope(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 
@@ -481,7 +502,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isTokenInsideArrowFunctionDefinition(File $phpcsFile, $stackPtr) {
+	public static function isTokenInsideArrowFunctionDefinition(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 		$openParenIndices = isset($token['nested_parenthesis']) ? $token['nested_parenthesis'] : [];
@@ -498,7 +520,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function getContainingArrowFunctionIndex(File $phpcsFile, $stackPtr) {
+	public static function getContainingArrowFunctionIndex(File $phpcsFile, $stackPtr)
+	{
 		$arrowFunctionIndex = self::getPreviousArrowFunctionIndex($phpcsFile, $stackPtr);
 		if (! is_int($arrowFunctionIndex)) {
 			return null;
@@ -521,7 +544,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	private static function getPreviousArrowFunctionIndex(File $phpcsFile, $stackPtr) {
+	private static function getPreviousArrowFunctionIndex(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$enclosingScopeIndex = self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
 		for ($index = $stackPtr - 1; $index > $enclosingScopeIndex; $index--) {
@@ -539,7 +563,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isArrowFunction(File $phpcsFile, $stackPtr) {
+	public static function isArrowFunction(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		if (defined('T_FN') && $tokens[$stackPtr]['code'] === T_FN) {
 			return true;
@@ -571,7 +596,8 @@ class Helpers {
 	 *
 	 * @return ?array<string, int>
 	 */
-	public static function getArrowFunctionOpenClose(File $phpcsFile, $stackPtr) {
+	public static function getArrowFunctionOpenClose(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		if (defined('T_FN') && $tokens[$stackPtr]['code'] === T_FN) {
 			return [
@@ -623,7 +649,8 @@ class Helpers {
 	 *
 	 * @return ?array<int>
 	 */
-	public static function getListAssignments(File $phpcsFile, $listOpenerIndex) {
+	public static function getListAssignments(File $phpcsFile, $listOpenerIndex)
+	{
 		$tokens = $phpcsFile->getTokens();
 		self::debug('getListAssignments', $listOpenerIndex, $tokens[$listOpenerIndex]);
 
@@ -689,7 +716,8 @@ class Helpers {
 	 *
 	 * @return string[]
 	 */
-	public static function getVariablesDefinedByArrowFunction(File $phpcsFile, $stackPtr) {
+	public static function getVariablesDefinedByArrowFunction(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$arrowFunctionToken = $tokens[$stackPtr];
 		$variableNames = [];
@@ -707,7 +735,8 @@ class Helpers {
 	/**
 	 * @return void
 	 */
-	public static function debug() {
+	public static function debug()
+	{
 		$messages = func_get_args();
 		if (! defined('PHP_CODESNIFFER_VERBOSITY')) {
 			return;
@@ -733,7 +762,8 @@ class Helpers {
 	 *
 	 * @return string[]
 	 */
-	public static function splitStringToArray($pattern, $value) {
+	public static function splitStringToArray($pattern, $value)
+	{
 		$result = preg_split($pattern, $value);
 		return is_array($result) ? $result : [];
 	}
@@ -743,7 +773,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isVariableANumericVariable($varName) {
+	public static function isVariableANumericVariable($varName)
+	{
 		return is_numeric(substr($varName, 0, 1));
 	}
 
@@ -753,7 +784,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isVariableInsideElseCondition(File $phpcsFile, $stackPtr) {
+	public static function isVariableInsideElseCondition(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$nonFunctionTokenTypes = Tokens::$emptyTokens;
 		$nonFunctionTokenTypes[] = T_OPEN_PARENTHESIS;
@@ -781,7 +813,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isVariableInsideElseBody(File $phpcsFile, $stackPtr) {
+	public static function isVariableInsideElseBody(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 		$conditions = isset($token['conditions']) ? $token['conditions'] : [];
@@ -815,7 +848,8 @@ class Helpers {
 	 *
 	 * @return int[]
 	 */
-	public static function getAttachedBlockIndicesForElse(File $phpcsFile, $stackPtr) {
+	public static function getAttachedBlockIndicesForElse(File $phpcsFile, $stackPtr)
+	{
 		$currentElsePtr = $phpcsFile->findPrevious([T_ELSE, T_ELSEIF], $stackPtr - 1);
 		if (! is_int($currentElsePtr)) {
 			throw new \Exception("Cannot find expected else at {$stackPtr}");
@@ -846,7 +880,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isIndexInsideScope($needle, $scopeStart, $scopeEnd) {
+	public static function isIndexInsideScope($needle, $scopeStart, $scopeEnd)
+	{
 		return ($needle > $scopeStart && $needle < $scopeEnd);
 	}
 
@@ -856,7 +891,8 @@ class Helpers {
 	 *
 	 * @return int
 	 */
-	public static function getScopeCloseForScopeOpen(File $phpcsFile, $scopeStartIndex) {
+	public static function getScopeCloseForScopeOpen(File $phpcsFile, $scopeStartIndex)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$scopeCloserIndex = isset($tokens[$scopeStartIndex]['scope_closer']) ? $tokens[$scopeStartIndex]['scope_closer'] : null;
 
@@ -876,7 +912,8 @@ class Helpers {
 	 *
 	 * @return int
 	 */
-	public static function getLastNonEmptyTokenIndexInFile(File $phpcsFile) {
+	public static function getLastNonEmptyTokenIndexInFile(File $phpcsFile)
+	{
 		$tokens = $phpcsFile->getTokens();
 		foreach (array_reverse($tokens, true) as $index => $token) {
 			if (! in_array($token['code'], self::getPossibleEndOfFileTokens(), true)) {
@@ -893,7 +930,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function areFollowingArgumentsUsed(VariableInfo $varInfo, ScopeInfo $scopeInfo) {
+	public static function areFollowingArgumentsUsed(VariableInfo $varInfo, ScopeInfo $scopeInfo)
+	{
 		$foundVarPosition = false;
 		foreach ($scopeInfo->variables as $variable) {
 			if ($variable === $varInfo) {
@@ -920,7 +958,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isRequireInScopeAfter(File $phpcsFile, VariableInfo $varInfo, ScopeInfo $scopeInfo) {
+	public static function isRequireInScopeAfter(File $phpcsFile, VariableInfo $varInfo, ScopeInfo $scopeInfo)
+	{
 		$requireTokens = [
 			T_REQUIRE,
 			T_REQUIRE_ONCE,
@@ -951,7 +990,8 @@ class Helpers {
 	 *
 	 * @return ?int
 	 */
-	public static function getFunctionIndexForFunctionCallArgument(File $phpcsFile, $stackPtr) {
+	public static function getFunctionIndexForFunctionCallArgument(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 		if (empty($token['nested_parenthesis'])) {
@@ -980,7 +1020,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isVariableInsideIssetOrEmpty(File $phpcsFile, $stackPtr) {
+	public static function isVariableInsideIssetOrEmpty(File $phpcsFile, $stackPtr)
+	{
 		$functionIndex = self::getFunctionIndexForFunctionCallArgument($phpcsFile, $stackPtr);
 		if (! is_int($functionIndex)) {
 			return false;
@@ -1005,7 +1046,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isVariableArrayPushShortcut(File $phpcsFile, $stackPtr) {
+	public static function isVariableArrayPushShortcut(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$nonFunctionTokenTypes = Tokens::$emptyTokens;
 
@@ -1042,7 +1084,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isVariableInsideUnset(File $phpcsFile, $stackPtr) {
+	public static function isVariableInsideUnset(File $phpcsFile, $stackPtr)
+	{
 		$functionIndex = self::getFunctionIndexForFunctionCallArgument($phpcsFile, $stackPtr);
 		if (! is_int($functionIndex)) {
 			return false;
@@ -1063,7 +1106,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isTokenInsideAssignmentRHS(File $phpcsFile, $stackPtr) {
+	public static function isTokenInsideAssignmentRHS(File $phpcsFile, $stackPtr)
+	{
 		$previousStatementPtr = $phpcsFile->findPrevious([T_SEMICOLON, T_CLOSE_CURLY_BRACKET, T_OPEN_CURLY_BRACKET, T_COMMA], $stackPtr - 1);
 		if (! is_int($previousStatementPtr)) {
 			$previousStatementPtr = 1;
@@ -1081,7 +1125,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isTokenInsideAssignmentLHS(File $phpcsFile, $stackPtr) {
+	public static function isTokenInsideAssignmentLHS(File $phpcsFile, $stackPtr)
+	{
 		// Is the next non-whitespace an assignment?
 		$assignPtr = self::getNextAssignPointer($phpcsFile, $stackPtr);
 		if (! is_int($assignPtr)) {
@@ -1102,7 +1147,8 @@ class Helpers {
 	 *
 	 * @return bool
 	 */
-	public static function isTokenVariableVariable(File $phpcsFile, $stackPtr) {
+	public static function isTokenVariableVariable(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 
 		$prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), null, true);

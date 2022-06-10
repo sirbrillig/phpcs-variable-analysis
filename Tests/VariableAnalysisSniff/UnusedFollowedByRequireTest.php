@@ -3,8 +3,10 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class UnusedFollowedByRequire extends BaseTestCase {
-	public function testUnusedFollowedByRequireWarnsByDefault() {
+class UnusedFollowedByRequire extends BaseTestCase
+{
+	public function testUnusedFollowedByRequireWarnsByDefault()
+	{
 		$fixtureFile = $this->getFixture('UnusedFollowedByRequireFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -26,7 +28,8 @@ class UnusedFollowedByRequire extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testUnusedFollowedByRequireDoesNotWarnWhenSet() {
+	public function testUnusedFollowedByRequireDoesNotWarnWhenSet()
+	{
 		$fixtureFile = $this->getFixture('UnusedFollowedByRequireFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -45,7 +48,8 @@ class UnusedFollowedByRequire extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testUnusedFollowedByRequireDoesNotBreakOtherThingsWhenSet() {
+	public function testUnusedFollowedByRequireDoesNotBreakOtherThingsWhenSet()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithoutParamFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
