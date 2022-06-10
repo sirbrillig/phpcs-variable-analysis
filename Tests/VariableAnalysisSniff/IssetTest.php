@@ -3,8 +3,10 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class IssetTest extends BaseTestCase {
-	public function testIssetVariableUse() {
+class IssetTest extends BaseTestCase
+{
+	public function testIssetVariableUse()
+	{
 		$fixtureFile = $this->getFixture('IssetFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();

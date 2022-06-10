@@ -7,7 +7,8 @@ use VariableAnalysis\Lib\ScopeType;
 /**
  * Holds details of a variable within a scope.
  */
-class VariableInfo {
+class VariableInfo
+{
 	/**
 	 * @var string
 	 */
@@ -101,7 +102,8 @@ class VariableInfo {
 	/**
 	 * @param string $varName
 	 */
-	public function __construct($varName) {
+	public function __construct($varName)
+	{
 		$this->name = $varName;
 	}
 }

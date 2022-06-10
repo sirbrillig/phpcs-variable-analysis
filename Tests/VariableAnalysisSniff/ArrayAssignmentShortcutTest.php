@@ -3,8 +3,10 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class ArrayAssignmentShortcutTest extends BaseTestCase {
-	public function testArrayAssignmentReportsCorrectLines() {
+class ArrayAssignmentShortcutTest extends BaseTestCase
+{
+	public function testArrayAssignmentReportsCorrectLines()
+	{
 		$fixtureFile = $this->getFixture('ArrayAssignmentShortcutFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -19,7 +21,8 @@ class ArrayAssignmentShortcutTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testArrayAssignmentHasCorrectSniffCodes() {
+	public function testArrayAssignmentHasCorrectSniffCodes()
+	{
 		$fixtureFile = $this->getFixture('ArrayAssignmentShortcutFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();

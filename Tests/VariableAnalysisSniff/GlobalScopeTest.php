@@ -3,8 +3,10 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class GlobalScopeTest extends BaseTestCase {
-	public function testGlobalScopeWarnings() {
+class GlobalScopeTest extends BaseTestCase
+{
+	public function testGlobalScopeWarnings()
+	{
 		$fixtureFile = $this->getFixture('GlobalScopeFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -23,7 +25,8 @@ class GlobalScopeTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testGlobalScopeWarningsWithAllowUndefinedVariablesInFileScope() {
+	public function testGlobalScopeWarningsWithAllowUndefinedVariablesInFileScope()
+	{
 		$fixtureFile = $this->getFixture('GlobalScopeFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -41,7 +44,8 @@ class GlobalScopeTest extends BaseTestCase {
 		$this->assertSame($expectedErrors, $lines);
 	}
 
-	public function testGlobalScopeWarningsWithAllowUnusedVariablesInFileScope() {
+	public function testGlobalScopeWarningsWithAllowUnusedVariablesInFileScope()
+	{
 		$fixtureFile = $this->getFixture('GlobalScopeFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(

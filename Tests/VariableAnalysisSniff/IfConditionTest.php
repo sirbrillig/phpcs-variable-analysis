@@ -3,8 +3,10 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class IfConditionTest extends BaseTestCase {
-	public function testIfConditionWarnings() {
+class IfConditionTest extends BaseTestCase
+{
+	public function testIfConditionWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithIfConditionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -36,7 +38,8 @@ class IfConditionTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testIfConditionWarningsWithValidUndefinedVariableNames() {
+	public function testIfConditionWarningsWithValidUndefinedVariableNames()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithIfConditionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -67,7 +70,8 @@ class IfConditionTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testInlineIfConditionWarnings() {
+	public function testInlineIfConditionWarnings()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithInlineIfConditionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(
@@ -99,7 +103,8 @@ class IfConditionTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testInlineIfConditionWarningsWithValidUndefinedVariableNames() {
+	public function testInlineIfConditionWarningsWithValidUndefinedVariableNames()
+	{
 		$fixtureFile = $this->getFixture('FunctionWithInlineIfConditionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->ruleset->setSniffProperty(

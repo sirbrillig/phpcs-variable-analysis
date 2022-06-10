@@ -6,10 +6,12 @@ use PHP_CodeSniffer\Files\LocalFile;
 use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Config;
 
-class BaseTestCase extends TestCase {
+class BaseTestCase extends TestCase
+{
 	const STANDARD_NAME = 'VariableAnalysis';
 
-	public function prepareLocalFileForSniffs($fixtureFile) {
+	public function prepareLocalFileForSniffs($fixtureFile)
+	{
 		$sniffFile = __DIR__ . '/../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php';
 
 		$config            = new Config();
@@ -27,21 +29,25 @@ class BaseTestCase extends TestCase {
 		return new LocalFile($fixtureFile, $ruleset, $config);
 	}
 
-	public function getLineNumbersFromMessages(array $messages) {
+	public function getLineNumbersFromMessages(array $messages)
+	{
 		$lines = array_keys($messages);
 		sort($lines);
 		return $lines;
 	}
 
-	public function getWarningLineNumbersFromFile(LocalFile $phpcsFile) {
+	public function getWarningLineNumbersFromFile(LocalFile $phpcsFile)
+	{
 		return $this->getLineNumbersFromMessages($phpcsFile->getWarnings());
 	}
 
-	public function getErrorLineNumbersFromFile(LocalFile $phpcsFile) {
+	public function getErrorLineNumbersFromFile(LocalFile $phpcsFile)
+	{
 		return $this->getLineNumbersFromMessages($phpcsFile->getErrors());
 	}
 
-	public function getFixture($fixtureFilename) {
+	public function getFixture($fixtureFilename)
+	{
 		return realpath(__DIR__ . '/VariableAnalysisSniff/fixtures/' . $fixtureFilename);
 	}
 }

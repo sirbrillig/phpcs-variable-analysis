@@ -5,7 +5,8 @@ namespace VariableAnalysis\Lib;
 /**
  * Holds details of a scope.
  */
-class ScopeInfo {
+class ScopeInfo
+{
 	/**
 	 * The token index of the start of this scope.
 	 *
@@ -31,7 +32,8 @@ class ScopeInfo {
 	 * @param int      $scopeStartIndex
 	 * @param int|null $scopeEndIndex
 	 */
-	public function __construct($scopeStartIndex, $scopeEndIndex = null) {
+	public function __construct($scopeStartIndex, $scopeEndIndex = null)
+	{
 		$this->scopeStartIndex = $scopeStartIndex;
 		$this->scopeEndIndex = $scopeEndIndex;
 	}

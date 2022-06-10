@@ -2,7 +2,8 @@
 
 namespace VariableAnalysis\Lib;
 
-class Constants {
+class Constants
+{
 	/**
 	 *  Array of known pass-by-reference functions and the argument(s) which are passed
 	 *  by reference, the arguments are numbered starting from 1 and an elipsis '...'
@@ -14,7 +15,8 @@ class Constants {
 	 *
 	 *  @return array<string, array<int|string>>
 	 */
-	public static function getPassByReferenceFunctions() {
+	public static function getPassByReferenceFunctions()
+	{
 		return [
 			'__soapCall' => [5],
 			'addFunction' => [3],
@@ -238,7 +240,8 @@ class Constants {
 	/**
 	 * @return array<string, array<int>>
 	 */
-	public static function getWordPressPassByReferenceFunctions() {
+	public static function getWordPressPassByReferenceFunctions()
+	{
 		return [
 			'wp_parse_str' => [2],
 			'wp_cache_get' => [4],
@@ -250,7 +253,8 @@ class Constants {
 	 *
 	 * @return string
 	 */
-	public static function getDoubleQuotedVarRegexp() {
+	public static function getDoubleQuotedVarRegexp()
+	{
 		return '|(?<!\\\\)(?:\\\\{2})*\${?([a-zA-Z0-9_]+)}?|';
 	}
 }

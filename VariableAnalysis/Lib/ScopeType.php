@@ -2,7 +2,8 @@
 
 namespace VariableAnalysis\Lib;
 
-class ScopeType {
+class ScopeType
+{
 	const PARAM = 'param';
 	const BOUND = 'bound';
 	const LOCAL = 'local';

@@ -3,8 +3,10 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class ClosingPhpTagsTest extends BaseTestCase {
-	public function testVariableWarningsWhenClosingTagsAreUsed() {
+class ClosingPhpTagsTest extends BaseTestCase
+{
+	public function testVariableWarningsWhenClosingTagsAreUsed()
+	{
 		$fixtureFile = $this->getFixture('ClosingPhpTagsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -18,7 +20,8 @@ class ClosingPhpTagsTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testVariableWarningsHaveCorrectSniffCodesWhenClosingTagsAreUsed() {
+	public function testVariableWarningsHaveCorrectSniffCodesWhenClosingTagsAreUsed()
+	{
 		$fixtureFile = $this->getFixture('ClosingPhpTagsFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();

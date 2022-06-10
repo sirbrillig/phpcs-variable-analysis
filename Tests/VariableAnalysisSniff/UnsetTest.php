@@ -3,8 +3,10 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class UnsetTest extends BaseTestCase {
-	public function testUnsetReportsUndefinedVariables() {
+class UnsetTest extends BaseTestCase
+{
+	public function testUnsetReportsUndefinedVariables()
+	{
 		$fixtureFile = $this->getFixture('UnsetFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
@@ -17,7 +19,8 @@ class UnsetTest extends BaseTestCase {
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
-	public function testUnsetHasCorrectSniffCodes() {
+	public function testUnsetHasCorrectSniffCodes()
+	{
 		$fixtureFile = $this->getFixture('UnsetFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
