@@ -26,9 +26,9 @@ class ClosingPhpTagsTest extends BaseTestCase
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
 		$phpcsFile->process();
 		$warnings = $phpcsFile->getWarnings();
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[6][1][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[8][6][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[13][1][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[16][6][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[6][1][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[8][6][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[13][1][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[16][6][0]['source']);
 	}
 }

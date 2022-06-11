@@ -552,15 +552,15 @@ class VariableAnalysisTest extends BaseTestCase
 		$phpcsFile->process();
 
 		$warnings = $phpcsFile->getWarnings();
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[2][49][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[7][23][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[10][54][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[14][52][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[19][5][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[23][23][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[26][66][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[36][5][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[36][23][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[2][49][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[7][23][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[10][54][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[14][52][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[19][5][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[23][23][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[26][66][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[36][5][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[36][23][0]['source']);
 	}
 
 	public function testTraitAllowsThis()
@@ -696,13 +696,13 @@ class VariableAnalysisTest extends BaseTestCase
 		$phpcsFile->process();
 
 		$warnings = $phpcsFile->getWarnings();
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[4][43][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[16][52][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[27][60][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[39][42][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[39][51][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[72][5][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[73][5][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[4][43][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[16][52][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[27][60][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[39][42][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[39][51][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[72][5][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[73][5][0]['source']);
 	}
 
 	public function testValidUnusedVariableNamesIgnoresUnusedVariables()

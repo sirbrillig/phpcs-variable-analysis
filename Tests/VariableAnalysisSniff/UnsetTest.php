@@ -26,7 +26,7 @@ class UnsetTest extends BaseTestCase
 		$phpcsFile->process();
 
 		$warnings = $phpcsFile->getWarnings();
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedUnsetVariable', $warnings[6][7][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedUnsetVariable', $warnings[11][9][0]['source']);
+		$this->assertSame(self::UNSET_ERROR_CODE, $warnings[6][7][0]['source']);
+		$this->assertSame(self::UNSET_ERROR_CODE, $warnings[11][9][0]['source']);
 	}
 }

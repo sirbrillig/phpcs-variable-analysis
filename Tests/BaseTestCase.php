@@ -10,6 +10,13 @@ class BaseTestCase extends TestCase
 {
 	const STANDARD_NAME = 'VariableAnalysis';
 
+	const REDECLARATION_ERROR_CODE = 'VariableAnalysis.CodeAnalysis.VariableAnalysis.VariableRedeclaration';
+	const SELF_OUTSIDE_CLASS_ERROR_CODE = 'VariableAnalysis.CodeAnalysis.VariableAnalysis.SelfOutsideClass';
+	const STATIC_OUSIDE_CLASS_ERROR_CODE = 'VariableAnalysis.CodeAnalysis.VariableAnalysis.StaticOutsideClass';
+	const UNDEFINED_ERROR_CODE = 'VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable';
+	const UNSET_ERROR_CODE = 'VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedUnsetVariable';
+	const UNUSED_ERROR_CODE = 'VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable';
+
 	public function prepareLocalFileForSniffs($fixtureFile)
 	{
 		$sniffFile = __DIR__ . '/../VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php';
