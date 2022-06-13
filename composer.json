@@ -49,6 +49,7 @@
     "require-dev": {
         "phpunit/phpunit": "^4.8.36 || ^5.7.21 || ^6.5 || ^7.0 || ^8.0 || ^9.0",
         "sirbrillig/phpcs-import-detection": "^1.1",
+        "phpcsstandards/phpcsdevcs": "^1.1",
         "phpstan/phpstan": "^1.7",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0"
     }

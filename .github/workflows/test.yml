@@ -147,8 +147,8 @@ jobs:
 
       - name: 'Composer: adjust dependencies'
         run: |
-          # Remove dev dependencies which are not compatible with all supported PHP versions.
-          composer remove --dev --no-update sirbrillig/phpcs-import-detection phpstan/phpstan
+          # Remove dev dependencies which are not compatible with all supported PHP/PHPCS versions.
+          composer remove --dev --no-update phpcsstandards/phpcsdevcs sirbrillig/phpcs-import-detection phpstan/phpstan
           composer require --no-update squizlabs/php_codesniffer:"${{ matrix.phpcs_version }}"
 
       - name: Install Composer dependencies

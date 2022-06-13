@@ -1,4 +1,5 @@
 <?php
+
 namespace VariableAnalysis\Tests;
 
 use PHPUnit\Framework\TestCase;

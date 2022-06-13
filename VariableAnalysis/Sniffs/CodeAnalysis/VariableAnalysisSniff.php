@@ -378,7 +378,7 @@ class VariableAnalysisSniff implements Sniff
 	protected function getVariableInfo($varName, $currScope)
 	{
 		$scopeInfo = $this->getScopeInfo($currScope);
-		return ( $scopeInfo && isset($scopeInfo->variables[$varName]) ) ? $scopeInfo->variables[$varName] : null;
+		return ($scopeInfo && isset($scopeInfo->variables[$varName])) ? $scopeInfo->variables[$varName] : null;
 	}
 
 	/**
@@ -838,8 +838,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	protected function processVariableAsSuperGlobal($varName)
 	{
-		// Are we a superglobal variable?
-		if (in_array($varName, [
+		$superglobals = [
 			'GLOBALS',
 			'_SERVER',
 			'_GET',
@@ -854,11 +853,9 @@ class VariableAnalysisSniff implements Sniff
 			'php_errormsg',
 			'http_response_header',
 			'HTTP_RAW_POST_DATA',
-		])) {
-			return true;
-		}
-
-		return false;
+		];
+		// Are we a superglobal variable?
+		return (in_array($varName, $superglobals, true));
 	}
 
 	/**
@@ -1140,22 +1137,21 @@ class VariableAnalysisSniff implements Sniff
 		//   class constant T_STRING T_DOUBLE_COLON T_STRING
 		// Search backwards for first token that isn't whitespace, comma, variable,
 		// equals, or on the list of assignable constant values above.
-		$staticPtr = $phpcsFile->findPrevious(
-			[
-				T_WHITESPACE, T_VARIABLE, T_COMMA, T_EQUAL,
-				T_MINUS, T_LNUMBER, T_DNUMBER,
-				T_CONSTANT_ENCAPSED_STRING,
-				T_STRING,
-				T_DOUBLE_COLON,
-				T_START_HEREDOC, T_HEREDOC, T_END_HEREDOC,
-				T_START_NOWDOC, T_NOWDOC, T_END_NOWDOC,
-			],
-			$stackPtr - 1,
-			null,
-			true,
-			null,
-			true
-		);
+		$find = [
+			T_WHITESPACE => T_WHITESPACE,
+			T_VARIABLE => T_VARIABLE,
+			T_COMMA => T_COMMA,
+			T_EQUAL => T_EQUAL,
+			T_MINUS => T_MINUS,
+			T_LNUMBER => T_LNUMBER,
+			T_DNUMBER => T_DNUMBER,
+			T_CONSTANT_ENCAPSED_STRING => T_CONSTANT_ENCAPSED_STRING,
+			T_STRING => T_STRING,
+			T_DOUBLE_COLON => T_DOUBLE_COLON,
+		];
+		$find += Tokens::$heredocTokens;
+
+		$staticPtr = $phpcsFile->findPrevious($find, $stackPtr - 1, null, true, null, true);
 		if (($staticPtr === false) || ($tokens[$staticPtr]['code'] !== T_STATIC)) {
 			return false;
 		}

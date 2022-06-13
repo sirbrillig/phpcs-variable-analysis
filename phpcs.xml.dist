@@ -1,7 +1,15 @@
 <?xml version="1.0"?>
 <ruleset name="PaytonsStandard">
-    <file>./VariableAnalysis/</file>
-    <file>./Tests/</file>
+
+    <!--
+    #############################################################################
+    COMMAND LINE ARGUMENTS
+    https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml
+    #############################################################################
+    -->
+
+    <file>.</file>
+
     <exclude-pattern>./Tests/VariableAnalysisSniff/fixtures/</exclude-pattern>
     <exclude-pattern>./vendor/</exclude-pattern>
 
@@ -17,21 +25,83 @@
     <!-- Check up to 8 files simultaneously. -->
     <arg name="parallel" value="8"/>
 
+    <!-- One tab = 4 spaces. This is needed to properly support tab indentation. -->
     <arg name="tab-width" value="4"/>
 
-    <!-- Rules -->
-    <rule ref="PSR2">
+    <!--
+    #############################################################################
+    USE THE PHPCSDev, ImportDetection and VariableAnalysis RULESETS
+    #############################################################################
+    -->
+
+    <!-- Set minimum PHP version supported to PHP 5.4. -->
+    <config name="testVersion" value="5.4-"/>
+
+    <rule ref="PHPCSDev">
+        <!-- This code base uses tab indentation instead of spaces. -->
         <exclude name="Generic.WhiteSpace.DisallowTabIndent"/>
+
+        <!-- Don't enforce lining up the assignment operators in assignment blocks. -->
+        <exclude name="Generic.Formatting.MultipleStatementAlignment.NotSameWarning"/>
+
+        <!-- Don't enforce lining up the double arrows in array declarations.
+             Possibly enforce this later once the sniff has been replaced by a better, more configurable version. -->
+        <exclude name="Squiz.Arrays.ArrayDeclaration.DoubleArrowNotAligned"/>
+
+        <!-- Don't enforce documentation (yet). -->
+        <exclude name="Generic.Commenting.DocComment"/>
+        <exclude name="PEAR.Commenting.ClassComment"/>
+        <exclude name="PEAR.Commenting.FileComment"/>
+        <exclude name="PEAR.Commenting.InlineComment"/>
+
+        <!-- WIP: This is part of PSR12 and should probably be enforced,
+             but the codebase needs work before it can be enabled. -->
         <exclude name="Generic.Files.LineLength.TooLong" />
     </rule>
 
-    <rule ref="Generic.WhiteSpace.DisallowSpaceIndent"/>
+    <rule ref="ImportDetection" />
+    <rule ref="VariableAnalysis"/>
+
+
+    <!--
+    #############################################################################
+    SNIFF SPECIFIC CONFIGURATION AND SELECTIVELY DEVIATE FROM THE STANDARD
+    #############################################################################
+    -->
+
+    <!-- Enforce the use of tab indentation instead of spaces. -->
+    <rule name="Generic.WhiteSpace.DisallowSpaceIndent"/>
     <rule ref="Generic.WhiteSpace.ScopeIndent">
         <properties>
             <property name="tabIndent" value="true"/>
         </properties>
     </rule>
 
-    <rule ref="ImportDetection" />
-    <rule ref="VariableAnalysis"/>
+    <!-- Disallow a blank line at the start of a class.
+         This is a minor deviation from PHPCSDev to stay closer to PSR12. -->
+    <rule ref="PSR12.Classes.OpeningBraceSpace.Found">
+        <severity>5</severity>
+    </rule>
+    <rule ref="Squiz.WhiteSpace.FunctionSpacing">
+        <properties>
+            <property name="spacingBeforeFirst" value="0"/>
+        </properties>
+    </rule>
+    <rule ref="Squiz.WhiteSpace.MemberVarSpacing">
+        <properties>
+            <property name="spacingBeforeFirst" value="0"/>
+        </properties>
+    </rule>
+
+    <!-- While (most of) the documentation sniffs included in PHPCSDev are disabled,
+         do enforce some basic checking on the tags in function docblocks, like
+         enforcing columnization of the information in @param tags. -->
+    <rule ref="PEAR.Commenting.FunctionComment">
+        <exclude name="PEAR.Commenting.FunctionComment.MissingParamTag"/>
+        <exclude name="PEAR.Commenting.FunctionComment.MissingParamComment"/>
+        <exclude name="PEAR.Commenting.FunctionComment.InvalidThrows"/>
+        <exclude name="PEAR.Commenting.FunctionComment.MissingReturn"/>
+        <exclude name="PEAR.Commenting.FunctionComment.Missing"/>
+    </rule>
+
 </ruleset>
