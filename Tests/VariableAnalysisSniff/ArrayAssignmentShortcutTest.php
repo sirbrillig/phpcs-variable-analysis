@@ -28,9 +28,9 @@ class ArrayAssignmentShortcutTest extends BaseTestCase
 		$phpcsFile->process();
 
 		$warnings = $phpcsFile->getWarnings();
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[21][5][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[27][5][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable', $warnings[28][5][0]['source']);
-		$this->assertSame('VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable', $warnings[29][10][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[21][5][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[27][5][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[28][5][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[29][10][0]['source']);
 	}
 }
