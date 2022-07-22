@@ -38,9 +38,6 @@ class VariableAnalysisSniff implements Sniff
 	 * Each array of scopes is keyed by a string containing the filename (see
 	 * `getFilename`).
 	 *
-	 * Unlike the `ScopeInfo` objects stored in `$this->scopes`, these objects do
-	 * not track variables themselves, only the position of the scope boundaries.
-	 *
 	 * @var array<string, ScopeInfo[]>
 	 */
 	private $scopeStartEndPairs = [];
@@ -246,8 +243,13 @@ class VariableAnalysisSniff implements Sniff
 			$this->recordScopeStartAndEnd($phpcsFile, 0);
 		}
 
+<<<<<<< HEAD
 		// Report variables defined but not used in the current scope as unused
 		// variables if the current token closes scopes.
+=======
+		// Report variables defined in the current scope but not used as unused
+		// variables if the current token closes a scope.
+>>>>>>> 766adf5 (Fix some minor type errors and improve code comments)
 		$this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
 
 		// Find and process variables to perform two jobs: to record variable
@@ -298,6 +300,9 @@ class VariableAnalysisSniff implements Sniff
 	private function recordScopeStartAndEnd($phpcsFile, $scopeStartIndex)
 	{
 		$scopeEndIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $scopeStartIndex);
+		if (is_null($scopeEndIndex)) {
+			return;
+		}
 		$filename = $this->getFilename();
 		if (! isset($this->scopeStartEndPairs[$filename])) {
 			$this->scopeStartEndPairs[$filename] = [];
@@ -348,7 +353,13 @@ class VariableAnalysisSniff implements Sniff
 	/**
 	 * Find scopes closed by a token and process their variables.
 	 *
+<<<<<<< HEAD
 	 * Calls `processScopeClose()` for each closed scope.
+=======
+	 * Calls `processScopeClose()` for each closed scope. Requires that
+	 * `scopeEndIndexCache` has been populated for the current file by
+	 * `recordScopeStartAndEnd()`.
+>>>>>>> 766adf5 (Fix some minor type errors and improve code comments)
 	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
