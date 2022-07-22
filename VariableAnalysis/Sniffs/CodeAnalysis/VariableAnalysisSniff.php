@@ -43,13 +43,6 @@ class VariableAnalysisSniff implements Sniff
 	private $scopeStartEndPairs = [];
 
 	/**
-	 * A cache of scope end indices in the current file to improve performance.
-	 *
-	 * @var int[]
-	 */
-	private $scopeEndIndexCache = [];
-
-	/**
 	 * A list of custom functions which pass in variables to be initialized by
 	 * reference (eg `preg_match()`) and therefore should not require those
 	 * variables to be defined ahead of time. The list is space separated and
@@ -234,8 +227,6 @@ class VariableAnalysisSniff implements Sniff
 		// easily accessed in other places which aren't passed the object.
 		if ($this->currentFile !== $phpcsFile) {
 			$this->currentFile = $phpcsFile;
-			// Reset the scope end cache when the File changes since it is per-file.
-			$this->scopeEndIndexCache = [];
 		}
 
 		// Add the global scope for the current file to our scope indexes.
@@ -309,7 +300,27 @@ class VariableAnalysisSniff implements Sniff
 		}
 		Helpers::debug('recording scope for file', $filename, 'start/end', $scopeStartIndex, $scopeEndIndex);
 		$this->scopeStartEndPairs[$filename][] = new ScopeInfo($scopeStartIndex, $scopeEndIndex);
-		$this->scopeEndIndexCache[] = $scopeEndIndex;
+	}
+
+	/**
+	 * Find scope close indexes for a file.
+	 *
+	 * @param File $phpcsFile
+	 *
+	 * @return int[]
+	 */
+	private function getScopeCloseIndexes($phpcsFile) {
+		$filename = $phpcsFile->getFilename();
+		if (empty($this->scopeStartEndPairs[$filename])) {
+			return [];
+		}
+		$indexes = [];
+		foreach($this->scopeStartEndPairs[$filename] as $scopeInfo) {
+			if ($scopeInfo->scopeEndIndex) {
+				$indexes[] = $scopeInfo->scopeEndIndex;
+			}
+		}
+		return array_unique($indexes);
 	}
 
 	/**
@@ -322,7 +333,8 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	private function getScopesClosedBy($phpcsFile, $stackPtr)
 	{
-		if (! in_array($stackPtr, $this->scopeEndIndexCache, true)) {
+		$scopeEndIndexes = $this->getScopeCloseIndexes($phpcsFile);
+		if (! in_array($stackPtr, $scopeEndIndexes, true)) {
 			return [];
 		}
 		$scopePairsForFile = isset($this->scopeStartEndPairs[$this->getFilename()]) ? $this->scopeStartEndPairs[$this->getFilename()] : [];
@@ -357,7 +369,7 @@ class VariableAnalysisSniff implements Sniff
 	 * Calls `processScopeClose()` for each closed scope.
 =======
 	 * Calls `processScopeClose()` for each closed scope. Requires that
-	 * `scopeEndIndexCache` has been populated for the current file by
+	 * `scopeStartEndPairs` has been populated for the current file by
 	 * `recordScopeStartAndEnd()`.
 >>>>>>> 766adf5 (Fix some minor type errors and improve code comments)
 	 *
