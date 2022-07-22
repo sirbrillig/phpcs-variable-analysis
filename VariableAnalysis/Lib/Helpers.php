@@ -889,7 +889,7 @@ class Helpers
 	 * @param File $phpcsFile
 	 * @param int  $scopeStartIndex
 	 *
-	 * @return int
+	 * @return int|null
 	 */
 	public static function getScopeCloseForScopeOpen(File $phpcsFile, $scopeStartIndex)
 	{

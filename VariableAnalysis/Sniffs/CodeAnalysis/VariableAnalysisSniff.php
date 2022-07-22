@@ -34,7 +34,7 @@ class VariableAnalysisSniff implements Sniff
 	 *
 	 * Each array of scopes is keyed by a string containing the filename (see `getFilename`).
 	 *
-	 * @var ScopeInfo[][]
+	 * @var array<string, ScopeInfo[]>
 	 */
 	private $scopeStartEndPairs = [];
 
@@ -159,6 +159,8 @@ class VariableAnalysisSniff implements Sniff
 	public $allowUnusedVariablesBeforeRequire = false;
 
 	/**
+	 * Decide which tokens to scan.
+	 *
 	 * @return (int|string)[]
 	 */
 	public function register()
@@ -203,6 +205,11 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Scan and process a token.
+	 *
+	 * This is the main processing function of the sniff. Will run on every token
+	 * for which `register()` returns true.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
@@ -219,18 +226,26 @@ class VariableAnalysisSniff implements Sniff
 
 		$token = $tokens[$stackPtr];
 
+		// Cache the current PHPCS File in an instance variable so it can be more
+		// easily accessed in other places which aren't passed the object.
 		if ($this->currentFile !== $phpcsFile) {
 			$this->currentFile = $phpcsFile;
+			// Reset the scope end cache when the File changes since it is per-file.
 			$this->scopeEndIndexCache = [];
 		}
 
-		// Add the global scope
+		// Add the global scope for the current file to our scope indexes.
 		if (empty($this->scopeStartEndPairs[$this->getFilename()])) {
 			$this->recordScopeStartAndEnd($phpcsFile, 0);
 		}
 
+		// Report variables defined in the current scope but not used as unused
+		// variables if the current token closes a scope.
 		$this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
 
+		// Find and process variables to perform two jobs: to record variable
+		// definition or use, and to report variables as undefined if they are used
+		// without having been first defined.
 		if ($token['code'] === T_VARIABLE) {
 			$this->processVariable($phpcsFile, $stackPtr);
 			return;
@@ -243,13 +258,21 @@ class VariableAnalysisSniff implements Sniff
 			$this->processCompact($phpcsFile, $stackPtr);
 			return;
 		}
+
+		// If the current token is a call to `get_defined_vars()`, consider that a
+		// usage of all variables in the current scope.
 		if ($this->isGetDefinedVars($phpcsFile, $stackPtr)) {
 			Helpers::debug('get_defined_vars is being called');
 			$this->markAllVariablesRead($phpcsFile, $stackPtr);
 			return;
 		}
-		if (in_array($token['code'], $scopeStartTokenTypes, true)
-			|| Helpers::isArrowFunction($phpcsFile, $stackPtr)
+
+		// If the current token starts a scope, record that scope's start and end
+		// indexes so that we can determine if variables in that scope are defined
+		// and/or used.
+		if (
+			in_array($token['code'], $scopeStartTokenTypes, true) ||
+			Helpers::isArrowFunction($phpcsFile, $stackPtr)
 		) {
 			Helpers::debug('found scope condition', $token);
 			$this->recordScopeStartAndEnd($phpcsFile, $stackPtr);
@@ -258,6 +281,8 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Add a scope's start and end index to our record for the file.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $scopeStartIndex
 	 *
@@ -266,6 +291,9 @@ class VariableAnalysisSniff implements Sniff
 	private function recordScopeStartAndEnd($phpcsFile, $scopeStartIndex)
 	{
 		$scopeEndIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $scopeStartIndex);
+		if (is_null($scopeEndIndex)) {
+			return;
+		}
 		$filename = $this->getFilename();
 		if (! isset($this->scopeStartEndPairs[$filename])) {
 			$this->scopeStartEndPairs[$filename] = [];
@@ -276,6 +304,50 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Find scopes closed by a token.
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return ScopeInfo[]
+	 */
+	private function getScopesClosedBy($phpcsFile, $stackPtr)
+	{
+		if (! in_array($stackPtr, $this->scopeEndIndexCache, true)) {
+			return [];
+		}
+		$scopePairsForFile = isset($this->scopeStartEndPairs[$this->getFilename()]) ? $this->scopeStartEndPairs[$this->getFilename()] : [];
+		$scopeIndicesThisCloses = array_reduce(
+			$scopePairsForFile,
+			/**
+			 * @param ScopeInfo[] $found
+			 * @param ScopeInfo   $scope
+			 *
+			 * @return ScopeInfo[]
+			 */
+			function ($found, $scope) use ($stackPtr) {
+				if (! is_int($scope->scopeEndIndex)) {
+					Helpers::debug('No scope closer found for scope start', $scope->scopeStartIndex);
+					return $found;
+				}
+
+				if ($stackPtr === $scope->scopeEndIndex) {
+					$found[] = $scope;
+				}
+				return $found;
+			},
+			[]
+		);
+		return $scopeIndicesThisCloses;
+	}
+
+	/**
+	 * Find scopes closed by a token and process their variables.
+	 *
+	 * Calls `processScopeClose()` for each closed scope. Requires that
+	 * `scopeEndIndexCache` has been populated for the current file by
+	 * `recordScopeStartAndEnd()`.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
@@ -283,21 +355,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	private function searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr)
 	{
-		if (! in_array($stackPtr, $this->scopeEndIndexCache, true)) {
-			return;
-		}
-		$scopePairsForFile = isset($this->scopeStartEndPairs[$this->getFilename()]) ? $this->scopeStartEndPairs[$this->getFilename()] : [];
-		$scopeIndicesThisCloses = array_reduce($scopePairsForFile, function ($found, $scope) use ($stackPtr) {
-			if (! is_int($scope->scopeEndIndex)) {
-				Helpers::debug('No scope closer found for scope start', $scope->scopeStartIndex);
-				return $found;
-			}
-
-			if ($stackPtr === $scope->scopeEndIndex) {
-				$found[] = $scope;
-			}
-			return $found;
-		}, []);
+		$scopeIndicesThisCloses = $this->getScopesClosedBy($phpcsFile, $stackPtr);
 
 		foreach ($scopeIndicesThisCloses as $scopeIndexThisCloses) {
 			Helpers::debug('found closing scope at index', $stackPtr, 'for scopes starting at:', $scopeIndexThisCloses);
@@ -306,6 +364,8 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Return true if the token is a call to `get_defined_vars()`.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
@@ -1707,6 +1767,8 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Warn about an unused variable if it has not been used within a scope.
+	 *
 	 * @param File         $phpcsFile
 	 * @param VariableInfo $varInfo
 	 * @param ScopeInfo    $scopeInfo
@@ -1756,6 +1818,8 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Register warnings for a variable that is defined but not used.
+	 *
 	 * @param File         $phpcsFile
 	 * @param VariableInfo $varInfo
 	 *
