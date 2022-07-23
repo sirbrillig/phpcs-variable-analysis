@@ -17,12 +17,12 @@ class ScopeManager {
 	 * An associative array of a list of token index pairs which start and end
 	 * scopes and will be used to check for unused variables.
 	 *
-	 * Each array of scopes is keyed by a string containing the filename (see
-	 * `getFilename`).
+	 * The outer array of scopes is keyed by a string containing the filename.
+	 * The inner array of scopes in keyed by the scope start token index.
 	 *
-	 * @var array<string, ScopeInfo[]>
+	 * @var array<string, array<int, ScopeInfo>>
 	 */
-	private $scopeStartEndPairs = [];
+	private $scopes = [];
 
 	/**
 	 * Add a scope's start and end index to our record for the file.
@@ -30,17 +30,19 @@ class ScopeManager {
 	 * @param File $phpcsFile
 	 * @param int  $scopeStartIndex
 	 *
-	 * @return void
+	 * @return ScopeInfo
 	 */
 	public function recordScopeStartAndEnd($phpcsFile, $scopeStartIndex)
 	{
 		$scopeEndIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $scopeStartIndex);
 		$filename = $phpcsFile->getFilename();
-		if (! isset($this->scopeStartEndPairs[$filename])) {
-			$this->scopeStartEndPairs[$filename] = [];
+		if (! isset($this->scopes[$filename])) {
+			$this->scopes[$filename] = [];
 		}
 		Helpers::debug('recording scope for file', $filename, 'start/end', $scopeStartIndex, $scopeEndIndex);
-		$this->scopeStartEndPairs[$filename][] = new ScopeInfo($scopeStartIndex, $scopeEndIndex);
+		$scope = new ScopeInfo($scopeStartIndex, $scopeEndIndex);
+		$this->scopes[$filename][$scopeStartIndex] = $scope;
+		return $scope;
 	}
 
 	/**
@@ -52,9 +54,25 @@ class ScopeManager {
 	 */
 	public function getScopesForFilename($filename)
 	{
-		if (empty($this->scopeStartEndPairs[$filename])) {
+		if (empty($this->scopes[$filename])) {
 			return [];
 		}
-		return $this->scopeStartEndPairs[$filename];
+		return array_values($this->scopes[$filename]);
+	}
+
+	/**
+	 * Return the scope for a scope start index.
+	 *
+	 * @param string  $filename
+	 * @param int  $scopeStartIndex
+	 *
+	 * @return ScopeInfo|null
+	 */
+	public function getScopeForScopeStart($filename, $scopeStartIndex)
+	{
+		if (empty($this->scopes[$filename][$scopeStartIndex])) {
+			return null;
+		}
+		return $this->scopes[$filename][$scopeStartIndex];
 	}
 }
