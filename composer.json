@@ -41,7 +41,7 @@
         "coverage": "./vendor/bin/phpunit",
         "lint": "./vendor/bin/phpcs",
         "phpstan": "./vendor/bin/phpstan analyse",
-        "psalm": "./vendor/bin/psalm"
+        "psalm": "./vendor/bin/psalm --no-cache"
     },
     "require" : {
         "php" : ">=5.4.0",
