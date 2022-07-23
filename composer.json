@@ -40,6 +40,7 @@
         "test": "./vendor/bin/phpunit --no-coverage",
         "coverage": "./vendor/bin/phpunit",
         "lint": "./vendor/bin/phpcs",
+        "fix": "./vendor/bin/phpcbf",
         "phpstan": "./vendor/bin/phpstan analyse",
         "psalm": "./vendor/bin/psalm --no-cache"
     },
