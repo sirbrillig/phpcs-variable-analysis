@@ -42,7 +42,8 @@
         "lint": "./vendor/bin/phpcs",
         "fix": "./vendor/bin/phpcbf",
         "phpstan": "./vendor/bin/phpstan analyse",
-        "psalm": "./vendor/bin/psalm --no-cache"
+        "psalm": "./vendor/bin/psalm --no-cache",
+        "static-analysis": "composer phpstan && composer psalm"
     },
     "require" : {
         "php" : ">=5.4.0",
