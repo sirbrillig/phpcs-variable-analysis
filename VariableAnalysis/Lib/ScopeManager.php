@@ -11,8 +11,8 @@ use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
 
-class ScopeManager {
-
+class ScopeManager
+{
 	/**
 	 * An associative array of a list of token index pairs which start and end
 	 * scopes and will be used to check for unused variables.
@@ -48,7 +48,7 @@ class ScopeManager {
 	/**
 	 * Return the scopes for a file.
 	 *
-	 * @param string  $filename
+	 * @param string $filename
 	 *
 	 * @return ScopeInfo[]
 	 */
@@ -63,8 +63,8 @@ class ScopeManager {
 	/**
 	 * Return the scope for a scope start index.
 	 *
-	 * @param string  $filename
-	 * @param int  $scopeStartIndex
+	 * @param string $filename
+	 * @param int    $scopeStartIndex
 	 *
 	 * @return ScopeInfo|null
 	 */
@@ -79,8 +79,8 @@ class ScopeManager {
 	/**
 	 * Find scopes closed by a scope close index.
 	 *
-	 * @param string  $filename
-	 * @param int  $scopeEndIndex
+	 * @param string $filename
+	 * @param int    $scopeEndIndex
 	 *
 	 * @return ScopeInfo[]
 	 */
@@ -110,5 +110,4 @@ class ScopeManager {
 		);
 		return $scopeIndicesThisCloses;
 	}
-
 }
