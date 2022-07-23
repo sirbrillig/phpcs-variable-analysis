@@ -246,8 +246,8 @@ class VariableAnalysisSniff implements Sniff
 			$this->recordScopeStartAndEnd($phpcsFile, 0);
 		}
 
-		// Report variables defined in the current scope but not used as unused
-		// variables if the current token closes a scope.
+		// Report variables defined but not used in the current scope as unused
+		// variables if the current token closes scopes.
 		$this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
 
 		// Find and process variables to perform two jobs: to record variable
@@ -746,30 +746,30 @@ class VariableAnalysisSniff implements Sniff
 	 *
 	 * @return void
 	 */
-	protected function processVariableAsFunctionDefinitionArgument(File $phpcsFile, $stackPtr, $varName, $outerScope)
+	protected function processVariableAsFunctionParameter(File $phpcsFile, $stackPtr, $varName, $outerScope)
 	{
-		Helpers::debug('processVariableAsFunctionDefinitionArgument', $stackPtr, $varName);
+		Helpers::debug('processVariableAsFunctionParameter', $stackPtr, $varName);
 		$tokens = $phpcsFile->getTokens();
 
-		$functionPtr = Helpers::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr);
+		$functionPtr = Helpers::getFunctionIndexForFunctionParameter($phpcsFile, $stackPtr);
 		if (! is_int($functionPtr)) {
 			throw new \Exception("Function index not found for function argument index {$stackPtr}");
 		}
 
-		Helpers::debug('processVariableAsFunctionDefinitionArgument found function definition', $tokens[$functionPtr]);
+		Helpers::debug('processVariableAsFunctionParameter found function definition', $tokens[$functionPtr]);
 		$this->markVariableDeclaration($varName, ScopeType::PARAM, null, $stackPtr, $functionPtr);
 
 		// Are we pass-by-reference?
 		$referencePtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true, null, true);
 		if (($referencePtr !== false) && ($tokens[$referencePtr]['code'] === T_BITWISE_AND)) {
-			Helpers::debug('processVariableAsFunctionDefinitionArgument found pass-by-reference to scope', $outerScope);
+			Helpers::debug('processVariableAsFunctionParameter found pass-by-reference to scope', $outerScope);
 			$varInfo = $this->getOrCreateVariableInfo($varName, $functionPtr);
 			$varInfo->referencedVariableScope = $outerScope;
 		}
 
 		//  Are we optional with a default?
 		if (Helpers::getNextAssignPointer($phpcsFile, $stackPtr) !== null) {
-			Helpers::debug('processVariableAsFunctionDefinitionArgument optional with default');
+			Helpers::debug('processVariableAsFunctionParameter optional with default');
 			$this->markVariableAssignment($varName, $stackPtr, $functionPtr);
 		}
 	}
@@ -794,7 +794,7 @@ class VariableAnalysisSniff implements Sniff
 		if (! is_int($endOfArgsPtr)) {
 			throw new \Exception("Arguments index not found for function use index {$stackPtr} when processing variable {$varName}");
 		}
-		$functionPtr = Helpers::getFunctionIndexForFunctionArgument($phpcsFile, $endOfArgsPtr);
+		$functionPtr = Helpers::getFunctionIndexForFunctionParameter($phpcsFile, $endOfArgsPtr);
 		if (! is_int($functionPtr)) {
 			throw new \Exception("Function index not found for function use index {$stackPtr} (using {$endOfArgsPtr}) when processing variable {$varName}");
 		}
@@ -1496,7 +1496,7 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
-	 * Process a normal variable in the code
+	 * Process a normal variable in the code.
 	 *
 	 * Most importantly, this function determines if the variable use is a "read"
 	 * (using the variable for something) or a "write" (an assignment) or,
@@ -1509,7 +1509,7 @@ class VariableAnalysisSniff implements Sniff
 	 *
 	 * We can also determine, once the scan has hit the end of a scope, if any of
 	 * the variables within that scope have been defined ("write") without being
-	 * used ("read"). That behavior, however, happens in the `processScopeClose`
+	 * used ("read"). That behavior, however, happens in the `processScopeClose()`
 	 * function using the data gathered by this function.
 	 *
 	 * Some variables are used in more complex ways, so there are other similar
@@ -1526,8 +1526,11 @@ class VariableAnalysisSniff implements Sniff
 		$tokens = $phpcsFile->getTokens();
 		$token  = $tokens[$stackPtr];
 
+		// Get the name of the variable.
 		$varName = Helpers::normalizeVarName($token['content']);
 		Helpers::debug("examining token for variable '{$varName}' on line {$token['line']}", $token);
+
+		// Find the start of the current scope.
 		$currScope = Helpers::findVariableScope($phpcsFile, $stackPtr);
 		if ($currScope === null) {
 			Helpers::debug('no scope found');
@@ -1562,9 +1565,9 @@ class VariableAnalysisSniff implements Sniff
 		}
 
 		// Are we a function or closure parameter?
-		if (Helpers::isTokenInsideFunctionDefinitionArgumentList($phpcsFile, $stackPtr)) {
-			Helpers::debug('found function definition argument');
-			$this->processVariableAsFunctionDefinitionArgument($phpcsFile, $stackPtr, $varName, $currScope);
+		if (Helpers::isTokenFunctionParameter($phpcsFile, $stackPtr)) {
+			Helpers::debug('found function definition parameter');
+			$this->processVariableAsFunctionParameter($phpcsFile, $stackPtr, $varName, $currScope);
 			return;
 		}
 
