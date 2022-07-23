@@ -558,7 +558,7 @@ class VariableAnalysisSniff implements Sniff
 	 * Record that a variable has been defined within a scope.
 	 *
 	 * @param string  $varName
-	 * @param string  $scopeType
+	 * @param ScopeType::PARAM|ScopeType::BOUND|ScopeType::LOCAL|ScopeType::GLOBALSCOPE|ScopeType::STATICSCOPE  $scopeType
 	 * @param ?string $typeHint
 	 * @param int     $stackPtr
 	 * @param int     $currScope
