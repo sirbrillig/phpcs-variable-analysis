@@ -1950,7 +1950,7 @@ class VariableAnalysisSniff implements Sniff
 				$indexForWarning,
 				'UnusedVariable',
 				[
-					VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType],
+					VariableInfo::$scopeTypeDescriptions[$varInfo->scopeType ?: ScopeType::LOCAL],
 					"\${$varInfo->name}",
 				]
 			);

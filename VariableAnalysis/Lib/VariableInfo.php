@@ -17,7 +17,7 @@ class VariableInfo
 	/**
 	 * What scope the variable has: local, param, static, global, bound
 	 *
-	 * @var ScopeType::PARAM|ScopeType::BOUND|ScopeType::LOCAL|ScopeType::GLOBALSCOPE|ScopeType::STATICSCOPE
+	 * @var ScopeType::PARAM|ScopeType::BOUND|ScopeType::LOCAL|ScopeType::GLOBALSCOPE|ScopeType::STATICSCOPE|null
 	 */
 	public $scopeType;
 
