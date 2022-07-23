@@ -889,12 +889,12 @@ class Helpers
 	 * @param File $phpcsFile
 	 * @param int  $scopeStartIndex
 	 *
-	 * @return int|null
+	 * @return int
 	 */
 	public static function getScopeCloseForScopeOpen(File $phpcsFile, $scopeStartIndex)
 	{
 		$tokens = $phpcsFile->getTokens();
-		$scopeCloserIndex = isset($tokens[$scopeStartIndex]['scope_closer']) ? $tokens[$scopeStartIndex]['scope_closer'] : null;
+		$scopeCloserIndex = isset($tokens[$scopeStartIndex]['scope_closer']) ? $tokens[$scopeStartIndex]['scope_closer'] : 0;
 
 		if (self::isArrowFunction($phpcsFile, $scopeStartIndex)) {
 			$arrowFunctionInfo = self::getArrowFunctionOpenClose($phpcsFile, $scopeStartIndex);

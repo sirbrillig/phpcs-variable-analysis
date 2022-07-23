@@ -298,9 +298,6 @@ class VariableAnalysisSniff implements Sniff
 	private function recordScopeStartAndEnd($phpcsFile, $scopeStartIndex)
 	{
 		$scopeEndIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $scopeStartIndex);
-		if (is_null($scopeEndIndex)) {
-			return;
-		}
 		$filename = $this->getFilename();
 		if (! isset($this->scopeStartEndPairs[$filename])) {
 			$this->scopeStartEndPairs[$filename] = [];
