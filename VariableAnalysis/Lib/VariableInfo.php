@@ -22,7 +22,7 @@ class VariableInfo
 	public $scopeType;
 
 	/**
-	 * @var string
+	 * @var string|null
 	 */
 	public $typeHint;
 
