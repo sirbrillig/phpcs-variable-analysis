@@ -22,17 +22,6 @@ class VariableAnalysisSniff implements Sniff
 	protected $currentFile = null;
 
 	/**
-	 * An associative array of scopes for variables encountered so far and the
-	 * variables within them.
-	 *
-	 * Each scope is keyed by a string of the form `filename:scopeStartIndex`
-	 * (see `getScopeKey`).
-	 *
-	 * @var array<string, ScopeInfo>
-	 */
-	private $scopes = [];
-
-	/**
 	 * @var ScopeManager
 	 */
 	private $scopeManager;
@@ -377,16 +366,6 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
-	 * @param int $currScope
-	 *
-	 * @return string
-	 */
-	protected function getScopeKey($currScope)
-	{
-		return $this->getFilename() . ':' . $currScope;
-	}
-
-	/**
 	 * @return string
 	 */
 	protected function getFilename()
@@ -397,26 +376,18 @@ class VariableAnalysisSniff implements Sniff
 	/**
 	 * @param int $currScope
 	 *
-	 * @return ScopeInfo|null
-	 */
-	protected function getScopeInfo($currScope)
-	{
-		$scopeKey = $this->getScopeKey($currScope);
-		return isset($this->scopes[$scopeKey]) ? $this->scopes[$scopeKey] : null;
-	}
-
-	/**
-	 * @param int $currScope
-	 *
 	 * @return ScopeInfo
 	 */
 	protected function getOrCreateScopeInfo($currScope)
 	{
-		$scopeKey = $this->getScopeKey($currScope);
-		if (!isset($this->scopes[$scopeKey])) {
-			$this->scopes[$scopeKey] = new ScopeInfo($currScope);
+		$scope = $this->scopeManager->getScopeForScopeStart($this->getFilename(), $currScope);
+		if (! $scope) {
+			if (! $this->currentFile) {
+				throw new \Exception('Cannot create scope info; current file is not set.');
+			}
+			$scope = $this->scopeManager->recordScopeStartAndEnd($this->currentFile, $currScope);
 		}
-		return $this->scopes[$scopeKey];
+		return $scope;
 	}
 
 	/**
@@ -427,7 +398,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	protected function getVariableInfo($varName, $currScope)
 	{
-		$scopeInfo = $this->getScopeInfo($currScope);
+		$scopeInfo = $this->scopeManager->getScopeForScopeStart($this->getFilename(), $currScope);
 		return ($scopeInfo && isset($scopeInfo->variables[$varName])) ? $scopeInfo->variables[$varName] : null;
 	}
 
@@ -1861,7 +1832,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	protected function processScopeClose(File $phpcsFile, $stackPtr)
 	{
-		$scopeInfo = $this->getScopeInfo($stackPtr);
+		$scopeInfo = $this->scopeManager->getScopeForScopeStart($phpcsFile->getFilename(), $stackPtr);
 		if (is_null($scopeInfo)) {
 			return;
 		}
