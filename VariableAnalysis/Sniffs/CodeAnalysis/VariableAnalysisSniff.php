@@ -21,18 +21,25 @@ class VariableAnalysisSniff implements Sniff
 	protected $currentFile = null;
 
 	/**
-	 * An associative array of scopes for variables encountered so far and the variables within them.
+	 * An associative array of scopes for variables encountered so far and the
+	 * variables within them.
 	 *
-	 * Each scope is keyed by a string of the form `filename:scopeStartIndex` (see `getScopeKey`).
+	 * Each scope is keyed by a string of the form `filename:scopeStartIndex`
+	 * (see `getScopeKey`).
 	 *
-	 * @var ScopeInfo[]
+	 * @var array<string, ScopeInfo>
 	 */
 	private $scopes = [];
 
 	/**
-	 * An associative array of a list of token index pairs which start and end scopes and will be used to check for unused variables.
+	 * An associative array of a list of token index pairs which start and end
+	 * scopes and will be used to check for unused variables.
 	 *
-	 * Each array of scopes is keyed by a string containing the filename (see `getFilename`).
+	 * Each array of scopes is keyed by a string containing the filename (see
+	 * `getFilename`).
+	 *
+	 * Unlike the `ScopeInfo` objects stored in `$this->scopes`, these objects do
+	 * not track variables themselves, only the position of the scope boundaries.
 	 *
 	 * @var array<string, ScopeInfo[]>
 	 */
@@ -344,9 +351,7 @@ class VariableAnalysisSniff implements Sniff
 	/**
 	 * Find scopes closed by a token and process their variables.
 	 *
-	 * Calls `processScopeClose()` for each closed scope. Requires that
-	 * `scopeEndIndexCache` has been populated for the current file by
-	 * `recordScopeStartAndEnd()`.
+	 * Calls `processScopeClose()` for each closed scope.
 	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
@@ -442,6 +447,12 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Returns variable data for a variable at an index.
+	 *
+	 * The variable will also be added to the list of variables stored in its
+	 * scope so that its use or non-use can be reported when those scopes end by
+	 * `processScopeClose()`.
+	 *
 	 * @param string $varName
 	 * @param int    $currScope
 	 *
@@ -483,6 +494,16 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Record that a variable has been defined and assigned a value.
+	 *
+	 * If a variable has been defined within a scope, it will not be marked as
+	 * undefined when that variable is later used. If it is not used, it will be
+	 * marked as unused when that scope ends.
+	 *
+	 * Sometimes it's possible to assign something to a variable without
+	 * definining it (eg: assignment to a reference); in that case, use
+	 * `markVariableAssignmentWithoutInitialization()`.
+	 *
 	 * @param string $varName
 	 * @param int    $stackPtr
 	 * @param int    $currScope
@@ -504,6 +525,13 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Record that a variable has been assigned a value.
+	 *
+	 * Does not record that a variable has been defined, which is the usual state
+	 * of affairs. For that, use `markVariableAssignment()`.
+	 *
+	 * This is useful for assignments to references.
+	 *
 	 * @param string $varName
 	 * @param int    $stackPtr
 	 * @param int    $currScope
@@ -530,6 +558,8 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Record that a variable has been defined within a scope.
+	 *
 	 * @param string  $varName
 	 * @param string  $scopeType
 	 * @param ?string $typeHint
@@ -604,6 +634,12 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Record that a variable has been used within a scope.
+	 *
+	 * If the variable has not been defined first, this will still mark it used.
+	 * To display a warning for undefined variables, use
+	 * `markVariableReadAndWarnIfUndefined()`.
+	 *
 	 * @param string $varName
 	 * @param int    $stackPtr
 	 * @param int    $currScope
@@ -620,6 +656,8 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Return true if a variable is defined within a scope.
+	 *
 	 * @param string $varName
 	 * @param int    $stackPtr
 	 * @param int    $currScope
@@ -643,6 +681,8 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Record a variable use and report a warning if the variable is undefined.
+	 *
 	 * @param File   $phpcsFile
 	 * @param string $varName
 	 * @param int    $stackPtr
@@ -673,6 +713,11 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Mark all variables within a scope as being used.
+	 *
+	 * This will prevent any of the variables in that scope from being reported
+	 * as unused.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
@@ -693,7 +738,7 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
-	 * Process a variable if it is inside a function definition
+	 * Process a parameter definition if it is inside a function definition.
 	 *
 	 * This does not include variables imported by a "use" statement.
 	 *
@@ -733,7 +778,7 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
-	 * Process a variable if it is inside a function's "use" import
+	 * Process a variable definition if it is inside a function's "use" import.
 	 *
 	 * @param File   $phpcsFile
 	 * @param int    $stackPtr
@@ -781,6 +826,14 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Process a class property that is being defined.
+	 *
+	 * Property definitions are ignored currently because all property access is
+	 * legal, even to undefined properties.
+	 *
+	 * Can be called for any token and will return false if the variable is not
+	 * of this type.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
@@ -820,6 +873,11 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Process a variable that is being accessed inside a catch block.
+	 *
+	 * Can be called for any token and will return false if the variable is not
+	 * of this type.
+	 *
 	 * @param File   $phpcsFile
 	 * @param int    $stackPtr
 	 * @param string $varName
@@ -852,6 +910,13 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Process a variable that is being accessed as a member of `$this`.
+	 *
+	 * Looks for variables of the form `$this->myVariable`.
+	 *
+	 * Can be called for any token and will return false if the variable is not
+	 * of this type.
+	 *
 	 * @param File   $phpcsFile
 	 * @param int    $stackPtr
 	 * @param string $varName
@@ -892,6 +957,11 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Process a superglobal variable that is being accessed.
+	 *
+	 * Can be called for any token and will return false if the variable is not
+	 * of this type.
+	 *
 	 * @param string $varName
 	 *
 	 * @return bool
@@ -919,6 +989,14 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Process a variable that is being accessed with static syntax.
+	 *
+	 * That is, this will record the use of a variable of the form
+	 * `MyClass::$myVariable` or `self::$myVariable`.
+	 *
+	 * Can be called for any token and will return false if the variable is not
+	 * of this type.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
@@ -997,6 +1075,15 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Process a variable that is being assigned.
+	 *
+	 * This will record that the variable has been defined within a scope so that
+	 * later we can determine if it it unused and we can guarantee that any
+	 * future uses of the variable are not using an undefined variable.
+	 *
+	 * References (on either side of an assignment) behave differently and this
+	 * function handles those cases as well.
+	 *
 	 * @param File   $phpcsFile
 	 * @param int    $stackPtr
 	 * @param string $varName
@@ -1060,6 +1147,18 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Processes variables destructured from an array using shorthand list assignment.
+	 *
+	 * This will record the definition and assignment of variables defined using
+	 * the format:
+	 *
+	 * ```
+	 * [ $foo, $bar, $baz ] = $ary;
+	 * ```
+	 *
+	 * Can be called for any token and will return false if the variable is not
+	 * of this type.
+	 *
 	 * @param File   $phpcsFile
 	 * @param int    $stackPtr
 	 * @param string $varName
@@ -1096,6 +1195,18 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Processes variables destructured from an array using list assignment.
+	 *
+	 * This will record the definition and assignment of variables defined using
+	 * the format:
+	 *
+	 * ```
+	 * list( $foo, $bar, $baz ) = $ary;
+	 * ```
+	 *
+	 * Can be called for any token and will return false if the variable is not
+	 * of this type.
+	 *
 	 * @param File   $phpcsFile
 	 * @param int    $stackPtr
 	 * @param string $varName
@@ -1139,6 +1250,11 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Process a variable being defined (imported, really) with the `global` keyword.
+	 *
+	 * Can be called for any token and will return false if the variable is not
+	 * of this type.
+	 *
 	 * @param File   $phpcsFile
 	 * @param int    $stackPtr
 	 * @param string $varName
