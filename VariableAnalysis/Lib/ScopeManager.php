@@ -75,4 +75,40 @@ class ScopeManager {
 		}
 		return $this->scopes[$filename][$scopeStartIndex];
 	}
+
+	/**
+	 * Find scopes closed by a scope close index.
+	 *
+	 * @param string  $filename
+	 * @param int  $scopeEndIndex
+	 *
+	 * @return ScopeInfo[]
+	 */
+	public function getScopesForScopeEnd($filename, $scopeEndIndex)
+	{
+		$scopePairsForFile = $this->getScopesForFilename($filename);
+		$scopeIndicesThisCloses = array_reduce(
+			$scopePairsForFile,
+			/**
+			 * @param ScopeInfo[] $found
+			 * @param ScopeInfo   $scope
+			 *
+			 * @return ScopeInfo[]
+			 */
+			function ($found, $scope) use ($scopeEndIndex) {
+				if (! is_int($scope->scopeEndIndex)) {
+					Helpers::debug('No scope closer found for scope start', $scope->scopeStartIndex);
+					return $found;
+				}
+
+				if ($scopeEndIndex === $scope->scopeEndIndex) {
+					$found[] = $scope;
+				}
+				return $found;
+			},
+			[]
+		);
+		return $scopeIndicesThisCloses;
+	}
+
 }

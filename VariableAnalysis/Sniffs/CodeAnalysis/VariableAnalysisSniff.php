@@ -265,64 +265,6 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
-	 * Find scope close indexes for a file.
-	 *
-	 * @param File $phpcsFile
-	 *
-	 * @return int[]
-	 */
-	private function getScopeCloseIndexes($phpcsFile) {
-		$filename = $phpcsFile->getFilename();
-		$indexes = [];
-		foreach($this->scopeManager->getScopesForFilename($filename) as $scopeInfo) {
-			if ($scopeInfo->scopeEndIndex) {
-				$indexes[] = $scopeInfo->scopeEndIndex;
-			}
-		}
-		return array_unique($indexes);
-	}
-
-	/**
-	 * Find scopes closed by a token.
-	 *
-	 * @param File $phpcsFile
-	 * @param int  $stackPtr
-	 *
-	 * @return ScopeInfo[]
-	 */
-	private function getScopesClosedBy($phpcsFile, $stackPtr)
-	{
-		$scopeEndIndexes = $this->getScopeCloseIndexes($phpcsFile);
-		if (! in_array($stackPtr, $scopeEndIndexes, true)) {
-			return [];
-		}
-		$filename = $phpcsFile->getFilename();
-		$scopePairsForFile = $this->scopeManager->getScopesForFilename($filename);
-		$scopeIndicesThisCloses = array_reduce(
-			$scopePairsForFile,
-			/**
-			 * @param ScopeInfo[] $found
-			 * @param ScopeInfo   $scope
-			 *
-			 * @return ScopeInfo[]
-			 */
-			function ($found, $scope) use ($stackPtr) {
-				if (! is_int($scope->scopeEndIndex)) {
-					Helpers::debug('No scope closer found for scope start', $scope->scopeStartIndex);
-					return $found;
-				}
-
-				if ($stackPtr === $scope->scopeEndIndex) {
-					$found[] = $scope;
-				}
-				return $found;
-			},
-			[]
-		);
-		return $scopeIndicesThisCloses;
-	}
-
-	/**
 	 * Find scopes closed by a token and process their variables.
 	 *
 	 * Calls `processScopeClose()` for each closed scope.
@@ -334,7 +276,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	private function searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr)
 	{
-		$scopeIndicesThisCloses = $this->getScopesClosedBy($phpcsFile, $stackPtr);
+		$scopeIndicesThisCloses = $this->scopeManager->getScopesForScopeEnd($phpcsFile->getFilename(), $stackPtr);
 
 		foreach ($scopeIndicesThisCloses as $scopeIndexThisCloses) {
 			Helpers::debug('found closing scope at index', $stackPtr, 'for scopes starting at:', $scopeIndexThisCloses);
