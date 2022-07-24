@@ -55,6 +55,6 @@
         "phpcsstandards/phpcsdevcs": "^1.1",
         "phpstan/phpstan": "^1.7",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
-        "vimeo/psalm": "^1.1 || ^4.24"
+        "vimeo/psalm": "^0.3 || ^1.1 || ^4.24"
     }
 }
