@@ -3,13 +3,8 @@
 namespace VariableAnalysis\Lib;
 
 use VariableAnalysis\Lib\ScopeInfo;
-use VariableAnalysis\Lib\ScopeType;
-use VariableAnalysis\Lib\VariableInfo;
-use VariableAnalysis\Lib\Constants;
 use VariableAnalysis\Lib\Helpers;
-use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
-use PHP_CodeSniffer\Util\Tokens;
 
 class ScopeManager
 {
@@ -32,7 +27,7 @@ class ScopeManager
 	 *
 	 * @return ScopeInfo
 	 */
-	public function recordScopeStartAndEnd($phpcsFile, $scopeStartIndex)
+	public function recordScopeStartAndEnd(File $phpcsFile, $scopeStartIndex)
 	{
 		$scopeEndIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $scopeStartIndex);
 		$filename = $phpcsFile->getFilename();
