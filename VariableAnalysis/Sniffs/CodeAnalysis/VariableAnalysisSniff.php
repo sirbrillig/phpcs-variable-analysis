@@ -219,7 +219,8 @@ class VariableAnalysisSniff implements Sniff
 		}
 
 		// Add the global scope for the current file to our scope indexes.
-		if (empty($this->scopeManager->getScopesForFilename($phpcsFile->getFilename()))) {
+		$scopesForFilename = $this->scopeManager->getScopesForFilename($phpcsFile->getFilename());
+		if (empty($scopesForFilename)) {
 			$this->scopeManager->recordScopeStartAndEnd($phpcsFile, 0);
 		}
 
