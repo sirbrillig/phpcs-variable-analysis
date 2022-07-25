@@ -7,6 +7,7 @@ use VariableAnalysis\Lib\ScopeType;
 use VariableAnalysis\Lib\VariableInfo;
 use VariableAnalysis\Lib\Constants;
 use VariableAnalysis\Lib\Helpers;
+use VariableAnalysis\Lib\ScopeManager;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
@@ -21,36 +22,9 @@ class VariableAnalysisSniff implements Sniff
 	protected $currentFile = null;
 
 	/**
-	 * An associative array of scopes for variables encountered so far and the
-	 * variables within them.
-	 *
-	 * Each scope is keyed by a string of the form `filename:scopeStartIndex`
-	 * (see `getScopeKey`).
-	 *
-	 * @var array<string, ScopeInfo>
+	 * @var ScopeManager
 	 */
-	private $scopes = [];
-
-	/**
-	 * An associative array of a list of token index pairs which start and end
-	 * scopes and will be used to check for unused variables.
-	 *
-	 * Each array of scopes is keyed by a string containing the filename (see
-	 * `getFilename`).
-	 *
-	 * Unlike the `ScopeInfo` objects stored in `$this->scopes`, these objects do
-	 * not track variables themselves, only the position of the scope boundaries.
-	 *
-	 * @var array<string, ScopeInfo[]>
-	 */
-	private $scopeStartEndPairs = [];
-
-	/**
-	 * A cache of scope end indices in the current file to improve performance.
-	 *
-	 * @var int[]
-	 */
-	private $scopeEndIndexCache = [];
+	private $scopeManager;
 
 	/**
 	 * A list of custom functions which pass in variables to be initialized by
@@ -165,6 +139,11 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	public $allowUnusedVariablesBeforeRequire = false;
 
+	public function __construct()
+	{
+		$this->scopeManager = new ScopeManager();
+	}
+
 	/**
 	 * Decide which tokens to scan.
 	 *
@@ -237,13 +216,12 @@ class VariableAnalysisSniff implements Sniff
 		// easily accessed in other places which aren't passed the object.
 		if ($this->currentFile !== $phpcsFile) {
 			$this->currentFile = $phpcsFile;
-			// Reset the scope end cache when the File changes since it is per-file.
-			$this->scopeEndIndexCache = [];
 		}
 
 		// Add the global scope for the current file to our scope indexes.
-		if (empty($this->scopeStartEndPairs[$this->getFilename()])) {
-			$this->recordScopeStartAndEnd($phpcsFile, 0);
+		$scopesForFilename = $this->scopeManager->getScopesForFilename($phpcsFile->getFilename());
+		if (empty($scopesForFilename)) {
+			$this->scopeManager->recordScopeStartAndEnd($phpcsFile, 0);
 		}
 
 		// Report variables defined but not used in the current scope as unused
@@ -282,67 +260,9 @@ class VariableAnalysisSniff implements Sniff
 			Helpers::isArrowFunction($phpcsFile, $stackPtr)
 		) {
 			Helpers::debug('found scope condition', $token);
-			$this->recordScopeStartAndEnd($phpcsFile, $stackPtr);
+			$this->scopeManager->recordScopeStartAndEnd($phpcsFile, $stackPtr);
 			return;
 		}
-	}
-
-	/**
-	 * Add a scope's start and end index to our record for the file.
-	 *
-	 * @param File $phpcsFile
-	 * @param int  $scopeStartIndex
-	 *
-	 * @return void
-	 */
-	private function recordScopeStartAndEnd($phpcsFile, $scopeStartIndex)
-	{
-		$scopeEndIndex = Helpers::getScopeCloseForScopeOpen($phpcsFile, $scopeStartIndex);
-		$filename = $this->getFilename();
-		if (! isset($this->scopeStartEndPairs[$filename])) {
-			$this->scopeStartEndPairs[$filename] = [];
-		}
-		Helpers::debug('recording scope for file', $filename, 'start/end', $scopeStartIndex, $scopeEndIndex);
-		$this->scopeStartEndPairs[$filename][] = new ScopeInfo($scopeStartIndex, $scopeEndIndex);
-		$this->scopeEndIndexCache[] = $scopeEndIndex;
-	}
-
-	/**
-	 * Find scopes closed by a token.
-	 *
-	 * @param File $phpcsFile
-	 * @param int  $stackPtr
-	 *
-	 * @return ScopeInfo[]
-	 */
-	private function getScopesClosedBy($phpcsFile, $stackPtr)
-	{
-		if (! in_array($stackPtr, $this->scopeEndIndexCache, true)) {
-			return [];
-		}
-		$scopePairsForFile = isset($this->scopeStartEndPairs[$this->getFilename()]) ? $this->scopeStartEndPairs[$this->getFilename()] : [];
-		$scopeIndicesThisCloses = array_reduce(
-			$scopePairsForFile,
-			/**
-			 * @param ScopeInfo[] $found
-			 * @param ScopeInfo   $scope
-			 *
-			 * @return ScopeInfo[]
-			 */
-			function ($found, $scope) use ($stackPtr) {
-				if (! is_int($scope->scopeEndIndex)) {
-					Helpers::debug('No scope closer found for scope start', $scope->scopeStartIndex);
-					return $found;
-				}
-
-				if ($stackPtr === $scope->scopeEndIndex) {
-					$found[] = $scope;
-				}
-				return $found;
-			},
-			[]
-		);
-		return $scopeIndicesThisCloses;
 	}
 
 	/**
@@ -357,7 +277,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	private function searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr)
 	{
-		$scopeIndicesThisCloses = $this->getScopesClosedBy($phpcsFile, $stackPtr);
+		$scopeIndicesThisCloses = $this->scopeManager->getScopesForScopeEnd($phpcsFile->getFilename(), $stackPtr);
 
 		foreach ($scopeIndicesThisCloses as $scopeIndexThisCloses) {
 			Helpers::debug('found closing scope at index', $stackPtr, 'for scopes starting at:', $scopeIndexThisCloses);
@@ -389,16 +309,6 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
-	 * @param int $currScope
-	 *
-	 * @return string
-	 */
-	protected function getScopeKey($currScope)
-	{
-		return $this->getFilename() . ':' . $currScope;
-	}
-
-	/**
 	 * @return string
 	 */
 	protected function getFilename()
@@ -409,26 +319,18 @@ class VariableAnalysisSniff implements Sniff
 	/**
 	 * @param int $currScope
 	 *
-	 * @return ScopeInfo|null
-	 */
-	protected function getScopeInfo($currScope)
-	{
-		$scopeKey = $this->getScopeKey($currScope);
-		return isset($this->scopes[$scopeKey]) ? $this->scopes[$scopeKey] : null;
-	}
-
-	/**
-	 * @param int $currScope
-	 *
 	 * @return ScopeInfo
 	 */
 	protected function getOrCreateScopeInfo($currScope)
 	{
-		$scopeKey = $this->getScopeKey($currScope);
-		if (!isset($this->scopes[$scopeKey])) {
-			$this->scopes[$scopeKey] = new ScopeInfo($currScope);
+		$scope = $this->scopeManager->getScopeForScopeStart($this->getFilename(), $currScope);
+		if (! $scope) {
+			if (! $this->currentFile) {
+				throw new \Exception('Cannot create scope info; current file is not set.');
+			}
+			$scope = $this->scopeManager->recordScopeStartAndEnd($this->currentFile, $currScope);
 		}
-		return $this->scopes[$scopeKey];
+		return $scope;
 	}
 
 	/**
@@ -439,7 +341,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	protected function getVariableInfo($varName, $currScope)
 	{
-		$scopeInfo = $this->getScopeInfo($currScope);
+		$scopeInfo = $this->scopeManager->getScopeForScopeStart($this->getFilename(), $currScope);
 		return ($scopeInfo && isset($scopeInfo->variables[$varName])) ? $scopeInfo->variables[$varName] : null;
 	}
 
@@ -1873,7 +1775,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	protected function processScopeClose(File $phpcsFile, $stackPtr)
 	{
-		$scopeInfo = $this->getScopeInfo($stackPtr);
+		$scopeInfo = $this->scopeManager->getScopeForScopeStart($phpcsFile->getFilename(), $stackPtr);
 		if (is_null($scopeInfo)) {
 			return;
 		}
