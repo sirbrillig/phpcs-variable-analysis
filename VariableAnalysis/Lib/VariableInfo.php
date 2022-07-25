@@ -17,12 +17,12 @@ class VariableInfo
 	/**
 	 * What scope the variable has: local, param, static, global, bound
 	 *
-	 * @var string
+	 * @var ScopeType::PARAM|ScopeType::BOUND|ScopeType::LOCAL|ScopeType::GLOBALSCOPE|ScopeType::STATICSCOPE|null
 	 */
 	public $scopeType;
 
 	/**
-	 * @var string
+	 * @var string|null
 	 */
 	public $typeHint;
 
@@ -89,7 +89,7 @@ class VariableInfo
 	public $isForeachLoopAssociativeValue = false;
 
 	/**
-	 * @var string[]
+	 * @var array<ScopeType::PARAM|ScopeType::BOUND|ScopeType::LOCAL|ScopeType::GLOBALSCOPE|ScopeType::STATICSCOPE, string>
 	 */
 	public static $scopeTypeDescriptions = [
 		ScopeType::LOCAL  => 'variable',

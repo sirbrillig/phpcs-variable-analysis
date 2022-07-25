@@ -8,10 +8,10 @@
     #############################################################################
     -->
 
-    <file>.</file>
+    <file>./VariableAnalysis</file>
+    <file>./Tests</file>
 
     <exclude-pattern>./Tests/VariableAnalysisSniff/fixtures/</exclude-pattern>
-    <exclude-pattern>./vendor/</exclude-pattern>
 
     <!-- Only check PHP files. -->
     <arg name="extensions" value="php"/>

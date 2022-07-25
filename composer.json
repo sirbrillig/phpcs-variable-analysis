@@ -40,7 +40,10 @@
         "test": "./vendor/bin/phpunit --no-coverage",
         "coverage": "./vendor/bin/phpunit",
         "lint": "./vendor/bin/phpcs",
-        "phpstan": "./vendor/bin/phpstan analyse"
+        "fix": "./vendor/bin/phpcbf",
+        "phpstan": "./vendor/bin/phpstan analyse",
+        "psalm": "./vendor/bin/psalm --no-cache",
+        "static-analysis": "composer phpstan && composer psalm"
     },
     "require" : {
         "php" : ">=5.4.0",
@@ -51,6 +54,7 @@
         "sirbrillig/phpcs-import-detection": "^1.1",
         "phpcsstandards/phpcsdevcs": "^1.1",
         "phpstan/phpstan": "^1.7",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0"
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+        "vimeo/psalm": "^0.2 || ^0.3 || ^1.1 || ^4.24 || ^5.0@beta"
     }
 }

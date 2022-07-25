@@ -136,9 +136,9 @@ class Helpers
 	 *
 	 * @return bool
 	 */
-	public static function isTokenInsideFunctionDefinitionArgumentList(File $phpcsFile, $stackPtr)
+	public static function isTokenFunctionParameter(File $phpcsFile, $stackPtr)
 	{
-		return is_int(self::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr));
+		return is_int(self::getFunctionIndexForFunctionParameter($phpcsFile, $stackPtr));
 	}
 
 	/**
@@ -167,7 +167,7 @@ class Helpers
 	 *
 	 * @return ?int
 	 */
-	public static function getFunctionIndexForFunctionArgument(File $phpcsFile, $stackPtr)
+	public static function getFunctionIndexForFunctionParameter(File $phpcsFile, $stackPtr)
 	{
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
@@ -437,8 +437,8 @@ class Helpers
 		}
 
 		// If there is no "conditions" array, this is a function definition argument.
-		if (self::isTokenInsideFunctionDefinitionArgumentList($phpcsFile, $stackPtr)) {
-			$functionPtr = self::getFunctionIndexForFunctionArgument($phpcsFile, $stackPtr);
+		if (self::isTokenFunctionParameter($phpcsFile, $stackPtr)) {
+			$functionPtr = self::getFunctionIndexForFunctionParameter($phpcsFile, $stackPtr);
 			if (! is_int($functionPtr)) {
 				throw new \Exception("Function index not found for function argument index {$stackPtr}");
 			}
@@ -894,7 +894,7 @@ class Helpers
 	public static function getScopeCloseForScopeOpen(File $phpcsFile, $scopeStartIndex)
 	{
 		$tokens = $phpcsFile->getTokens();
-		$scopeCloserIndex = isset($tokens[$scopeStartIndex]['scope_closer']) ? $tokens[$scopeStartIndex]['scope_closer'] : null;
+		$scopeCloserIndex = isset($tokens[$scopeStartIndex]['scope_closer']) ? $tokens[$scopeStartIndex]['scope_closer'] : 0;
 
 		if (self::isArrowFunction($phpcsFile, $scopeStartIndex)) {
 			$arrowFunctionInfo = self::getArrowFunctionOpenClose($phpcsFile, $scopeStartIndex);
