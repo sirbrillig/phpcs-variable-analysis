@@ -4,6 +4,7 @@ namespace VariableAnalysis\Lib;
 
 use PHP_CodeSniffer\Files\File;
 use VariableAnalysis\Lib\ScopeInfo;
+use VariableAnalysis\Lib\ForLoopInfo;
 use VariableAnalysis\Lib\ScopeType;
 use VariableAnalysis\Lib\VariableInfo;
 use PHP_CodeSniffer\Util\Tokens;
@@ -1167,5 +1168,91 @@ class Helpers
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return ForLoopInfo
+	 */
+	public static function makeForLoopInfo(File $phpcsFile, $stackPtr)
+	{
+		$tokens = $phpcsFile->getTokens();
+		$token = $tokens[$stackPtr];
+		$forIndex = $stackPtr;
+		$blockStart = $token['scope_opener'];
+		$blockEnd = $token['scope_closer'];
+		$initStart = intval($token['parenthesis_opener']) + 1;
+		$initEnd = null;
+		$conditionStart = null;
+		$conditionEnd = null;
+		$incrementStart = null;
+		$incrementEnd = $token['parenthesis_closer'] - 1;
+
+		$semicolonCount = 0;
+		$forLoopLevel = $tokens[$forIndex]['level'];
+		$forLoopNestedParensCount = 1;
+
+		if (isset($tokens[$forIndex]['nested_parenthesis'])) {
+			$forLoopNestedParensCount = count($tokens[$forIndex]['nested_parenthesis']) + 1;
+		}
+
+		for ($i = $initStart; ($i <= $incrementEnd && $semicolonCount < 2); $i++) {
+			if ($tokens[$i]['code'] !== T_SEMICOLON) {
+				continue;
+			}
+
+			if ($tokens[$i]['level'] !== $forLoopLevel) {
+				continue;
+			}
+
+			if (count($tokens[$i]['nested_parenthesis']) !== $forLoopNestedParensCount) {
+				continue;
+			}
+
+			switch ($semicolonCount) {
+				case 0:
+					$initEnd = $i;
+					$conditionStart = $initEnd + 1;
+					break;
+				case 1:
+					$conditionEnd = $i;
+					$incrementStart = $conditionEnd + 1;
+					break;
+			}
+			$semicolonCount += 1;
+		}
+
+		if ($initEnd === null || $conditionStart === null || $conditionEnd === null || $incrementStart === null) {
+			throw new \Exception("Cannot parse for loop at position {$forIndex}");
+		}
+
+		return new ForLoopInfo(
+			$forIndex,
+			$blockStart,
+			$blockEnd,
+			$initStart,
+			$initEnd,
+			$conditionStart,
+			$conditionEnd,
+			$incrementStart,
+			$incrementEnd
+		);
+	}
+
+	/**
+	 * @param int                     $stackPtr
+	 * @param array<int, ForLoopInfo> $forLoops
+	 * @return ForLoopInfo|null
+	 */
+	public static function getForLoopForIncrementVariable($stackPtr, $forLoops)
+	{
+		foreach ($forLoops as $forLoop) {
+			if ($stackPtr > $forLoop->incrementStart && $stackPtr < $forLoop->incrementEnd) {
+				return $forLoop;
+			}
+		}
+		return null;
 	}
 }
