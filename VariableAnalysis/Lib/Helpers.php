@@ -143,12 +143,17 @@ class Helpers
 	}
 
 	/**
+	 * Return true if the token is inside the arguments of a function call.
+	 *
+	 * For example, the variable `$foo` in `doSomething($foo)` is inside the
+	 * arguments to the call to `doSomething()`.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
-	public static function isTokenInsideFunctionCall(File $phpcsFile, $stackPtr)
+	public static function isTokenInsideFunctionCallArgument(File $phpcsFile, $stackPtr)
 	{
 		return is_int(self::getFunctionIndexForFunctionCallArgument($phpcsFile, $stackPtr));
 	}
@@ -986,6 +991,9 @@ class Helpers
 	/**
 	 * Find the index of the function keyword for a token in a function call's arguments
 	 *
+	 * For the variable `$foo` in the expression `doSomething($foo)`, this will
+	 * return the index of the `doSomething` token.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
@@ -1009,7 +1017,10 @@ class Helpers
 		if (! is_int($functionPtr) || ! isset($tokens[$functionPtr]['code'])) {
 			return null;
 		}
-		if ($tokens[$functionPtr]['code'] === 'function' || ($tokens[$functionPtr]['content'] === 'fn' && self::isArrowFunction($phpcsFile, $functionPtr))) {
+		if ($tokens[$functionPtr]['content'] === 'function' || ($tokens[$functionPtr]['content'] === 'fn' && self::isArrowFunction($phpcsFile, $functionPtr))) {
+			return null;
+		}
+		if (! empty($tokens[$functionPtr]['scope_opener'])) {
 			return null;
 		}
 		return $functionPtr;
