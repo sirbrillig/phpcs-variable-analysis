@@ -170,6 +170,7 @@ class VariableAnalysisSniff implements Sniff
 			T_SEMICOLON,
 			T_CLOSE_PARENTHESIS,
 			T_FOR,
+			T_ENDFOR,
 		];
 		if (defined('T_FN')) {
 			$types[] = T_FN;
