@@ -1192,8 +1192,12 @@ class Helpers
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 		$forIndex = $stackPtr;
-		$blockStart = $token['scope_opener'];
-		$blockEnd = $token['scope_closer'];
+		$blockStart = $token['parenthesis_closer'];
+		$blockEnd = $token['parenthesis_closer'];
+		if (isset($token['scope_opener'])) {
+		  $blockStart = $token['scope_opener'];
+		  $blockEnd = $token['scope_closer'];
+		}
 		$initStart = intval($token['parenthesis_opener']) + 1;
 		$initEnd = null;
 		$conditionStart = null;
