@@ -108,3 +108,16 @@ class ClassWithAssignedMembers {
         }
     }
 }
+
+class ClassWithConstructorPromotion {
+  public function __construct(
+        public string $name = 'Brent',
+        public string $role,
+        private string $role2,
+        protected string $role3,
+        public $nickname,
+        private $nickname2,
+        protected $nickname3
+  ) {
+  }
+}
