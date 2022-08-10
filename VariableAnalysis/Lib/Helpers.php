@@ -1193,10 +1193,18 @@ class Helpers
 		$token = $tokens[$stackPtr];
 		$forIndex = $stackPtr;
 		$blockStart = $token['parenthesis_closer'];
-		$blockEnd = $token['parenthesis_closer'];
 		if (isset($token['scope_opener'])) {
 		  $blockStart = $token['scope_opener'];
 		  $blockEnd = $token['scope_closer'];
+		} else {
+			// Some for loop blocks will not have scope positions because it they are
+			// inline (no curly braces) so we have to find the end of their scope by
+			// looking for the end of the next statement.
+			$nextSemicolonIndex = $phpcsFile->findNext([T_SEMICOLON], $token['parenthesis_closer']);
+			if (! is_int($nextSemicolonIndex)) {
+				$nextSemicolonIndex = $token['parenthesis_closer'] + 1;
+			}
+		  $blockEnd = $nextSemicolonIndex;
 		}
 		$initStart = intval($token['parenthesis_opener']) + 1;
 		$initEnd = null;
