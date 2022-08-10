@@ -112,6 +112,8 @@ class ClassWithAssignedMembers {
 class ClassWithConstructorPromotion {
   public function __construct(
         public string $name = 'Brent',
+        $unused, // Unused variable $unused
+        string $unused2, // Unused variable $unused2
         public string $role,
         private string $role2,
         protected string $role3,
