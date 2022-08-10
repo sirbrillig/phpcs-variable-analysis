@@ -1278,4 +1278,43 @@ class Helpers
 		}
 		return null;
 	}
+
+
+	/**
+	 * Return true if the token looks like constructor promotion.
+	 *
+	 * Call on a parameter variable token only.
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return bool
+	 */
+	public static function isConstructorPromotion(File $phpcsFile, $stackPtr) {
+		$tokens = $phpcsFile->getTokens();
+
+		$prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), null, true);
+		if (! is_int($prev)) {
+			return false;
+		}
+
+		// If the previous token is a visibility keyword, this is constructor promotion.
+		$prevToken = $tokens[$prev];
+		if (in_array($prevToken['code'], Tokens::$scopeModifiers, true)) {
+			return true;
+		}
+
+		// If the previous token is not a visibility keyword, but the one before it
+		// is, the previous token was probably a typehint and this is constructor
+		// promotion.
+		$prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prev - 1), null, true);
+		if (! is_int($prev)) {
+			return false;
+		}
+
+		if (in_array($prevToken['code'], Tokens::$scopeModifiers, true)) {
+			return true;
+		}
+		return false;
+	}
 }

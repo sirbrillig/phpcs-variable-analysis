@@ -761,6 +761,12 @@ class VariableAnalysisSniff implements Sniff
 			Helpers::debug('processVariableAsFunctionParameter optional with default');
 			$this->markVariableAssignment($varName, $stackPtr, $functionPtr);
 		}
+
+		// Are we using constructor promotion? If so, that counts as both definition and use.
+		if (Helpers::isConstructorPromotion($phpcsFile, $stackPtr)) {
+			Helpers::debug('processVariableAsFunctionParameter constructor promotion');
+			$this->markVariableRead($varName, $stackPtr, $outerScope);
+		}
 	}
 
 	/**
