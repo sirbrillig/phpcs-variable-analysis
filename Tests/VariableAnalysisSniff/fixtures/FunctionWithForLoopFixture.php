@@ -148,6 +148,17 @@ function colonSyntaxForLoop() {
   endfor;
 }
 
+function colonSyntaxForLoopAndLateDefinition() {
+  for ($i = 0; $i < 10; var_dump($foo), $i++):
+    $foo = 'hello';
+    print $i;
+  endfor;
+}
+
 function forLoopWithOneStatement() {
   for ($i = 0; $i < 10; $i++) echo $i;
+}
+
+function forLoopWithOneStatementAndLateDefinition() {
+  for ($i = 0; $i < 10; var_dump($foo), $i++) $foo = 'hello';
 }
