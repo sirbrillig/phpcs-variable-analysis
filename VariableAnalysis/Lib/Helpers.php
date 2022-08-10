@@ -637,7 +637,7 @@ class Helpers
 			T_CLOSE_CURLY_BRACKET,
 			T_CLOSE_SHORT_ARRAY,
 		];
-		$scopeCloserIndex = $phpcsFile->findNext($endScopeTokens, $fatArrowIndex  + 1);
+		$scopeCloserIndex = $phpcsFile->findNext($endScopeTokens, $fatArrowIndex	+ 1);
 		if (! is_int($scopeCloserIndex)) {
 			return null;
 		}
@@ -1194,8 +1194,8 @@ class Helpers
 		$forIndex = $stackPtr;
 		$blockStart = $token['parenthesis_closer'];
 		if (isset($token['scope_opener'])) {
-		  $blockStart = $token['scope_opener'];
-		  $blockEnd = $token['scope_closer'];
+			$blockStart = $token['scope_opener'];
+			$blockEnd = $token['scope_closer'];
 		} else {
 			// Some for loop blocks will not have scope positions because it they are
 			// inline (no curly braces) so we have to find the end of their scope by
@@ -1204,7 +1204,7 @@ class Helpers
 			if (! is_int($nextSemicolonIndex)) {
 				$nextSemicolonIndex = $token['parenthesis_closer'] + 1;
 			}
-		  $blockEnd = $nextSemicolonIndex;
+			$blockEnd = $nextSemicolonIndex;
 		}
 		$initStart = intval($token['parenthesis_opener']) + 1;
 		$initEnd = null;
