@@ -27,6 +27,13 @@ class VariableAnalysisSniff implements Sniff
 	private $scopeManager;
 
 	/**
+	 * A list of for loops, keyed by the index of their first token in this file.
+	 *
+	 * @var array<int, \VariableAnalysis\Lib\ForLoopInfo>
+	 */
+	private $forLoops = [];
+
+	/**
 	 * A list of custom functions which pass in variables to be initialized by
 	 * reference (eg `preg_match()`) and therefore should not require those
 	 * variables to be defined ahead of time. The list is space separated and
@@ -162,6 +169,8 @@ class VariableAnalysisSniff implements Sniff
 			T_COMMA,
 			T_SEMICOLON,
 			T_CLOSE_PARENTHESIS,
+			T_FOR,
+			T_ENDFOR,
 		];
 		if (defined('T_FN')) {
 			$types[] = T_FN;
@@ -216,6 +225,7 @@ class VariableAnalysisSniff implements Sniff
 		// easily accessed in other places which aren't passed the object.
 		if ($this->currentFile !== $phpcsFile) {
 			$this->currentFile = $phpcsFile;
+			$this->forLoops = [];
 		}
 
 		// Add the global scope for the current file to our scope indexes.
@@ -227,6 +237,10 @@ class VariableAnalysisSniff implements Sniff
 		// Report variables defined but not used in the current scope as unused
 		// variables if the current token closes scopes.
 		$this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
+
+		// Scan variables that were postponed because they exist in the increment
+		// expression of a for loop if the current token closes a loop.
+		$this->processClosingForLoopsAt($phpcsFile, $stackPtr);
 
 		// Find and process variables to perform two jobs: to record variable
 		// definition or use, and to report variables as undefined if they are used
@@ -241,6 +255,13 @@ class VariableAnalysisSniff implements Sniff
 		}
 		if (($token['code'] === T_STRING) && ($token['content'] === 'compact')) {
 			$this->processCompact($phpcsFile, $stackPtr);
+			return;
+		}
+
+		// Record for loop boundaries so we can delay scanning the third for loop
+		// expression until after the loop has been scanned.
+		if ($token['code'] === T_FOR) {
+			$this->recordForLoop($phpcsFile, $stackPtr);
 			return;
 		}
 
@@ -266,6 +287,19 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Record the boundaries of a for loop.
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return void
+	 */
+	private function recordForLoop($phpcsFile, $stackPtr)
+	{
+		$this->forLoops[$stackPtr] = Helpers::makeForLoopInfo($phpcsFile, $stackPtr);
+	}
+
+	/**
 	 * Find scopes closed by a token and process their variables.
 	 *
 	 * Calls `processScopeClose()` for each closed scope.
@@ -279,9 +313,37 @@ class VariableAnalysisSniff implements Sniff
 	{
 		$scopeIndicesThisCloses = $this->scopeManager->getScopesForScopeEnd($phpcsFile->getFilename(), $stackPtr);
 
+		$tokens = $phpcsFile->getTokens();
+		$token = $tokens[$stackPtr];
+		$line = $token['line'];
 		foreach ($scopeIndicesThisCloses as $scopeIndexThisCloses) {
-			Helpers::debug('found closing scope at index', $stackPtr, 'for scopes starting at:', $scopeIndexThisCloses);
+			Helpers::debug('found closing scope at index', $stackPtr, 'line', $line, 'for scopes starting at:', $scopeIndexThisCloses->scopeStartIndex);
 			$this->processScopeClose($phpcsFile, $scopeIndexThisCloses->scopeStartIndex);
+		}
+	}
+
+	/**
+	 * Scan variables that were postponed because they exist in the increment expression of a for loop.
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return void
+	 */
+	private function processClosingForLoopsAt($phpcsFile, $stackPtr)
+	{
+		$forLoopsThisCloses = [];
+		foreach ($this->forLoops as $forLoop) {
+			if ($forLoop->blockEnd === $stackPtr) {
+				$forLoopsThisCloses[] = $forLoop;
+			}
+		}
+
+		foreach ($forLoopsThisCloses as $forLoop) {
+			foreach ($forLoop->incrementVariables as $varIndex => $varInfo) {
+				Helpers::debug('processing delayed for loop increment variable at', $varIndex, $varInfo);
+				$this->processVariable($phpcsFile, $varIndex, ['ignore-for-loops' => true]);
+			}
 		}
 	}
 
@@ -362,7 +424,7 @@ class VariableAnalysisSniff implements Sniff
 		Helpers::debug("getOrCreateVariableInfo: starting for '{$varName}'");
 		$scopeInfo = $this->getOrCreateScopeInfo($currScope);
 		if (isset($scopeInfo->variables[$varName])) {
-			Helpers::debug("getOrCreateVariableInfo: found scope for '{$varName}'", $scopeInfo);
+			Helpers::debug("getOrCreateVariableInfo: found variable for '{$varName}'", $scopeInfo->variables[$varName]);
 			return $scopeInfo->variables[$varName];
 		}
 		Helpers::debug("getOrCreateVariableInfo: creating a new variable for '{$varName}' in scope", $scopeInfo);
@@ -566,7 +628,7 @@ class VariableAnalysisSniff implements Sniff
 	protected function isVariableUndefined($varName, $stackPtr, $currScope)
 	{
 		$varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
-		Helpers::debug('isVariableUndefined', $varInfo);
+		Helpers::debug('isVariableUndefined', $varInfo, 'at', $stackPtr);
 		if ($varInfo->ignoreUndefined) {
 			return false;
 		}
@@ -575,6 +637,31 @@ class VariableAnalysisSniff implements Sniff
 		}
 		if (isset($varInfo->firstInitialized) && $varInfo->firstInitialized <= $stackPtr) {
 			return false;
+		}
+		// If we are inside a for loop increment expression, check to see if the
+		// variable was defined inside the for loop.
+		foreach ($this->forLoops as $forLoop) {
+			if ($stackPtr > $forLoop->incrementStart && $stackPtr < $forLoop->incrementEnd) {
+				Helpers::debug('isVariableUndefined looking at increment expression for loop', $forLoop);
+				if (
+					isset($varInfo->firstInitialized)
+					&& $varInfo->firstInitialized > $forLoop->blockStart
+					&& $varInfo->firstInitialized < $forLoop->blockEnd
+				) {
+					return false;
+				}
+			}
+		}
+		// If we are inside a for loop body, check to see if the variable was
+		// defined in that loop's third expression.
+		foreach ($this->forLoops as $forLoop) {
+			if ($stackPtr > $forLoop->blockStart && $stackPtr < $forLoop->blockEnd) {
+				foreach ($forLoop->incrementVariables as $forLoopVarInfo) {
+					if ($varInfo === $forLoopVarInfo) {
+						return false;
+					}
+				}
+			}
 		}
 		return true;
 	}
@@ -1418,12 +1505,17 @@ class VariableAnalysisSniff implements Sniff
 	 * functions to this one, like `processVariableInString`, and
 	 * `processCompact`. They have the same purpose as this function, though.
 	 *
-	 * @param File $phpcsFile The PHP_CodeSniffer file where this token was found.
-	 * @param int  $stackPtr  The position where the token was found.
+	 * If the 'ignore-for-loops' option is true, we will ignore the special
+	 * processing for the increment variables of for loops. This will prevent
+	 * infinite loops.
+	 *
+	 * @param File                           $phpcsFile The PHP_CodeSniffer file where this token was found.
+	 * @param int                            $stackPtr  The position where the token was found.
+	 * @param array<string, bool|string|int> $options   See above.
 	 *
 	 * @return void
 	 */
-	protected function processVariable(File $phpcsFile, $stackPtr)
+	protected function processVariable(File $phpcsFile, $stackPtr, $options = [])
 	{
 		$tokens = $phpcsFile->getTokens();
 		$token  = $tokens[$stackPtr];
@@ -1459,6 +1551,18 @@ class VariableAnalysisSniff implements Sniff
 		//   Declares as a static
 		//   Assignment via foreach (... as ...) { }
 		//   Pass-by-reference to known pass-by-reference function
+
+		// Are we inside the third expression of a for loop? Store such variables
+		// for processing after the loop ends by `processClosingForLoopsAt()`.
+		if (empty($options['ignore-for-loops'])) {
+			$forLoop = Helpers::getForLoopForIncrementVariable($stackPtr, $this->forLoops);
+			if ($forLoop) {
+				Helpers::debug('found variable inside for loop third expression');
+				$varInfo = $this->getOrCreateVariableInfo($varName, $currScope);
+				$forLoop->incrementVariables[$stackPtr] = $varInfo;
+				return;
+			}
+		}
 
 		// Are we a $object->$property type symbolic reference?
 		if ($this->processVariableAsSymbolicObjectProperty($phpcsFile, $stackPtr, $varName, $currScope)) {
@@ -1519,7 +1623,7 @@ class VariableAnalysisSniff implements Sniff
 		if (Helpers::isTokenInsideAssignmentLHS($phpcsFile, $stackPtr)) {
 			Helpers::debug('found assignment');
 			$this->processVariableAsAssignment($phpcsFile, $stackPtr, $varName, $currScope);
-			if (Helpers::isTokenInsideAssignmentRHS($phpcsFile, $stackPtr) || Helpers::isTokenInsideFunctionCall($phpcsFile, $stackPtr)) {
+			if (Helpers::isTokenInsideAssignmentRHS($phpcsFile, $stackPtr) || Helpers::isTokenInsideFunctionCallArgument($phpcsFile, $stackPtr)) {
 				Helpers::debug("found assignment that's also inside an expression");
 				$this->markVariableRead($varName, $stackPtr, $currScope);
 				return;
