@@ -137,3 +137,17 @@ function veryBoringForLoop() {
   ) {
   }
 }
+
+function reallySmallForLoop() {
+  for ($i = 1, $j = 0; $i <= 10; $j += $i, print $i, $i++);
+}
+
+function colonSyntaxForLoop() {
+  for ($i = 0; $i < 10; $i++):
+    print $i;
+  endfor;
+}
+
+function forLoopWithOneStatement() {
+  for ($i = 0; $i < 10; $i++) echo $i;
+}
