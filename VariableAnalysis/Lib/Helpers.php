@@ -1279,7 +1279,6 @@ class Helpers
 		return null;
 	}
 
-
 	/**
 	 * Return true if the token looks like constructor promotion.
 	 *
@@ -1290,7 +1289,8 @@ class Helpers
 	 *
 	 * @return bool
 	 */
-	public static function isConstructorPromotion(File $phpcsFile, $stackPtr) {
+	public static function isConstructorPromotion(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 
 		$prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), null, true);
