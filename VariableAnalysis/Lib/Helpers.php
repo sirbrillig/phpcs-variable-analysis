@@ -1278,4 +1278,49 @@ class Helpers
 		}
 		return null;
 	}
+
+	/**
+	 * Return true if the token looks like constructor promotion.
+	 *
+	 * Call on a parameter variable token only.
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return bool
+	 */
+	public static function isConstructorPromotion(File $phpcsFile, $stackPtr)
+	{
+		$functionIndex = self::getFunctionIndexForFunctionParameter($phpcsFile, $stackPtr);
+		if (! $functionIndex) {
+			return false;
+		}
+
+		$tokens = $phpcsFile->getTokens();
+
+		// If the previous token is a visibility keyword, this is constructor
+		// promotion. eg: `public $foobar`.
+		$prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), $functionIndex, true);
+		if (! is_int($prev)) {
+			return false;
+		}
+		$prevToken = $tokens[$prev];
+		if (in_array($prevToken['code'], Tokens::$scopeModifiers, true)) {
+			return true;
+		}
+
+		// If the previous token is not a visibility keyword, but the one before it
+		// is, the previous token was probably a typehint and this is constructor
+		// promotion. eg: `public boolean $foobar`.
+		$prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prev - 1), $functionIndex, true);
+		if (! is_int($prev)) {
+			return false;
+		}
+		$prevToken = $tokens[$prev];
+		if (in_array($prevToken['code'], Tokens::$scopeModifiers, true)) {
+			return true;
+		}
+
+		return false;
+	}
 }

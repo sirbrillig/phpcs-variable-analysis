@@ -187,6 +187,11 @@ class VariableAnalysisTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('ClassWithMembersFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+		$phpcsFile->ruleset->setSniffProperty(
+			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+			'allowUnusedParametersBeforeUsed',
+			'false'
+		);
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
@@ -202,6 +207,8 @@ class VariableAnalysisTest extends BaseTestCase
 			18,
 			19,
 			66,
+			115,
+			116,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
