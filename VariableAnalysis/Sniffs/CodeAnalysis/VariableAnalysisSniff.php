@@ -1275,6 +1275,32 @@ class VariableAnalysisSniff implements Sniff
 	}
 
 	/**
+	 * Process a variable as a static declaration within a function.
+	 *
+	 * This will not operate on variables that are written a class definition
+	 * like `static $foo;` or `public static ?int $foo = 'bar';` because class
+	 * properties (static or instance) are currently not tracked by this sniff.
+	 * This is because a class property might be unused inside the class, but
+	 * used outside the class (we cannot easily know if it is unused); this is
+	 * also because it's common and legal to define class properties when they
+	 * are assigned and that assignment can happen outside a class (we cannot
+	 * easily know if the use of a property is undefined). These sorts of checks
+	 * are better performed by static analysis tools that can see a whole project
+	 * rather than a linter which can only easily see a file or some lines.
+	 *
+	 * If found, such a variable will be marked as declared (and possibly
+	 * assigned, if it includes an initial value) within the scope of the
+	 * function body.
+	 *
+	 * This will not operate on variables that use late static binding
+	 * (`static::$foobar`) even though they include the word `static`.
+	 *
+	 * This only finds the defintions of static variables. Their use is handled
+	 * by `processVariableAsStaticMember()`.
+	 *
+	 * Can be called for any token and will return false if the variable is not
+	 * of this type.
+	 *
 	 * @param File   $phpcsFile
 	 * @param int    $stackPtr
 	 * @param string $varName
@@ -1286,55 +1312,21 @@ class VariableAnalysisSniff implements Sniff
 	{
 		$tokens = $phpcsFile->getTokens();
 
-		// Are we a static declaration?
-		// Static declarations are a bit more complicated than globals, since they
-		// can contain assignments. The assignment is compile-time however so can
-		// only be constant values, which makes life manageable.
-		//
-		// Just to complicate matters further, late static binding constants
-		// take the form static::CONSTANT and are invalid within static variable
-		// assignments, but we don't want to accidentally match their use of the
-		// static keyword.
-		//
-		// Valid values are:
-		//   number         T_MINUS T_LNUMBER T_DNUMBER
-		//   string         T_CONSTANT_ENCAPSED_STRING
-		//   heredoc        T_START_HEREDOC T_HEREDOC T_END_HEREDOC
-		//   nowdoc         T_START_NOWDOC T_NOWDOC T_END_NOWDOC
-		//   define         T_STRING
-		//   class constant T_STRING T_DOUBLE_COLON T_STRING
-		// Search backwards for first token that isn't whitespace, comma, variable,
-		// equals, or on the list of assignable constant values above.
-		$find = [
-			T_WHITESPACE => T_WHITESPACE,
-			T_VARIABLE => T_VARIABLE,
-			T_COMMA => T_COMMA,
-			T_EQUAL => T_EQUAL,
-			T_MINUS => T_MINUS,
-			T_LNUMBER => T_LNUMBER,
-			T_DNUMBER => T_DNUMBER,
-			T_CONSTANT_ENCAPSED_STRING => T_CONSTANT_ENCAPSED_STRING,
-			T_STRING => T_STRING,
-			T_DOUBLE_COLON => T_DOUBLE_COLON,
-		];
-		$find += Tokens::$heredocTokens;
-
-		$staticPtr = $phpcsFile->findPrevious($find, $stackPtr - 1, null, true, null, true);
-		if (($staticPtr === false) || ($tokens[$staticPtr]['code'] !== T_STATIC)) {
+		// Search backwards for a `static` keyword that occurs before the start of the statement.
+		$staticPtr = $phpcsFile->findPrevious([T_STATIC], $stackPtr - 1, null, false, null, true);
+		if (! is_int($staticPtr)) {
 			return false;
 		}
 
-		// Is it a late static binding static::?
-		// If so, this isn't the static keyword we're looking for, but since
-		// static:: isn't allowed in a compile-time constant, we also know
-		// we can't be part of a static declaration anyway, so there's no
-		// need to look any further.
+		// Is the keyword a late static binding? If so, this isn't the static
+		// keyword we're looking for, but since static:: isn't allowed in a
+		// compile-time constant, we also know we can't be part of a static
+		// declaration anyway, so there's no need to look any further.
 		$lateStaticBindingPtr = $phpcsFile->findNext(T_WHITESPACE, $staticPtr + 1, null, true, null, true);
 		if (($lateStaticBindingPtr !== false) && ($tokens[$lateStaticBindingPtr]['code'] === T_DOUBLE_COLON)) {
 			return false;
 		}
 
-		// It's a static declaration.
 		$this->markVariableDeclaration($varName, ScopeType::STATICSCOPE, null, $stackPtr, $currScope);
 		if (Helpers::getNextAssignPointer($phpcsFile, $stackPtr) !== null) {
 			$this->markVariableAssignment($varName, $stackPtr, $currScope);
