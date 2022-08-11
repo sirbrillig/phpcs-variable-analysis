@@ -1293,7 +1293,8 @@ class VariableAnalysisSniff implements Sniff
 	 * function body.
 	 *
 	 * This will not operate on variables that use late static binding
-	 * (`static::$foobar`) even though they include the word `static`.
+	 * (`static::$foobar`) or the parameters of static methods even though they
+	 * include the word `static` in the same statement.
 	 *
 	 * This only finds the defintions of static variables. Their use is handled
 	 * by `processVariableAsStaticMember()`.
@@ -1312,9 +1313,15 @@ class VariableAnalysisSniff implements Sniff
 	{
 		$tokens = $phpcsFile->getTokens();
 
-		// Search backwards for a `static` keyword that occurs before the start of the statement.
-		$staticPtr = $phpcsFile->findPrevious([T_STATIC], $stackPtr - 1, null, false, null, true);
-		if (! is_int($staticPtr)) {
+		// Search backwards for a `static` keyword that occurs at the start of the statement.
+		$notEndOfStatementTokens = [
+			T_COLON,
+			T_COMMA,
+			T_DOUBLE_ARROW,
+			T_MATCH_ARROW,
+		];
+		$staticPtr = $phpcsFile->findStartOfStatement($stackPtr - 1, $notEndOfStatementTokens);
+		if (! is_int($staticPtr) || $tokens[$staticPtr]['code'] !== T_STATIC) {
 			return false;
 		}
 
