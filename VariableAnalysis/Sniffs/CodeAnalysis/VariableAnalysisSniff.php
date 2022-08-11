@@ -1318,7 +1318,6 @@ class VariableAnalysisSniff implements Sniff
 			T_COLON,
 			T_COMMA,
 			T_DOUBLE_ARROW,
-			T_MATCH_ARROW,
 		];
 		$staticPtr = $phpcsFile->findStartOfStatement($stackPtr - 1, $notEndOfStatementTokens);
 		if (! is_int($staticPtr) || $tokens[$staticPtr]['code'] !== T_STATIC) {
