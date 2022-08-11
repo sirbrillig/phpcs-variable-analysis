@@ -137,4 +137,8 @@ class ClassWithStaticProperties {
     echo self::$static_with_visibility_and_type;
     echo self::$static_with_visibility_and_nullable_type;
   }
+
+  public static function getIntOrNull($value) {
+    return is_int($value) ? $value : null;
+  }
 }
