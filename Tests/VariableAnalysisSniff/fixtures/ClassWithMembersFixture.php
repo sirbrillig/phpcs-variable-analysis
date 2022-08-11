@@ -45,8 +45,8 @@ class ClassWithoutMembers {
 
 class ClassWithMembers {
     public $member_var;
-    private $private_member_var;
-    protected $protected_member_var;
+    private ?string $private_member_var;
+    protected string $protected_member_var;
     static $static_member_var;
 
     function method_with_member_var() {
@@ -121,5 +121,20 @@ class ClassWithConstructorPromotion {
         private $nickname2,
         protected $nickname3
   ) {
+  }
+}
+
+class ClassWithStaticProperties {
+  static $static_simple;
+  public static $static_with_visibility;
+  public static $static_with_visibility_unused;
+  public static int $static_with_visibility_and_type;
+  public static ?int $static_with_visibility_and_nullable_type;
+
+  public function use_vars() {
+    echo self::$static_simple;
+    echo self::$static_with_visibility;
+    echo self::$static_with_visibility_and_type;
+    echo self::$static_with_visibility_and_nullable_type;
   }
 }
