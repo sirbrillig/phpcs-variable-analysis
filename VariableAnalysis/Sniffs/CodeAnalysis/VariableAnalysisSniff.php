@@ -1313,14 +1313,24 @@ class VariableAnalysisSniff implements Sniff
 	{
 		$tokens = $phpcsFile->getTokens();
 
-		// Search backwards for a `static` keyword that occurs at the start of the statement.
-		$notEndOfStatementTokens = [
-			T_COLON,
-			T_COMMA,
-			T_DOUBLE_ARROW,
-		];
-		$staticPtr = $phpcsFile->findStartOfStatement($stackPtr - 1, $notEndOfStatementTokens);
-		if (! is_int($staticPtr) || $tokens[$staticPtr]['code'] !== T_STATIC) {
+		// Search backwards for a `static` keyword that occurs before the start of the statement.
+		$startOfStatement = $phpcsFile->findPrevious([T_SEMICOLON, T_OPEN_CURLY_BRACKET], $stackPtr - 1, null, false, null, true);
+		$staticPtr = $phpcsFile->findPrevious([T_STATIC], $stackPtr - 1, null, false, null, true);
+		if (! is_int($startOfStatement)) {
+			$line = $tokens[$stackPtr]['line'];
+			throw new \Exception("Could not find start of statement on line {$line}");
+		}
+		if (! is_int($staticPtr)) {
+			return false;
+		}
+		// PHPCS is bad at finding the start of statements so we have to do it ourselves.
+		if ($staticPtr < $startOfStatement) {
+			return false;
+		}
+
+		// Is the token inside function parameters? If so, this is not a static
+		// declaration because we must be inside a function body.
+		if (Helpers::isTokenFunctionParameter($phpcsFile, $stackPtr)) {
 			return false;
 		}
 

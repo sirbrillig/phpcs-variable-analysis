@@ -159,11 +159,13 @@ class Helpers
 	}
 
 	/**
-	 * Find the index of the function keyword for a token in a function definition's arguments
+	 * Find the index of the function keyword for a token in a function
+	 * definition's parameters.
 	 *
 	 * Does not work for tokens inside the "use".
 	 *
-	 * Will also work for the parenthesis that make up the function definition's arguments list.
+	 * Will also work for the parenthesis that make up the function definition's
+	 * parameters list.
 	 *
 	 * For arguments inside a function call, rather than a definition, use
 	 * `getFunctionIndexForFunctionCallArgument`.
@@ -256,6 +258,10 @@ class Helpers
 	}
 
 	/**
+	 * Return the index of a function's name token from inside the function.
+	 *
+	 * $stackPtr must be inside the function body or parameters for this to work.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
