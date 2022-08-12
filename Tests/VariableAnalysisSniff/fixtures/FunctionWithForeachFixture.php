@@ -82,3 +82,19 @@ function doSomethingLoopy($receipts) {
         }
     }
 }
+
+function foreachWithListDestructure($lines) {
+  $passByRefFunctions = [];
+  foreach ($lines as $line) {
+    list ($function, $args) = explode(':', $line);
+    $passByRefFunctions[$function] = explode(',', $args);
+  }
+}
+
+function foreachWithShortListDestructure($lines) {
+  $passByRefFunctions = [];
+  foreach ($lines as $line) {
+    [$function, $args] = explode(':', $line);
+    $passByRefFunctions[$function] = explode(',', $args);
+  }
+}
