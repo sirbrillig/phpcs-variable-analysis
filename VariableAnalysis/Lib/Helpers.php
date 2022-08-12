@@ -666,6 +666,22 @@ class Helpers
 		$tokens = $phpcsFile->getTokens();
 		self::debug('getListAssignments', $listOpenerIndex, $tokens[$listOpenerIndex]);
 
+		// If the list opener token is preceeded by a variable or a bracket (a
+		// multidimensional array), this is an array access and not a list
+		// assignment.
+		$previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $listOpenerIndex);
+		$previousTokenPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $listOpenerIndex - 1, $previousStatementPtr, true);
+		$arrayAccessEvidence = [
+			T_VARIABLE,
+			T_CLOSE_SQUARE_BRACKET,
+		];
+		if (
+			isset($tokens[$previousTokenPtr])
+			&& in_array($tokens[$previousTokenPtr]['code'], $arrayAccessEvidence, true)
+		) {
+			return null;
+		}
+
 		// First find the end of the list
 		$closePtr = null;
 		if (isset($tokens[$listOpenerIndex]['parenthesis_closer'])) {
