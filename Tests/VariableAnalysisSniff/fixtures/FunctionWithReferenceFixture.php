@@ -5,7 +5,16 @@ function /*comment*/ &function_with_return_by_reference_and_param($param) {
 }
 
 function function_with_static_var() {
-    static $static1, $static_num = 12, $static_neg_num = -1.5, $static_string = 'abc', $static_string2 = "def", $static_define = MYDEFINE, $static_constant = MyClass::CONSTANT, $static2, $static_new = new Foobar();
+  static $static1,
+    $static_num = 12,
+    $static_neg_num = -1.5, // Unused variable $static_neg_num
+    $static_string = 'abc', // Unused variable $static_string
+    $static_string2 = "def", // Unused variable $static_string2
+    $static_define = MYDEFINE, // Unused variable $static_define
+    $static_constant = MyClass::CONSTANT, // Unused variable $static_constant
+    $static2,
+    $static_new_unused = new Foobar(), // Unused variable $static_new_unused
+    $static_new = new Foobar();
     static $static_heredoc = <<<END_OF_HEREDOC
 this is an ugly but valid way to continue after a heredoc
 END_OF_HEREDOC
@@ -17,7 +26,7 @@ END_OF_NOWDOC
     echo $static1;
     echo $static_num;
     echo $static2;
-    echo $var;
+    echo $var; // Undefined variable $var
     echo $static_heredoc;
     echo $static3;
     echo $static_nowdoc;
@@ -29,21 +38,29 @@ function function_with_pass_by_reference_param(&$param) {
 }
 
 function function_with_pass_by_reference_calls() {
-    echo $matches;
-    echo $needle;
-    echo $haystack;
+    echo $matches; // Undefined variable $matches
+    echo $needle; // Undefined variable $needle
+    echo $haystack; // Undefined variable $haystack
     preg_match('/(abc)/', 'defabcghi', /* comment */ $matches);
-    preg_match($needle,   'defabcghi', $matches);
-    preg_match('/(abc)/', $haystack,   $matches);
+    preg_match(
+      $needle, // Undefined variable $needle
+      'defabcghi',
+      $matches
+    );
+    preg_match(
+      '/(abc)/',
+      $haystack, // Undefined variable $haystack
+      $matches
+    );
     echo $matches;
-    echo $needle;
-    echo $haystack;
+    echo $needle; // Undefined variable $needle
+    echo $haystack; // Undefined variable $haystack
     $stmt = 'whatever';
     $var1 = 'one';
     $var2 = 'two';
     echo $var1;
     echo $var2;
-    echo $var3;
+    echo $var3; // Undefined variable $var3
     maxdb_stmt_bind_result /*comment*/ ($stmt, $var1, $var2, $var3);
     echo $var1;
     echo $var2;
@@ -56,12 +73,12 @@ function function_with_pass_by_ref_assign_only_arg(&  /*comment*/  $return_value
 
 function function_with_ignored_reference_call() {
     $foo = 'bar';
-    my_reference_function($foo, $baz, $bip);
-    another_reference_function($foo, $foo2, $foo3);
+    my_reference_function($foo, $baz, $bip); // Undefined variable $bar, Undefined variable $bip
+    another_reference_function($foo, $foo2, $foo3); // Undefined variable $foo2, Undefined variable $foo3
 }
 
 function function_with_wordpress_reference_calls() {
-    wp_parse_str('foo=bar', $vars);
+    wp_parse_str('foo=bar', $vars); // Undefined variable $vars
 }
 
 function function_with_array_walk($userNameParts) {
@@ -78,7 +95,7 @@ function function_with_foreach_with_reference($derivatives, $base_plugin_definit
   foreach ($derivatives as &$entry) {
     $entry .= $base_plugin_definition;
   }
-  foreach ($derivatives as &$unused) { // unused variable
+  foreach ($derivatives as &$unused) { // Unused variable $unused
     $base_plugin_definition .= '1';
   }
   return $derivatives;

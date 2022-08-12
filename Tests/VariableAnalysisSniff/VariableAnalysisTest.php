@@ -300,20 +300,25 @@ class VariableAnalysisTest extends BaseTestCase
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
-			8,
-			20,
-			32,
-			33,
-			34,
-			36,
-			37,
-			39,
-			40,
+			10,
+			11,
+			12,
+			13,
+			14,
+			16,
+			29,
+			41,
+			42,
+			43,
 			46,
-			59,
-			60,
-			64,
+			52,
+			56,
+			57,
+			63,
+			76,
+			77,
 			81,
+			98,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
@@ -330,18 +335,23 @@ class VariableAnalysisTest extends BaseTestCase
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
-			8,
-			20,
-			32,
-			33,
-			34,
-			36,
-			37,
-			39,
-			40,
+			10,
+			11,
+			12,
+			13,
+			14,
+			16,
+			29,
+			41,
+			42,
+			43,
 			46,
-			64,
+			52,
+			56,
+			57,
+			63,
 			81,
+			98,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
@@ -358,19 +368,24 @@ class VariableAnalysisTest extends BaseTestCase
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
-			8,
-			20,
-			32,
-			33,
-			34,
-			36,
-			37,
-			39,
-			40,
+			10,
+			11,
+			12,
+			13,
+			14,
+			16,
+			29,
+			41,
+			42,
+			43,
 			46,
-			59,
-			60,
-			81,
+			52,
+			56,
+			57,
+			63,
+			76,
+			77,
+			98,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
