@@ -44,7 +44,7 @@ class Helpers
 	public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr)
 	{
 		$previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
-		return self::getIntOrNull($phpcsFile->findPrevious([T_OPEN_SHORT_ARRAY], $stackPtr - 1, $previousStatementPtr));
+		return self::getIntOrNull($phpcsFile->findPrevious([T_OPEN_SHORT_ARRAY, T_OPEN_SQUARE_BRACKET], $stackPtr - 1, $previousStatementPtr));
 	}
 
 	/**
