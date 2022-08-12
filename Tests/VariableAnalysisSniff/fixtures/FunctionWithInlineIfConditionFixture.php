@@ -154,3 +154,23 @@ function definedInsideElseIfBlockUndefinedInsideElseBlockDifferentName($first) {
     echo $third; // undefined variable $third
   echo $words;
 }
+
+function inlineIfWithListDestructure() {
+  if ( true )
+    list( $a ) = [ 'hi' ];
+
+  echo $a;
+
+  if ( true )
+    list( $b ) = [ 'hi' ]; // Unused variable $b
+}
+
+function inlineIfWithShortListDestructure() {
+  if ( true )
+    [ $a ] = [ 'hi' ];
+
+  echo $a;
+
+  if ( true )
+    [ $b ] = [ 'hi' ]; // Unused variable $b
+}

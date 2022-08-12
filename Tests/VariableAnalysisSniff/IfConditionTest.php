@@ -100,6 +100,8 @@ class IfConditionTest extends BaseTestCase
 			136,
 			152,
 			154,
+			165,
+			175,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
@@ -132,6 +134,8 @@ class IfConditionTest extends BaseTestCase
 			136,
 			152,
 			154,
+			165,
+			175,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
