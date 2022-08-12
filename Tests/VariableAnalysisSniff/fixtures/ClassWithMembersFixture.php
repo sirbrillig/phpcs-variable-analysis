@@ -45,8 +45,8 @@ class ClassWithoutMembers {
 
 class ClassWithMembers {
     public $member_var;
-    private $private_member_var;
-    protected $protected_member_var;
+    private ?string $private_member_var;
+    protected string $protected_member_var;
     static $static_member_var;
 
     function method_with_member_var() {
@@ -122,4 +122,41 @@ class ClassWithConstructorPromotion {
         protected $nickname3
   ) {
   }
+}
+
+class ClassWithStaticProperties {
+  static $static_simple;
+  public static $static_with_visibility;
+  public static $static_with_visibility_unused;
+  public static int $static_with_visibility_and_type;
+  public static ?int $static_with_visibility_and_nullable_type;
+
+  public function use_vars() {
+    echo self::$static_simple;
+    echo self::$static_with_visibility;
+    echo self::$static_with_visibility_and_type;
+    echo self::$static_with_visibility_and_nullable_type;
+  }
+
+  public static function getIntOrNull($value) {
+    return is_int($value) ? $value : null;
+  }
+
+  static function getIntOrNull2($value) {
+    return is_int($value) ? $value : null;
+  }
+}
+
+abstract class AbstractClassWithStaticProperties {
+  static $static_simple;
+  public static $static_with_visibility;
+  public static $static_with_visibility_unused;
+  public static int $static_with_visibility_and_type;
+  public static ?int $static_with_visibility_and_nullable_type;
+
+  public function use_vars();
+
+  public static function getIntOrNull($value);
+
+  static function getIntOrNull2($value);
 }
