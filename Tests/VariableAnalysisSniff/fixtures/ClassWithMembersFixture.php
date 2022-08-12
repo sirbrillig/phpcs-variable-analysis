@@ -141,4 +141,22 @@ class ClassWithStaticProperties {
   public static function getIntOrNull($value) {
     return is_int($value) ? $value : null;
   }
+
+  static function getIntOrNull2($value) {
+    return is_int($value) ? $value : null;
+  }
+}
+
+abstract class AbstractClassWithStaticProperties {
+  static $static_simple;
+  public static $static_with_visibility;
+  public static $static_with_visibility_unused;
+  public static int $static_with_visibility_and_type;
+  public static ?int $static_with_visibility_and_nullable_type;
+
+  public function use_vars();
+
+  public static function getIntOrNull($value);
+
+  static function getIntOrNull2($value);
 }
