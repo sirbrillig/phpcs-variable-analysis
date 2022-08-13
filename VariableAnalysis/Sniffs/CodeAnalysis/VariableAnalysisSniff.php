@@ -1949,6 +1949,24 @@ class VariableAnalysisSniff implements Sniff
 		if ($scopeInfo->scopeStartIndex === 0 && $this->allowUnusedVariablesInFileScope) {
 			return;
 		}
+		if (
+			! empty($varInfo->firstDeclared)
+			&& $varInfo->scopeType === ScopeType::PARAM
+			&& Helpers::isInAbstractClass(
+				$phpcsFile,
+				Helpers::getFunctionIndexForFunctionParameter($phpcsFile, $varInfo->firstDeclared) ?: 0
+			)
+			&& Helpers::isFunctionBodyEmpty(
+				$phpcsFile,
+				Helpers::getFunctionIndexForFunctionParameter($phpcsFile, $varInfo->firstDeclared) ?: 0
+			)
+		) {
+			// Allow non-abstract methods inside an abstract class to have unused
+			// parameters if the method body does nothing. Such methods are
+			// effectively optional abstract methods so their unused parameters
+			// should be ignored as we do with abstract method parameters.
+			return;
+		}
 
 		$this->warnAboutUnusedVariable($phpcsFile, $varInfo);
 	}

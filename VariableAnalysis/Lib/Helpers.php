@@ -91,14 +91,15 @@ class Helpers
 	}
 
 	/**
+	 * Return true if the token conditions are within a function before they are
+	 * within a class.
+	 *
 	 * @param (int|string)[] $conditions
 	 *
 	 * @return bool
 	 */
 	public static function areConditionsWithinFunctionBeforeClass(array $conditions)
 	{
-		// Return true if the token conditions are within a function before
-		// they are within a class.
 		$classTypes = [T_CLASS, T_ANON_CLASS, T_TRAIT];
 		foreach (array_reverse($conditions, true) as $scopeCode) {
 			if (in_array($scopeCode, $classTypes)) {
@@ -112,14 +113,15 @@ class Helpers
 	}
 
 	/**
+	 * Return true if the token conditions are within an if block before they are
+	 * within a class or function.
+	 *
 	 * @param (int|string)[] $conditions
 	 *
 	 * @return int|string|null
 	 */
 	public static function getClosestIfPositionIfBeforeOtherConditions(array $conditions)
 	{
-		// Return true if the token conditions are within an if block before
-		// they are within a class or function.
 		$conditionsInsideOut = array_reverse($conditions, true);
 		if (empty($conditions)) {
 			return null;
@@ -1395,5 +1397,54 @@ class Helpers
 		}
 
 		return false;
+	}
+
+	/**
+	 * Return true if the token is inside an abstract class.
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return bool
+	 */
+	public static function isInAbstractClass(File $phpcsFile, $stackPtr) {
+		$classIndex = $phpcsFile->getCondition($stackPtr, T_CLASS);
+		if (! is_int($classIndex)) {
+			return false;
+		}
+		$classProperties = $phpcsFile->getClassProperties($classIndex);
+		return $classProperties['is_abstract'];
+	}
+
+	/**
+	 * Return true if the function body is empty or contains only `return;`
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr The index of the function keyword.
+	 *
+	 * @return bool
+	 */
+	public static function isFunctionBodyEmpty(File $phpcsFile, $stackPtr) {
+		$tokens = $phpcsFile->getTokens();
+		if ($tokens[$stackPtr]['code'] !== T_FUNCTION) {
+			return false;
+		}
+		$functionScopeStart = $tokens[$stackPtr]['scope_opener'];
+		$functionScopeEnd = $tokens[$stackPtr]['scope_closer'];
+		$tokensToIgnore = array_merge(
+			Tokens::$emptyTokens,
+			[
+				T_RETURN,
+				T_SEMICOLON,
+				T_OPEN_CURLY_BRACKET,
+				T_CLOSE_CURLY_BRACKET,
+			]
+		);
+		for($i = $functionScopeStart; $i < $functionScopeEnd; $i++) {
+			if (! in_array($tokens[$i]['code'], $tokensToIgnore, true)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
