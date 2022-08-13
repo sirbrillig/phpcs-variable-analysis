@@ -154,9 +154,24 @@ abstract class AbstractClassWithStaticProperties {
   public static int $static_with_visibility_and_type;
   public static ?int $static_with_visibility_and_nullable_type;
 
-  public function use_vars();
+  abstract public function use_vars();
 
-  public static function getIntOrNull($value);
+  abstract public static function getIntOrNull($value);
 
-  static function getIntOrNull2($value);
+  abstract static function getIntOrNull2($value);
+}
+
+abstract class AbstractClassWithEmptyMethodBodies {
+  abstract public function bar($param);
+
+  public function baz($param) {
+  }
+
+  public function baz2($param) {
+    return;
+  }
+
+  public function baz3($param) { // Unused variable $param
+    return 'foobar';
+  }
 }
