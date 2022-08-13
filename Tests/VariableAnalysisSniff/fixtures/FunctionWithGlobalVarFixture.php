@@ -67,7 +67,6 @@ function function_with_reserved_variables() {
   return [
     $response,
     $response_headers,
-    $php_errormsg,
     $HTTP_RAW_POST_DATA,
   ];
 }

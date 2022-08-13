@@ -972,7 +972,6 @@ class VariableAnalysisSniff implements Sniff
 			'_ENV',
 			'argv',
 			'argc',
-			'php_errormsg',
 			'http_response_header',
 			'HTTP_RAW_POST_DATA',
 		];
