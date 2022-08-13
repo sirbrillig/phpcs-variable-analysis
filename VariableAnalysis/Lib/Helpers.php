@@ -1407,7 +1407,8 @@ class Helpers
 	 *
 	 * @return bool
 	 */
-	public static function isInAbstractClass(File $phpcsFile, $stackPtr) {
+	public static function isInAbstractClass(File $phpcsFile, $stackPtr)
+	{
 		$classIndex = $phpcsFile->getCondition($stackPtr, T_CLASS);
 		if (! is_int($classIndex)) {
 			return false;
@@ -1420,11 +1421,12 @@ class Helpers
 	 * Return true if the function body is empty or contains only `return;`
 	 *
 	 * @param File $phpcsFile
-	 * @param int  $stackPtr The index of the function keyword.
+	 * @param int  $stackPtr  The index of the function keyword.
 	 *
 	 * @return bool
 	 */
-	public static function isFunctionBodyEmpty(File $phpcsFile, $stackPtr) {
+	public static function isFunctionBodyEmpty(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		if ($tokens[$stackPtr]['code'] !== T_FUNCTION) {
 			return false;
@@ -1440,7 +1442,7 @@ class Helpers
 				T_CLOSE_CURLY_BRACKET,
 			]
 		);
-		for($i = $functionScopeStart; $i < $functionScopeEnd; $i++) {
+		for ($i = $functionScopeStart; $i < $functionScopeEnd; $i++) {
 			if (! in_array($tokens[$i]['code'], $tokensToIgnore, true)) {
 				return false;
 			}
