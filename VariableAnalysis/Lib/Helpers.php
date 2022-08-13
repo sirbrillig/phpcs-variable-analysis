@@ -44,7 +44,7 @@ class Helpers
 	public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr)
 	{
 		$previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
-		return self::getIntOrNull($phpcsFile->findPrevious([T_OPEN_SHORT_ARRAY], $stackPtr - 1, $previousStatementPtr));
+		return self::getIntOrNull($phpcsFile->findPrevious([T_OPEN_SHORT_ARRAY, T_OPEN_SQUARE_BRACKET], $stackPtr - 1, $previousStatementPtr));
 	}
 
 	/**
@@ -654,7 +654,70 @@ class Helpers
 	}
 
 	/**
-	 * Return a list of indices for variables assigned within a list assignment
+	 * Determine if a token is a list opener for list assignment/destructuring.
+	 *
+	 * The index provided can be either the opening square brace of a short list
+	 * assignment like the first character of `[$a] = $b;` or the `list` token of
+	 * an expression like `list($a) = $b;` or the opening parenthesis of that
+	 * expression.
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $listOpenerIndex
+	 *
+	 * @return bool
+	 */
+	private static function isListAssignment(File $phpcsFile, $listOpenerIndex)
+	{
+		$tokens = $phpcsFile->getTokens();
+		// Match `[$a] = $b;` except for when the previous token is a parenthesis.
+		if ($tokens[$listOpenerIndex]['code'] === T_OPEN_SHORT_ARRAY) {
+			return true;
+		}
+		// Match `list($a) = $b;`
+		if ($tokens[$listOpenerIndex]['code'] === T_LIST) {
+			return true;
+		}
+
+		// If $listOpenerIndex is the open parenthesis of `list($a) = $b;`, then
+		// match that too.
+		if ($tokens[$listOpenerIndex]['code'] === T_OPEN_PARENTHESIS) {
+			$previousTokenPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $listOpenerIndex - 1, null, true);
+			if (
+				isset($tokens[$previousTokenPtr])
+				&& $tokens[$previousTokenPtr]['code'] === T_LIST
+			) {
+				return true;
+			}
+			return true;
+		}
+
+		// If the list opener token is a square bracket that is preceeded by a
+		// close parenthesis that has an owner which is a scope opener, then this
+		// is a list assignment and not an array access.
+		//
+		// Match `if (true) [$a] = $b;`
+		if ($tokens[$listOpenerIndex]['code'] === T_OPEN_SQUARE_BRACKET) {
+			$previousTokenPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $listOpenerIndex - 1, null, true);
+			if (
+				isset($tokens[$previousTokenPtr])
+				&& $tokens[$previousTokenPtr]['code'] === T_CLOSE_PARENTHESIS
+				&& isset($tokens[$previousTokenPtr]['parenthesis_owner'])
+				&& isset(Tokens::$scopeOpeners[$tokens[$tokens[$previousTokenPtr]['parenthesis_owner']]['code']])
+			) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Return a list of indices for variables assigned within a list assignment.
+	 *
+	 * The index provided can be either the opening square brace of a short list
+	 * assignment like the first character of `[$a] = $b;` or the `list` token of
+	 * an expression like `list($a) = $b;` or the opening parenthesis of that
+	 * expression.
 	 *
 	 * @param File $phpcsFile
 	 * @param int  $listOpenerIndex
@@ -717,6 +780,10 @@ class Helpers
 				$variablePtrs[] = $variablePtr;
 			}
 			++$currentPtr;
+		}
+
+		if (! self::isListAssignment($phpcsFile, $listOpenerIndex)) {
+			return null;
 		}
 
 		return $variablePtrs;
