@@ -1,5 +1,6 @@
 <?php
 
+$post = $data['post']; // Undefined variable $data, unused variable $post
 $name = 'friend';
 $place = 'faerie'; // unused variable $place
 

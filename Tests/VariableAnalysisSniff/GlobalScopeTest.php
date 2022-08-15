@@ -18,10 +18,11 @@ class GlobalScopeTest extends BaseTestCase
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedErrors = [
-			4,
-			7,
-			10,
-			13,
+			3,
+			5,
+			8,
+			11,
+			14,
 		];
 		$this->assertSame($expectedErrors, $lines);
 	}
@@ -38,9 +39,10 @@ class GlobalScopeTest extends BaseTestCase
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedErrors = [
-			4,
-			10,
-			13,
+			3,
+			5,
+			11,
+			14,
 		];
 		$this->assertSame($expectedErrors, $lines);
 	}
@@ -57,8 +59,9 @@ class GlobalScopeTest extends BaseTestCase
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedErrors = [
-			7,
-			10,
+			3,
+			8,
+			11,
 		];
 		$this->assertSame($expectedErrors, $lines);
 	}
