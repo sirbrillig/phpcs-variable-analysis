@@ -94,3 +94,10 @@ function function_with_fully_qualified_type_argument_in_closure($items, $item_id
         return $line_item->item_id === $item_id;
     });
 }
+
+function function_with_static_closure() {
+    $params = array();
+    array_map(static function ($inner_param) {
+        echo $inner_param;
+    }, $params);
+}
