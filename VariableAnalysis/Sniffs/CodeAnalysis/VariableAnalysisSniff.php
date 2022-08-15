@@ -1316,8 +1316,7 @@ class VariableAnalysisSniff implements Sniff
 		$startOfStatement = $phpcsFile->findPrevious([T_SEMICOLON, T_OPEN_CURLY_BRACKET], $stackPtr - 1, null, false, null, true);
 		$staticPtr = $phpcsFile->findPrevious([T_STATIC], $stackPtr - 1, null, false, null, true);
 		if (! is_int($startOfStatement)) {
-			$line = $tokens[$stackPtr]['line'];
-			throw new \Exception("Could not find start of statement on line {$line}");
+			$startOfStatement = 1;
 		}
 		if (! is_int($staticPtr)) {
 			return false;
