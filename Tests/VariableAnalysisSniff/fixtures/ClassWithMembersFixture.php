@@ -175,3 +175,11 @@ abstract class AbstractClassWithEmptyMethodBodies {
     return 'foobar';
   }
 }
+
+class ClassWithStaticCreateMethod {
+
+  public static function createStatic($value) {
+    return new static($value);
+  }
+
+}

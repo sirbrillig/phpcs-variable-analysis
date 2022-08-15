@@ -1333,6 +1333,12 @@ class VariableAnalysisSniff implements Sniff
 			return false;
 		}
 
+		// Is the token inside a function call? If so, this is not a static
+		// declaration.
+		if (Helpers::isTokenInsideFunctionCallArgument($phpcsFile, $stackPtr)) {
+			return false;
+		}
+
 		// Is the keyword a late static binding? If so, this isn't the static
 		// keyword we're looking for, but since static:: isn't allowed in a
 		// compile-time constant, we also know we can't be part of a static
