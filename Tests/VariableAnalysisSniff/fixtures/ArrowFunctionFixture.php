@@ -77,3 +77,13 @@ function arrowFunctionWithVariableUsedInsideQuotes($allowed_extensions) {
     $data = array_map( fn($extension) => ".{$extension}", $allowed_extensions );
     return $data;
 }
+
+function staticArrowFunctionAsVariableWithUsedInside($subject) {
+    $arrowFunc = static fn($foo) => $foo . $subject;
+    echo $arrowFunc('hello');
+}
+
+function staticArrowFunctionAsVariableWithUnusedInside($subject) {
+    $arrowFunc = static fn($foo) => $subject; // unused variable $foo
+    echo $arrowFunc('hello');
+}

@@ -29,6 +29,7 @@ class ArrowFunctionTest extends BaseTestCase
 			61,
 			67,
 			71,
+			87,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
@@ -58,6 +59,7 @@ class ArrowFunctionTest extends BaseTestCase
 			63,
 			67,
 			71,
+			87,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
