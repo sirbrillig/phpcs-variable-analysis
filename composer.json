@@ -2,6 +2,7 @@
     "name": "sirbrillig/phpcs-variable-analysis",
     "description": "A PHPCS sniff to detect problems with variables.",
     "type": "phpcodesniffer-standard",
+    "keywords" : [ "phpcs", "static analysis" ],
     "license": "BSD-2-Clause",
     "authors": [
         {
