@@ -101,3 +101,11 @@ function function_with_static_closure() {
         echo $inner_param;
     }, $params);
 }
+
+function function_with_static_variable_inside_anonymous_function() {
+    $anon = (function() {
+      static $test;
+      echo $test;
+    });
+    $anon();
+}
