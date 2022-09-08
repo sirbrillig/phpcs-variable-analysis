@@ -23,6 +23,8 @@ class ForLoopTest extends BaseTestCase
 			118,
 			123,
 			129,
+			143,
+			145,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
@@ -43,5 +45,7 @@ class ForLoopTest extends BaseTestCase
 		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[118][5][0]['source']);
 		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[123][5][0]['source']);
 		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[129][14][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[143][5][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[145][3][0]['source']);
 	}
 }

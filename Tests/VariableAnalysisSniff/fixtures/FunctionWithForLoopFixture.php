@@ -138,8 +138,23 @@ function veryBoringForLoop() {
   }
 }
 
+function reallySmallForLoopWithUnusedInitVar() {
+  for ($i = 1,
+    $j = 0; // Unused variable $j
+  $i <= 10;
+  $j += $i, // Unused variable $j
+    print $i,
+    $i++);
+}
+
 function reallySmallForLoop() {
-  for ($i = 1, $j = 0; $i <= 10; $j += $i, print $i, $i++);
+  for ($i = 1,
+    $j = 0;
+  $i <= 10;
+  $j += $i,
+    print $i +
+    $j,
+    $i++);
 }
 
 function colonSyntaxForLoop() {

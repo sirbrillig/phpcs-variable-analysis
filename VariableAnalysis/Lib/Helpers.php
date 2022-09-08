@@ -1092,12 +1092,32 @@ class Helpers
 		if (! is_int($functionPtr) || ! isset($tokens[$functionPtr]['code'])) {
 			return null;
 		}
-		if ($tokens[$functionPtr]['content'] === 'function' || ($tokens[$functionPtr]['content'] === 'fn' && self::isArrowFunction($phpcsFile, $functionPtr))) {
+		if (
+			$tokens[$functionPtr]['content'] === 'function'
+			|| ($tokens[$functionPtr]['content'] === 'fn' && self::isArrowFunction($phpcsFile, $functionPtr))
+		) {
+			// If there is a function/fn keyword before the beginning of the parens,
+			// this is a function definition and not a function call.
 			return null;
 		}
 		if (! empty($tokens[$functionPtr]['scope_opener'])) {
+			// If the alleged function name has a scope, this is not a function call.
 			return null;
 		}
+
+		$functionNameType = $tokens[$functionPtr]['code'];
+		if (! in_array($functionNameType, Tokens::$functionNameTokens, true)) {
+			// If the alleged function name is not a variable or a string, this is
+			// not a function call.
+			return null;
+		}
+
+		if ($tokens[$functionPtr]['level'] !== $tokens[$stackPtr]['level']) {
+			// If the variable is inside a different scope than the function name,
+			// the function call doesn't apply to the variable.
+			return null;
+		}
+
 		return $functionPtr;
 	}
 

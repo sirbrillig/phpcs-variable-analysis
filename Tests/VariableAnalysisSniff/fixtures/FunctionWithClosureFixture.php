@@ -101,3 +101,18 @@ function function_with_static_closure() {
         echo $inner_param;
     }, $params);
 }
+
+function function_with_static_variable_inside_anonymous_function() {
+    $anon = (function() {
+      static $test;
+      echo $test;
+    });
+    $anon();
+}
+
+function function_with_static_variable_inside_anonymous_function_inside_arguments() {
+    add_action('test', function () {
+      static $providerId;
+      echo $providerId;
+    });
+}
