@@ -109,3 +109,10 @@ function function_with_static_variable_inside_anonymous_function() {
     });
     $anon();
 }
+
+function function_with_static_variable_inside_anonymous_function_inside_arguments() {
+    add_action('test', function () {
+      static $providerId;
+      echo $providerId;
+    });
+}
