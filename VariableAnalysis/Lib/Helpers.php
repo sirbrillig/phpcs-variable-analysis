@@ -1112,6 +1112,12 @@ class Helpers
 			return null;
 		}
 
+		if ($tokens[$functionPtr]['level'] !== $tokens[$stackPtr]['level']) {
+			// If the variable is inside a different scope than the function name,
+			// the function call doesn't apply to the variable.
+			return null;
+		}
+
 		return $functionPtr;
 	}
 
