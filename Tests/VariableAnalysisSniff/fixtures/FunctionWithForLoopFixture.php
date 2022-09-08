@@ -138,6 +138,15 @@ function veryBoringForLoop() {
   }
 }
 
+function reallySmallForLoopWithUnusedInitVar() {
+  for ($i = 1,
+    $j = 0; // Unused variable $j
+  $i <= 10;
+  $j += $i, // Unused variable $j
+    print $i,
+    $i++);
+}
+
 function reallySmallForLoop() {
   for ($i = 1,
     $j = 0;
