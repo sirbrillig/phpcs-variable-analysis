@@ -1276,16 +1276,20 @@ class VariableAnalysisSniff implements Sniff
 	/**
 	 * Process a variable as a static declaration within a function.
 	 *
-	 * This will not operate on variables that are written a class definition
-	 * like `static $foo;` or `public static ?int $foo = 'bar';` because class
-	 * properties (static or instance) are currently not tracked by this sniff.
-	 * This is because a class property might be unused inside the class, but
-	 * used outside the class (we cannot easily know if it is unused); this is
-	 * also because it's common and legal to define class properties when they
-	 * are assigned and that assignment can happen outside a class (we cannot
-	 * easily know if the use of a property is undefined). These sorts of checks
-	 * are better performed by static analysis tools that can see a whole project
-	 * rather than a linter which can only easily see a file or some lines.
+	 * Specifically, this looks for variable definitions of the form `static
+	 * $foo = 'hello';` or `static int $foo;` inside a function definition.
+	 *
+	 * This will not operate on variables that are written in a class definition
+	 * outside of a function like `static $foo;` or `public static ?int $foo =
+	 * 'bar';` because class properties (static or instance) are currently not
+	 * tracked by this sniff. This is because a class property might be unused
+	 * inside the class, but used outside the class (we cannot easily know if it
+	 * is unused); this is also because it's common and legal to define class
+	 * properties when they are assigned and that assignment can happen outside a
+	 * class (we cannot easily know if the use of a property is undefined). These
+	 * sorts of checks are better performed by static analysis tools that can see
+	 * a whole project rather than a linter which can only easily see a file or
+	 * some lines.
 	 *
 	 * If found, such a variable will be marked as declared (and possibly
 	 * assigned, if it includes an initial value) within the scope of the
@@ -1313,7 +1317,7 @@ class VariableAnalysisSniff implements Sniff
 		$tokens = $phpcsFile->getTokens();
 
 		// Search backwards for a `static` keyword that occurs before the start of the statement.
-		$startOfStatement = $phpcsFile->findPrevious([T_SEMICOLON, T_OPEN_CURLY_BRACKET, T_FN_ARROW], $stackPtr - 1, null, false, null, true);
+		$startOfStatement = $phpcsFile->findPrevious([T_SEMICOLON, T_OPEN_CURLY_BRACKET, T_FN_ARROW, T_OPEN_PARENTHESIS], $stackPtr - 1, null, false, null, true);
 		$staticPtr = $phpcsFile->findPrevious([T_STATIC], $stackPtr - 1, null, false, null, true);
 		if (! is_int($startOfStatement)) {
 			$startOfStatement = 1;
@@ -1323,6 +1327,18 @@ class VariableAnalysisSniff implements Sniff
 		}
 		// PHPCS is bad at finding the start of statements so we have to do it ourselves.
 		if ($staticPtr < $startOfStatement) {
+			return false;
+		}
+
+		// Is the 'static' keyword an anonymous static function declaration? If so,
+		// this is not a static variable declaration.
+		$tokenAfterStatic = $phpcsFile->findNext(Tokens::$emptyTokens, $staticPtr + 1, null, true, null, true);
+		$functionTokenTypes = [
+			T_FUNCTION,
+			T_CLOSURE,
+			T_FN,
+		];
+		if (is_int($tokenAfterStatic) && in_array($tokens[$tokenAfterStatic]['code'], $functionTokenTypes, true)) {
 			return false;
 		}
 
