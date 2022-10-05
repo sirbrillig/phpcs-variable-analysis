@@ -1317,7 +1317,7 @@ class VariableAnalysisSniff implements Sniff
 		$tokens = $phpcsFile->getTokens();
 
 		// Search backwards for a `static` keyword that occurs before the start of the statement.
-		$startOfStatement = $phpcsFile->findPrevious([T_SEMICOLON, T_OPEN_CURLY_BRACKET, T_FN_ARROW], $stackPtr - 1, null, false, null, true);
+		$startOfStatement = $phpcsFile->findPrevious([T_SEMICOLON, T_OPEN_CURLY_BRACKET, T_FN_ARROW, T_OPEN_PARENTHESIS], $stackPtr - 1, null, false, null, true);
 		$staticPtr = $phpcsFile->findPrevious([T_STATIC], $stackPtr - 1, null, false, null, true);
 		if (! is_int($startOfStatement)) {
 			$startOfStatement = 1;
