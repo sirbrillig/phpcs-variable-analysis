@@ -1326,6 +1326,13 @@ class VariableAnalysisSniff implements Sniff
 			return false;
 		}
 
+		// Is the 'static' keyword an anonymous static function declaration? If so,
+		// this is not a static variable declaration.
+		$tokenAfterStatic = $phpcsFile->findNext(Tokens::$emptyTokens, $staticPtr + 1, null, true, null, true);
+		if (is_int($tokenAfterStatic) && $tokens[$tokenAfterStatic]['code'] === T_CLOSURE) {
+			return false;
+		}
+
 		// Is the token inside function parameters? If so, this is not a static
 		// declaration because we must be inside a function body.
 		if (Helpers::isTokenFunctionParameter($phpcsFile, $stackPtr)) {
