@@ -116,3 +116,13 @@ function function_with_static_variable_inside_anonymous_function_inside_argument
       echo $providerId;
     });
 }
+
+function function_with_static_closure_inside_array_map($account, $getTeamsByUserQuery) {
+  $developer_team_ids = array_map(
+    static function (GroupInterface $group) {
+      return (int) $group->id();
+    },
+    ($getTeamsByUserQuery)((int) $account->id())
+  );
+  return $developer_team_ids;
+}
