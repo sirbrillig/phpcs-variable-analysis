@@ -124,5 +124,23 @@ function function_with_static_closure_inside_array_map($account, $getTeamsByUser
     },
     ($getTeamsByUserQuery)((int) $account->id())
   );
+  $developer_team_ids = array_map(
+    static function (GroupInterface $group) {
+      return (int) $group->id();
+    },
+    $getTeamsByUserQuery($account)
+  );
+  return $developer_team_ids;
+}
+
+function function_with_static_arrow_closure_inside_array_map($account, $getTeamsByUserQuery) {
+  $developer_team_ids = array_map(
+    static fn (GroupInterface $group) => (int) $group->id(),
+    ($getTeamsByUserQuery)((int) $account->id())
+  );
+  $developer_team_ids = array_map(
+    static fn (GroupInterface $group) => (int) $group->id(),
+    $getTeamsByUserQuery($account)
+  );
   return $developer_team_ids;
 }
