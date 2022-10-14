@@ -755,7 +755,7 @@ class Helpers
 				$parentSquareBracket = self::findContainingOpeningSquareBracket($phpcsFile, $listOpenerIndex);
 				if (is_int($parentSquareBracket)) {
 					// Collect the opening index, but we don't actually need the closing paren index so just make that 0
-					$parents[$parentSquareBracket] = 0;
+					$parents = [$parentSquareBracket => 0];
 				}
 			}
 			// If we have no parents, this is not a nested assignment and therefore is not an assignment
