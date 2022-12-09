@@ -29,6 +29,7 @@ jobs:
         # - PHPCS will run without errors on PHP 5.4 - 7.4 on all supported PHPCS versions.
         # - PHP 8.0 needs PHPCS 3.5.7+ to run without errors.
         # - PHP 8.1 needs PHPCS 3.6.1+ to run without errors.
+        # - PHP 8.2 needs PHPCS 3.6.1+ to run without errors.
         #
         # The matrix is set up so as not to duplicate the builds which are run for code coverage.
         php: ['5.5', '5.6', '7.0', '7.1', '7.2', '7.3']
@@ -36,6 +37,11 @@ jobs:
 
         include:
           # Make the matrix complete without duplicating builds run in code coverage.
+          - php: '8.2'
+            phpcs_version: '3.6.1'
+
+          - php: '8.1'
+            phpcs_version: 'dev-master'
           - php: '8.1'
             phpcs_version: '3.6.1'
 
@@ -48,12 +54,12 @@ jobs:
             phpcs_version: 'dev-master'
 
           # Experimental builds.
-          - php: '8.2' # Nightly.
+          - php: '8.3' # Nightly.
             phpcs_version: 'dev-master'
 
     name: "Test: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
 
-    continue-on-error: ${{ matrix.php == '8.2' }}
+    continue-on-error: ${{ matrix.php == '8.3' }}
 
     steps:
       - name: Checkout code
@@ -87,19 +93,19 @@ jobs:
       # Install dependencies and handle caching in one go.
       # @link https://github.com/marketplace/actions/install-composer-dependencies
       - name: Install Composer dependencies - normal
-        if: ${{ matrix.php != '8.2' }}
+        if: ${{ matrix.php != '8.3' }}
         uses: "ramsey/composer-install@v2"
         with:
-          # Bust the cache at least once a month - output format: YYYY-MM-DD.
-          custom-cache-suffix: $(date -u -d "-0 month -$(($(date +%d)-1)) days" "+%F")
+          # Bust the cache at least once a month - output format: YYYY-MM.
+          custom-cache-suffix: $(date -u "+%Y-%m")
 
       # For the PHP "nightly", we need to install with ignore platform reqs as not all dependencies allow it yet.
       - name: Install Composer dependencies - with ignore platform
-        if: ${{ matrix.php == '8.2' }}
+        if: ${{ matrix.php == '8.3' }}
         uses: "ramsey/composer-install@v2"
         with:
           composer-options: --ignore-platform-req=php
-          custom-cache-suffix: $(date -u -d "-0 month -$(($(date +%d)-1)) days" "+%F")
+          custom-cache-suffix: $(date -u "+%Y-%m")
 
       - name: Run the unit tests
         run: composer test
@@ -115,7 +121,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - php: '8.1'
+          - php: '8.2'
             phpcs_version: 'dev-master'
           - php: '7.4'
             phpcs_version: '3.5.6'
@@ -158,8 +164,8 @@ jobs:
       - name: Install Composer dependencies
         uses: "ramsey/composer-install@v2"
         with:
-          # Bust the cache at least once a month - output format: YYYY-MM-DD.
-          custom-cache-suffix: $(date -u -d "-0 month -$(($(date +%d)-1)) days" "+%F")
+          # Bust the cache at least once a month - output format: YYYY-MM.
+          custom-cache-suffix: $(date -u "+%Y-%m")
 
       - name: Grab PHPUnit version
         id: phpunit_version
