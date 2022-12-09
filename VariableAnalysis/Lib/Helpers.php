@@ -70,8 +70,8 @@ class Helpers
 		$tokens = $phpcsFile->getTokens();
 		if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
 			/**
-		 	 * @var array<int|null>
-		 	 */
+			 * @var array<int|string|null>
+			 */
 			$openPtrs = array_keys($tokens[$stackPtr]['nested_parenthesis']);
 			return (int)end($openPtrs);
 		}
@@ -1085,7 +1085,7 @@ class Helpers
 			return null;
 		}
 		/**
-		 * @var array<int|null>
+		 * @var array<int|string|null>
 		 */
 		$startingParenthesis = array_keys($token['nested_parenthesis']);
 		$startOfArguments = end($startingParenthesis);
