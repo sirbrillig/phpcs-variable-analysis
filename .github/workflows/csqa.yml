@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   checkcs:
-    name: 'PHP: 7.4 | Basic CS and QA checks'
+    name: 'Basic CS and QA checks'
     runs-on: ubuntu-latest
 
     env:
@@ -31,7 +31,7 @@ jobs:
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: 'latest'
           coverage: none
           tools: cs2pr
 
@@ -75,7 +75,7 @@ jobs:
         run: cs2pr ./phpcs-report.xml
 
   static-analysis:
-    name: "PHP: 7.4 | Static Analysis"
+    name: "PHPStan & Psalm"
     runs-on: ubuntu-latest
 
     steps:
@@ -85,7 +85,7 @@ jobs:
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: 'latest'
           coverage: none
 
       # Install dependencies and handle caching in one go.
