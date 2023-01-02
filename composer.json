@@ -55,7 +55,7 @@
         "sirbrillig/phpcs-import-detection": "^1.1",
         "phpcsstandards/phpcsdevcs": "^1.1",
         "phpstan/phpstan": "^1.7",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7 || ^1.0",
         "vimeo/psalm": "^0.2 || ^0.3 || ^1.1 || ^4.24 || ^5.0@beta"
     }
 }
