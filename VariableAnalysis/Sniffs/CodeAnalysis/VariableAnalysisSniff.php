@@ -17,7 +17,7 @@ class VariableAnalysisSniff implements Sniff
 	/**
 	 * The current phpcsFile being checked.
 	 *
-	 * @var File|null phpcsFile
+	 * @var File|null
 	 */
 	protected $currentFile = null;
 
@@ -32,6 +32,13 @@ class VariableAnalysisSniff implements Sniff
 	 * @var array<int, \VariableAnalysis\Lib\ForLoopInfo>
 	 */
 	private $forLoops = [];
+
+	/**
+	 * A list of enum blocks, keyed by the index of their first token in this file.
+	 *
+	 * @var array<int, \VariableAnalysis\Lib\EnumInfo>
+	 */
+	private $enums = [];
 
 	/**
 	 * A list of custom functions which pass in variables to be initialized by
@@ -175,6 +182,9 @@ class VariableAnalysisSniff implements Sniff
 		if (defined('T_FN')) {
 			$types[] = T_FN;
 		}
+		if (defined('T_ENUM')) {
+			$types[] = T_ENUM;
+		}
 		return $types;
 	}
 
@@ -226,6 +236,7 @@ class VariableAnalysisSniff implements Sniff
 		if ($this->currentFile !== $phpcsFile) {
 			$this->currentFile = $phpcsFile;
 			$this->forLoops = [];
+			$this->enums = [];
 		}
 
 		// Add the global scope for the current file to our scope indexes.
@@ -265,6 +276,12 @@ class VariableAnalysisSniff implements Sniff
 			return;
 		}
 
+		// Record enums so we can detect them even before phpcs was able to.
+		if ($token['content'] === 'enum') {
+			$this->recordEnum($phpcsFile, $stackPtr);
+			return;
+		}
+
 		// If the current token is a call to `get_defined_vars()`, consider that a
 		// usage of all variables in the current scope.
 		if ($this->isGetDefinedVars($phpcsFile, $stackPtr)) {
@@ -284,6 +301,19 @@ class VariableAnalysisSniff implements Sniff
 			$this->scopeManager->recordScopeStartAndEnd($phpcsFile, $stackPtr);
 			return;
 		}
+	}
+
+	/**
+	 * Record the boundaries of an enum.
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return void
+	 */
+	private function recordEnum($phpcsFile, $stackPtr)
+	{
+		$this->enums[$stackPtr] = Helpers::makeEnumInfo($phpcsFile, $stackPtr);
 	}
 
 	/**
@@ -857,9 +887,11 @@ class VariableAnalysisSniff implements Sniff
 		// define variables, so make sure we are not in a function before
 		// assuming it's a property.
 		$tokens = $phpcsFile->getTokens();
-		$token  = $tokens[$stackPtr];
-		if ($token && !empty($token['conditions']) && !Helpers::areConditionsWithinFunctionBeforeClass($token['conditions'])) {
-			return Helpers::areAnyConditionsAClass($token['conditions']);
+
+		/** @var array{conditions?: (int|string)[], content?: string}|null */
+		$token = $tokens[$stackPtr];
+		if ($token && !empty($token['conditions']) && !empty($token['content']) && !Helpers::areConditionsWithinFunctionBeforeClass($token)) {
+			return Helpers::areAnyConditionsAClass($token);
 		}
 		return false;
 	}
@@ -925,13 +957,30 @@ class VariableAnalysisSniff implements Sniff
 			return false;
 		}
 
+		// Handle enums specially since their condition may not exist in old phpcs.
+		$inEnum = false;
+		foreach ($this->enums as $enum) {
+			if ($stackPtr > $enum->blockStart && $stackPtr < $enum->blockEnd) {
+				$inEnum = true;
+			}
+		}
+
 		$inFunction = false;
 		foreach (array_reverse($token['conditions'], true) as $scopeCode) {
 			//  $this within a closure is valid
 			if ($scopeCode === T_CLOSURE && $inFunction === false) {
 				return true;
 			}
-			if ($scopeCode === T_CLASS || $scopeCode === T_ANON_CLASS || $scopeCode === T_TRAIT) {
+
+			$classlikeCodes = [T_CLASS, T_ANON_CLASS, T_TRAIT];
+			if (defined('T_ENUM')) {
+				$classlikeCodes[] = T_ENUM;
+			}
+			if (in_array($scopeCode, $classlikeCodes, true)) {
+				return true;
+			}
+
+			if ($scopeCode === T_FUNCTION && $inEnum) {
 				return true;
 			}
 
@@ -1033,7 +1082,9 @@ class VariableAnalysisSniff implements Sniff
 		// Are we refering to self:: outside a class?
 
 		$tokens = $phpcsFile->getTokens();
-		$token  = $tokens[$stackPtr];
+
+		/** @var array{conditions?: (int|string)[], content?: string}|null */
+		$token = $tokens[$stackPtr];
 
 		$doubleColonPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
 		if ($doubleColonPtr === false || $tokens[$doubleColonPtr]['code'] !== T_DOUBLE_COLON) {
@@ -1053,7 +1104,7 @@ class VariableAnalysisSniff implements Sniff
 		}
 		$errorClass = $code === T_SELF ? 'SelfOutsideClass' : 'StaticOutsideClass';
 		$staticRefType = $code === T_SELF ? 'self::' : 'static::';
-		if (!empty($token['conditions']) && Helpers::areAnyConditionsAClass($token['conditions'])) {
+		if (!empty($token['conditions']) && !empty($token['content']) && Helpers::areAnyConditionsAClass($token)) {
 			return false;
 		}
 		$phpcsFile->addError(
