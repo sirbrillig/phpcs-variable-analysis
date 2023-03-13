@@ -278,8 +278,13 @@ class VariableAnalysisSniff implements Sniff
 
 		// Record enums so we can detect them even before phpcs was able to.
 		if ($token['content'] === 'enum') {
-			$this->recordEnum($phpcsFile, $stackPtr);
-			return;
+			$enumInfo = Helpers::makeEnumInfo($phpcsFile, $stackPtr);
+			// The token might not actually be an enum so let's avoid returning if
+			// it's not.
+			if ($enumInfo) {
+				$this->enums[$stackPtr] = $enumInfo;
+				return;
+			}
 		}
 
 		// If the current token is a call to `get_defined_vars()`, consider that a
@@ -300,22 +305,6 @@ class VariableAnalysisSniff implements Sniff
 			Helpers::debug('found scope condition', $token);
 			$this->scopeManager->recordScopeStartAndEnd($phpcsFile, $stackPtr);
 			return;
-		}
-	}
-
-	/**
-	 * Record the boundaries of an enum.
-	 *
-	 * @param File $phpcsFile
-	 * @param int  $stackPtr
-	 *
-	 * @return void
-	 */
-	private function recordEnum($phpcsFile, $stackPtr)
-	{
-		$enumInfo = Helpers::makeEnumInfo($phpcsFile, $stackPtr);
-		if ($enumInfo) {
-			$this->enums[$stackPtr] = $enumInfo;
 		}
 	}
 
