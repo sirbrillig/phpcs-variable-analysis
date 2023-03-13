@@ -313,7 +313,10 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	private function recordEnum($phpcsFile, $stackPtr)
 	{
-		$this->enums[$stackPtr] = Helpers::makeEnumInfo($phpcsFile, $stackPtr);
+		$enumInfo = Helpers::makeEnumInfo($phpcsFile, $stackPtr);
+		if ( $enumInfo ) {
+			$this->enums[$stackPtr] = $enumInfo;
+		}
 	}
 
 	/**

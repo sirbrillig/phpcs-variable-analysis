@@ -37,3 +37,15 @@ enum Numbers: string {
     };
   }
 }
+
+final class Test
+{
+    public function __construct(private SomeClass $someClass)
+    {
+    }
+
+    public function createFor()
+    {
+        $this->someClass->enum('test');
+    }
+}

@@ -1298,7 +1298,7 @@ class Helpers
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
-	 * @return EnumInfo
+	 * @return EnumInfo|null
 	 */
 	public static function makeEnumInfo(File $phpcsFile, $stackPtr)
 	{
@@ -1314,7 +1314,7 @@ class Helpers
 
 			$blockStart = $phpcsFile->findNext([T_OPEN_CURLY_BRACKET], $stackPtr + 1);
 			if (! is_int($blockStart)) {
-				throw new \Exception("Cannot find enum start at position {$stackPtr}");
+				return null;
 			}
 			$blockEnd = $tokens[$blockStart]['bracket_closer'];
 		}
