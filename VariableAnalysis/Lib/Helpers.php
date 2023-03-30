@@ -1445,11 +1445,11 @@ class Helpers
 
 		// If the previous token is a visibility keyword, this is constructor
 		// promotion. eg: `public $foobar`.
-		$prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), $functionIndex, true);
-		if (! is_int($prev)) {
+		$prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), $functionIndex, true);
+		if (! is_int($prevIndex)) {
 			return false;
 		}
-		$prevToken = $tokens[$prev];
+		$prevToken = $tokens[$prevIndex];
 		if (in_array($prevToken['code'], Tokens::$scopeModifiers, true)) {
 			return true;
 		}
@@ -1457,12 +1457,26 @@ class Helpers
 		// If the previous token is not a visibility keyword, but the one before it
 		// is, the previous token was probably a typehint and this is constructor
 		// promotion. eg: `public boolean $foobar`.
-		$prev = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prev - 1), $functionIndex, true);
-		if (! is_int($prev)) {
+		$prev2Index = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prevIndex - 1), $functionIndex, true);
+		if (! is_int($prev2Index)) {
 			return false;
 		}
-		$prevToken = $tokens[$prev];
-		if (in_array($prevToken['code'], Tokens::$scopeModifiers, true)) {
+		$prev2Token = $tokens[$prev2Index];
+		if (in_array($prev2Token['code'], Tokens::$scopeModifiers, true)) {
+			return true;
+		}
+
+		// If the previous token is not a visibility keyword, but the one two
+		// before it is, and one of the tokens is `readonly`, the previous token
+		// was probably a typehint and this is constructor promotion. eg: `public
+		// readonly boolean $foobar`.
+		$prev3Index = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prev2Index - 1), $functionIndex, true);
+		if (! is_int($prev3Index)) {
+			return false;
+		}
+		$prev3Token = $tokens[$prev3Index];
+		$wasPreviousReadonly = $prevToken['content'] === 'readonly' || $prev2Token['content'] === 'readonly';
+		if (in_array($prev3Token['code'], Tokens::$scopeModifiers, true) && $wasPreviousReadonly) {
 			return true;
 		}
 
