@@ -628,12 +628,6 @@ class Helpers
 	public static function getArrowFunctionOpenClose(File $phpcsFile, $stackPtr)
 	{
 		$tokens = $phpcsFile->getTokens();
-		if (defined('T_FN') && $tokens[$stackPtr]['code'] === T_FN) {
-			return [
-				'scope_opener' => $tokens[$stackPtr]['scope_opener'],
-				'scope_closer' => $tokens[$stackPtr]['scope_closer'],
-			];
-		}
 		if ($tokens[$stackPtr]['content'] !== 'fn') {
 			return null;
 		}

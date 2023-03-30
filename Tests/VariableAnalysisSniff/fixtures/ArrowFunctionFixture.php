@@ -87,3 +87,8 @@ function staticArrowFunctionAsVariableWithUnusedInside($subject) {
     $arrowFunc = static fn($foo) => $subject; // unused variable $foo
     echo $arrowFunc('hello');
 }
+
+function arrowFunctionAsExpressionInArgumentWithArray() {
+    $type = do_something(fn($array, $needle) => $array[2] === $needle);
+    echo $type;
+}
