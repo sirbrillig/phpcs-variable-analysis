@@ -1475,13 +1475,8 @@ class Helpers
 			return false;
 		}
 		$prev3Token = $tokens[$prev3Index];
-		if (
-			in_array($prev3Token['code'], Tokens::$scopeModifiers, true) &&
-			(
-				$prevToken['content'] === 'readonly' ||
-				$prev2Token['content'] === 'readonly'
-			)
-		) {
+		$wasPreviousReadonly = $prevToken['content'] === 'readonly' || $prev2Token['content'] === 'readonly';
+		if (in_array($prev3Token['code'], Tokens::$scopeModifiers, true) && $wasPreviousReadonly) {
 			return true;
 		}
 
