@@ -183,3 +183,15 @@ class ClassWithStaticCreateMethod {
   }
 
 }
+
+class ClassWithReadonlyConstructorPromotion {
+  public function __construct(
+    private readonly string $message,
+    private readonly $name,
+    public readonly bool $key
+  ) {}
+
+  public function getMessage(): string {
+    return $this->message;
+  }
+}
