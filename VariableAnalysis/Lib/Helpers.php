@@ -650,14 +650,14 @@ class Helpers
 		$endScopeTokens = [
 			T_COMMA,
 			T_SEMICOLON,
-			T_CLOSE_PARENTHESIS,
 			T_CLOSE_CURLY_BRACKET,
 			T_CLOSE_SHORT_ARRAY,
 		];
-		$scopeCloserIndex = $phpcsFile->findNext($endScopeTokens, $fatArrowIndex	+ 1);
+		$scopeCloserIndex = $phpcsFile->findNext($endScopeTokens, $fatArrowIndex + 1);
 		if (! is_int($scopeCloserIndex)) {
 			return null;
 		}
+
 		return [
 			'scope_opener' => $stackPtr,
 			'scope_closer' => $scopeCloserIndex,
