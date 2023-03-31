@@ -661,7 +661,9 @@ class Helpers
 			if (! is_int($scopeCloserIndex)) {
 				break;
 			}
-			if (count($tokens[$scopeCloserIndex]['nested_parenthesis'] ?? []) !== count($tokens[$stackPtr]['nested_parenthesis'] ?? [])) {
+			$parensOfScopeCloser = isset( $tokens[$scopeCloserIndex]['nested_parenthesis'] ) ? $tokens[$scopeCloserIndex]['nested_parenthesis'] : [];
+			$parensOfFn = isset( $tokens[$stackPtr]['nested_parenthesis'] ) ? $tokens[$stackPtr]['nested_parenthesis'] : [];
+			if (count($parensOfScopeCloser) !== count($parensOfFn)) {
 				// If the alleged scope closer is inside a function parameter, it's not
 				// a closer.
 				$lastIndex = $scopeCloserIndex + 1;
