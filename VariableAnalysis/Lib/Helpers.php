@@ -656,13 +656,13 @@ class Helpers
 		$foundCloser = false;
 		$scopeCloserIndex = null;
 		$lastIndex = $fatArrowIndex;
-		while($foundCloser === false) {
+		while ($foundCloser === false) {
 			$scopeCloserIndex = $phpcsFile->findNext($endScopeTokens, $lastIndex + 1);
 			if (! is_int($scopeCloserIndex)) {
 				break;
 			}
-			$parensOfScopeCloser = isset( $tokens[$scopeCloserIndex]['nested_parenthesis'] ) ? $tokens[$scopeCloserIndex]['nested_parenthesis'] : [];
-			$parensOfFn = isset( $tokens[$stackPtr]['nested_parenthesis'] ) ? $tokens[$stackPtr]['nested_parenthesis'] : [];
+			$parensOfScopeCloser = isset($tokens[$scopeCloserIndex]['nested_parenthesis']) ? $tokens[$scopeCloserIndex]['nested_parenthesis'] : [];
+			$parensOfFn = isset($tokens[$stackPtr]['nested_parenthesis']) ? $tokens[$stackPtr]['nested_parenthesis'] : [];
 			if (count($parensOfScopeCloser) !== count($parensOfFn)) {
 				// If the alleged scope closer is inside a function parameter, it's not
 				// a closer.
