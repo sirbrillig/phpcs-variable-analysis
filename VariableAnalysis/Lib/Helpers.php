@@ -639,7 +639,6 @@ class Helpers
 		// Find the associated close parenthesis
 		$closeParenIndex = $tokens[$openParenIndex]['parenthesis_closer'];
 		// Make sure the next token is a fat arrow or a return type
-		$nonFunctionTokenTypes[] = T_OPEN_PARENTHESIS;
 		$fatArrowIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $closeParenIndex + 1, null, true);
 		if (! is_int($fatArrowIndex)) {
 			return null;
