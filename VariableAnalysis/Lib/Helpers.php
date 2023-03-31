@@ -646,34 +646,81 @@ class Helpers
 		if ($tokens[$fatArrowIndex]['code'] !== T_DOUBLE_ARROW && $tokens[$fatArrowIndex]['type'] !== 'T_FN_ARROW') {
 			return null;
 		}
+
 		// Find the scope closer
-		$endScopeTokens = [
-			T_COMMA,
-			T_SEMICOLON,
-			T_CLOSE_CURLY_BRACKET,
-			T_CLOSE_SHORT_ARRAY,
-		];
-		$foundCloser = false;
 		$scopeCloserIndex = null;
-		$lastIndex = $fatArrowIndex;
-		while ($foundCloser === false) {
-			$scopeCloserIndex = $phpcsFile->findNext($endScopeTokens, $lastIndex + 1);
-			if (! is_int($scopeCloserIndex)) {
+		$foundCurlyPairs = 0;
+		$foundArrayPairs = 0;
+		$foundParenPairs = 0;
+		$arrowBodyStart = $tokens[$stackPtr]['parenthesis_closer'] + 1;
+		for ($index = $arrowBodyStart; $index < self::getLastNonEmptyTokenIndexInFile($phpcsFile); $index++) {
+			$token = $tokens[$index];
+			if (empty($token['code'])) {
+				$scopeCloserIndex = $index;
 				break;
 			}
-			$parensOfScopeCloser = isset($tokens[$scopeCloserIndex]['nested_parenthesis']) ? $tokens[$scopeCloserIndex]['nested_parenthesis'] : [];
-			$parensOfFn = isset($tokens[$stackPtr]['nested_parenthesis']) ? $tokens[$stackPtr]['nested_parenthesis'] : [];
-			if (count($parensOfScopeCloser) !== count($parensOfFn)) {
-				// If the alleged scope closer is inside a function argument, it's not
-				// a closer.
-				$lastIndex = $scopeCloserIndex + 1;
+
+			// A line break is always a closer.
+			if ($token['line'] !== $tokens[$stackPtr]['line']) {
+				$scopeCloserIndex = $index;
+				break;
+			}
+			$code = $token['code'];
+
+			// A semicolon is always a closer.
+			if ($code === T_SEMICOLON) {
+				$scopeCloserIndex = $index;
+				break;
+			}
+
+			// Track pair opening tokens.
+			if ($code === T_OPEN_CURLY_BRACKET) {
+				$foundCurlyPairs += 1;
 				continue;
 			}
-			$foundCloser = true;
-			break;
-		}
-		if (! is_int($scopeCloserIndex) && !empty($tokens[$stackPtr]['scope_closer'])) {
-			$scopeCloserIndex = $tokens[$stackPtr]['scope_closer'];
+			if ($code === T_OPEN_SHORT_ARRAY || $code === T_OPEN_SQUARE_BRACKET) {
+				$foundArrayPairs += 1;
+				continue;
+			}
+			if ($code === T_OPEN_PARENTHESIS) {
+				$foundParenPairs += 1;
+				continue;
+			}
+
+			// A pair closing is only an arrow func closer if there was no matching opening token.
+			if ($code === T_CLOSE_CURLY_BRACKET) {
+				if ($foundCurlyPairs === 0) {
+					$scopeCloserIndex = $index;
+					break;
+				}
+				$foundCurlyPairs -= 1;
+				continue;
+			}
+			if ($code === T_CLOSE_SHORT_ARRAY || $code === T_CLOSE_SQUARE_BRACKET) {
+				if ($foundArrayPairs === 0) {
+					$scopeCloserIndex = $index;
+					break;
+				}
+				$foundArrayPairs -= 1;
+				continue;
+			}
+			if ($code === T_CLOSE_PARENTHESIS) {
+				if ($foundParenPairs === 0) {
+					$scopeCloserIndex = $index;
+					break;
+				}
+				$foundParenPairs -= 1;
+				continue;
+			}
+
+			// A comma is a closer only if we are not inside an opening token.
+			if ($code === T_COMMA) {
+				if (empty($foundArrayPairs) && empty($foundParenPairs) && empty($foundCurlyPairs)) {
+					$scopeCloserIndex = $index;
+					break;
+				}
+				continue;
+			}
 		}
 
 		if (! is_int($scopeCloserIndex)) {
