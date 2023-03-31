@@ -122,3 +122,8 @@ function arrowFunctionAsExpressionInArgumentWithSimpleTernary() {
     $type = do_something(fn(Thing $func) => $func ? $func : null);
     echo $type;
 }
+
+function arrowFunctionWithReturnType() {
+    $type = do_something(fn(string $func): string => $func ? $func : '');
+    echo $type;
+}
