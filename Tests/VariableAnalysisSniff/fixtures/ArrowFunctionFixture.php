@@ -117,3 +117,8 @@ function arrowFunctionAsExpressionInArgumentWithInnerArrayAndArgs() {
     $type = do_something(fn(Thing $func) => $func->call([1,2]) ? $func : null);
     echo $type;
 }
+
+function arrowFunctionAsExpressionInArgumentWithSimpleTernary() {
+    $type = do_something(fn(Thing $func) => $func ? $func : null);
+    echo $type;
+}
