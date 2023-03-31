@@ -92,3 +92,38 @@ function arrowFunctionAsExpressionInArgumentWithArray() {
     $type = do_something(fn($array, $needle) => $array[2] === $needle);
     echo $type;
 }
+
+function arrowFunctionAsExpressionInArgumentWithInnerCall() {
+    $type = do_something(fn(Thing $func) => $func->call() ? $func : null);
+    echo $type;
+}
+
+function arrowFunctionAsExpressionInArgumentWithInnerCallAndUndefinedAfterTernary() {
+    $type = do_something(fn(Thing $func) => $func->call() ? $func : $foo); // undefined variable $foo
+    echo $type;
+}
+
+function arrowFunctionAsExpressionInArgumentWithInnerCallAndArgs() {
+    $type = do_something(fn(Thing $func) => $func->call(1,2) ? $func : null);
+    echo $type;
+}
+
+function arrowFunctionAsExpressionWithUndefinedAfterComma() {
+    $type = do_something(fn(Thing $func, $bar) => $func->call(1,2) ? $bar : null, $bar); // undefined variable $bar
+    echo $type;
+}
+
+function arrowFunctionAsExpressionInArgumentWithInnerArrayAndArgs() {
+    $type = do_something(fn(Thing $func) => $func->call([1,2]) ? $func : null);
+    echo $type;
+}
+
+function arrowFunctionAsExpressionInArgumentWithSimpleTernary() {
+    $type = do_something(fn(Thing $func) => $func ? $func : null);
+    echo $type;
+}
+
+function arrowFunctionWithReturnType() {
+    $type = do_something(fn(string $func): string => $func ? $func : '');
+    echo $type;
+}
