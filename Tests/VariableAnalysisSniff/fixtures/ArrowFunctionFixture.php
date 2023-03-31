@@ -92,3 +92,8 @@ function arrowFunctionAsExpressionInArgumentWithArray() {
     $type = do_something(fn($array, $needle) => $array[2] === $needle);
     echo $type;
 }
+
+function arrowFunctionAsExpressionInArgumentWithTernary() {
+    $type = do_something(fn(Thing $func) => $func->call() ? $func : null);
+    echo $type;
+}
