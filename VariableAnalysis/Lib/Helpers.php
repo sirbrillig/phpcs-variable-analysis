@@ -664,7 +664,7 @@ class Helpers
 			$parensOfScopeCloser = isset($tokens[$scopeCloserIndex]['nested_parenthesis']) ? $tokens[$scopeCloserIndex]['nested_parenthesis'] : [];
 			$parensOfFn = isset($tokens[$stackPtr]['nested_parenthesis']) ? $tokens[$stackPtr]['nested_parenthesis'] : [];
 			if (count($parensOfScopeCloser) !== count($parensOfFn)) {
-				// If the alleged scope closer is inside a function parameter, it's not
+				// If the alleged scope closer is inside a function argument, it's not
 				// a closer.
 				$lastIndex = $scopeCloserIndex + 1;
 				continue;
@@ -672,6 +672,10 @@ class Helpers
 			$foundCloser = true;
 			break;
 		}
+		if (! is_int($scopeCloserIndex) && !empty($tokens[$stackPtr]['scope_closer'])) {
+			$scopeCloserIndex = $tokens[$stackPtr]['scope_closer'];
+		}
+
 		if (! is_int($scopeCloserIndex)) {
 			return null;
 		}
