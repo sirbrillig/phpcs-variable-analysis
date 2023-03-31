@@ -653,7 +653,8 @@ class Helpers
 		$foundArrayPairs = 0;
 		$foundParenPairs = 0;
 		$arrowBodyStart = $tokens[$stackPtr]['parenthesis_closer'] + 1;
-		for ($index = $arrowBodyStart; $index < self::getLastNonEmptyTokenIndexInFile($phpcsFile); $index++) {
+		$lastToken = self::getLastNonEmptyTokenIndexInFile($phpcsFile);
+		for ($index = $arrowBodyStart; $index < $lastToken; $index++) {
 			$token = $tokens[$index];
 			if (empty($token['code'])) {
 				$scopeCloserIndex = $index;
