@@ -653,7 +653,23 @@ class Helpers
 			T_CLOSE_CURLY_BRACKET,
 			T_CLOSE_SHORT_ARRAY,
 		];
-		$scopeCloserIndex = $phpcsFile->findNext($endScopeTokens, $fatArrowIndex + 1);
+		$foundCloser = false;
+		$scopeCloserIndex = null;
+		$lastIndex = $fatArrowIndex;
+		while($foundCloser === false) {
+			$scopeCloserIndex = $phpcsFile->findNext($endScopeTokens, $lastIndex + 1);
+			if (! is_int($scopeCloserIndex)) {
+				break;
+			}
+			if (count($tokens[$scopeCloserIndex]['nested_parenthesis'] ?? []) !== count($tokens[$stackPtr]['nested_parenthesis'] ?? [])) {
+				// If the alleged scope closer is inside a function parameter, it's not
+				// a closer.
+				$lastIndex = $scopeCloserIndex + 1;
+				continue;
+			}
+			$foundCloser = true;
+			break;
+		}
 		if (! is_int($scopeCloserIndex)) {
 			return null;
 		}
