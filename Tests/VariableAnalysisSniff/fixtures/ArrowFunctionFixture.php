@@ -93,7 +93,23 @@ function arrowFunctionAsExpressionInArgumentWithArray() {
     echo $type;
 }
 
-function arrowFunctionAsExpressionInArgumentWithTernary() {
+function arrowFunctionAsExpressionInArgumentWithInnerCall() {
     $type = do_something(fn(Thing $func) => $func->call() ? $func : null);
     echo $type;
 }
+
+function arrowFunctionAsExpressionInArgumentWithInnerCallAndUndefinedAfterTernary() {
+    $type = do_something(fn(Thing $func) => $func->call() ? $func : $foo); // undefined variable $foo
+    echo $type;
+}
+
+function arrowFunctionAsExpressionInArgumentWithInnerCallAndArgs() {
+    $type = do_something(fn(Thing $func) => $func->call(1,2) ? $func : null);
+    echo $type;
+}
+
+function arrowFunctionAsExpressionWithUndefinedAfterComma() {
+    $type = do_something(fn(Thing $func, $bar) => $func->call(1,2) ? $bar : null, $bar); // undefined variable $bar
+    echo $type;
+}
+
