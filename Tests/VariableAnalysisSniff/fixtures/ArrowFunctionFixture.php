@@ -152,3 +152,17 @@ function arrowFunctionWithNewClass(): array {
   };
   echo $arrow;
 }
+
+function arrowFunctionWithQuotes($allowedReferrers) {
+  array_map(
+    static fn (string $allowedReferrer) => str_replace(
+      ['\*\*', '\*'],
+      ['[a-z\d.-]{0,63}', '[a-z\d-]{0,63}'],
+      preg_quote($allowedReferrer, '~'),
+    ),
+    $allowedReferrers;
+  do_something(
+    static fn (string $permissionName) => Str::startsWith($permissionName, CONFIG_START)
+    && $permissionName !== CustomPermission::ALL_CONFIG
+  );
+}
