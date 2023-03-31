@@ -113,3 +113,7 @@ function arrowFunctionAsExpressionWithUndefinedAfterComma() {
     echo $type;
 }
 
+function arrowFunctionAsExpressionInArgumentWithInnerArrayAndArgs() {
+    $type = do_something(fn(Thing $func) => $func->call([1,2]) ? $func : null);
+    echo $type;
+}
