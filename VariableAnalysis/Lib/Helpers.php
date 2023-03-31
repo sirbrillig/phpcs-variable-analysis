@@ -665,11 +665,6 @@ class Helpers
 				break;
 			}
 
-			// A line break is always a closer.
-			if ($token['line'] !== $tokens[$stackPtr]['line']) {
-				$scopeCloserIndex = $index;
-				break;
-			}
 			$code = $token['code'];
 
 			// A semicolon is always a closer.

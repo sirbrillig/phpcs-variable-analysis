@@ -127,3 +127,42 @@ function arrowFunctionWithReturnType() {
     $type = do_something(fn(string $func): string => $func ? $func : '');
     echo $type;
 }
+
+function arrowFunctionWithNewlines( $items ): array {
+  return $items
+    ->map(
+      fn ( array $item ) => apply_overrides(
+        [
+          'a' => ! empty( $item['b'] ),
+        ],
+        $item,
+      )
+    )
+    ->filter( fn ( array $item ) => ! empty( $item['post'] ) )
+    ->values()
+    ->all();
+}
+
+function arrowFunctionWithNewClass(): array {
+  $arrow = fn($a) => new class($a) {
+    public function __construct($key) {
+      $this->key = $key;
+      echo $bar; // undefined variable $bar
+    }
+  };
+  echo $arrow;
+}
+
+function arrowFunctionWithQuotes($allowedReferrers) {
+  array_map(
+    static fn (string $allowedReferrer) => str_replace(
+      ['\*\*', '\*'],
+      ['[a-z\d.-]{0,63}', '[a-z\d-]{0,63}'],
+      preg_quote($allowedReferrer, '~'),
+    ),
+    $allowedReferrers;
+  do_something(
+    static fn (string $permissionName) => Str::startsWith($permissionName, CONFIG_START)
+    && $permissionName !== CustomPermission::ALL_CONFIG
+  );
+}
