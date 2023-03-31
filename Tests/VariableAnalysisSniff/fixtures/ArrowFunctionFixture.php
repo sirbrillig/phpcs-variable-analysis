@@ -127,3 +127,18 @@ function arrowFunctionWithReturnType() {
     $type = do_something(fn(string $func): string => $func ? $func : '');
     echo $type;
 }
+
+function arrowFunctionWithNewlines( $items ): array {
+    return $items
+      ->map(
+        fn ( array $item ) => apply_overrides(
+          [
+            'a' => ! empty( $item['b'] ),
+          ],
+          $item, // throws an undefined variable error
+        )
+      )
+      ->filter( fn ( array $item ) => ! empty( $item['post'] ) )
+      ->values()
+      ->all();
+  }
