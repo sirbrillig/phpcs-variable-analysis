@@ -129,16 +129,26 @@ function arrowFunctionWithReturnType() {
 }
 
 function arrowFunctionWithNewlines( $items ): array {
-    return $items
-      ->map(
-        fn ( array $item ) => apply_overrides(
-          [
-            'a' => ! empty( $item['b'] ),
-          ],
-          $item, // throws an undefined variable error
-        )
+  return $items
+    ->map(
+      fn ( array $item ) => apply_overrides(
+        [
+          'a' => ! empty( $item['b'] ),
+        ],
+        $item,
       )
-      ->filter( fn ( array $item ) => ! empty( $item['post'] ) )
-      ->values()
-      ->all();
-  }
+    )
+    ->filter( fn ( array $item ) => ! empty( $item['post'] ) )
+    ->values()
+    ->all();
+}
+
+function arrowFunctionWithNewClass(): array {
+  $arrow = fn($a) => new class($a) {
+    public function __construct($key) {
+      $this->key = $key;
+      echo $bar; // undefined variable $bar
+    }
+  };
+  echo $arrow;
+}
