@@ -10,11 +10,7 @@ class IfConditionTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('FunctionWithIfConditionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedParametersBeforeUsed',
-			'true'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUnusedParametersBeforeUsed', 'true');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
@@ -43,16 +39,8 @@ class IfConditionTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('FunctionWithIfConditionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'validUndefinedVariableNames',
-			'second'
-		);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedParametersBeforeUsed',
-			'true'
-		);
+		$this->setSniffProperty($phpcsFile, 'validUndefinedVariableNames', 'second');
+		$this->setSniffProperty($phpcsFile, 'allowUnusedParametersBeforeUsed', 'true');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
@@ -75,11 +63,7 @@ class IfConditionTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('FunctionWithInlineIfConditionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedParametersBeforeUsed',
-			'true'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUnusedParametersBeforeUsed', 'true');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
@@ -110,16 +94,8 @@ class IfConditionTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('FunctionWithInlineIfConditionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'validUndefinedVariableNames',
-			'second'
-		);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedParametersBeforeUsed',
-			'true'
-		);
+		$this->setSniffProperty($phpcsFile, 'validUndefinedVariableNames', 'second');
+		$this->setSniffProperty($phpcsFile, 'allowUnusedParametersBeforeUsed', 'true');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
