@@ -10,11 +10,7 @@ class VariableArgumentListTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('VariableArgumentListFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedParametersBeforeUsed',
-			'true'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUnusedParametersBeforeUsed', 'true');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
@@ -31,11 +27,7 @@ class VariableArgumentListTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('VariableArgumentListFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedParametersBeforeUsed',
-			'false'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUnusedParametersBeforeUsed', 'false');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [

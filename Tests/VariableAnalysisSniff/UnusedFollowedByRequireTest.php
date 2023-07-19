@@ -33,11 +33,7 @@ class UnusedFollowedByRequire extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('UnusedFollowedByRequireFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedVariablesBeforeRequire',
-			'true'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUnusedVariablesBeforeRequire', 'true');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
@@ -53,11 +49,7 @@ class UnusedFollowedByRequire extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('FunctionWithoutParamFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedVariablesBeforeRequire',
-			'true'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUnusedVariablesBeforeRequire', 'true');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [

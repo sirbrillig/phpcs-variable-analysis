@@ -10,11 +10,7 @@ class ArrowFunctionTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('ArrowFunctionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedParametersBeforeUsed',
-			'true'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUnusedParametersBeforeUsed', 'true');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [
@@ -41,11 +37,7 @@ class ArrowFunctionTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('ArrowFunctionFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedParametersBeforeUsed',
-			'false'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUnusedParametersBeforeUsed', 'false');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedWarnings = [

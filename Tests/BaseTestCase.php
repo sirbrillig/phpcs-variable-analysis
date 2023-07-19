@@ -58,4 +58,24 @@ class BaseTestCase extends TestCase
 	{
 		return realpath(__DIR__ . '/VariableAnalysisSniff/fixtures/' . $fixtureFilename);
 	}
+
+	public function setSniffProperty($phpcsFile, $property, $value)
+	{
+		if (version_compare(Config::VERSION, '3.8.0', '>=')) {
+			$phpcsFile->ruleset->setSniffProperty(
+				'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+				$property,
+				[
+					'scope' => 'sniff',
+					'value' => $value,
+				]
+			);
+		} else {
+			$phpcsFile->ruleset->setSniffProperty(
+				'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
+				$property,
+				$value
+			);
+		}
+	}
 }

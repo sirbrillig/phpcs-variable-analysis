@@ -10,11 +10,7 @@ class GlobalScopeTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('GlobalScopeFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUndefinedVariablesInFileScope',
-			'false'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUndefinedVariablesInFileScope', 'false');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedErrors = [
@@ -31,11 +27,7 @@ class GlobalScopeTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('GlobalScopeFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUndefinedVariablesInFileScope',
-			'true'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUndefinedVariablesInFileScope', 'true');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedErrors = [
@@ -51,11 +43,7 @@ class GlobalScopeTest extends BaseTestCase
 	{
 		$fixtureFile = $this->getFixture('GlobalScopeFixture.php');
 		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
-		$phpcsFile->ruleset->setSniffProperty(
-			'VariableAnalysis\Sniffs\CodeAnalysis\VariableAnalysisSniff',
-			'allowUnusedVariablesInFileScope',
-			'true'
-		);
+		$this->setSniffProperty($phpcsFile, 'allowUnusedVariablesInFileScope', 'true');
 		$phpcsFile->process();
 		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
 		$expectedErrors = [
