@@ -190,18 +190,18 @@ jobs:
         if: ${{ steps.phpunit_version.outputs.VERSION >= '9.3' }}
         run: composer coverage -- --coverage-cache ./build/phpunit-cache
 
-      # PHP Coveralls v2 has a PHP 5.5 minimum and is not yet fully compatible with PHP 8.0+, so switch the PHP version.
-      - name: Switch to PHP 7.4
-        if: ${{ success() && matrix.php != '7.4' }}
+      # PHP Coveralls v2 has a PHP 5.5 minimum, so switch the PHP version.
+      - name: Switch to PHP latest
+        if: ${{ success() && matrix.php == '5.4' }}
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 'latest'
           coverage: none
 
-      # Global install is used to prevent a conflict with the local composer.lock in PHP 8.0+.
+      # Global install is used to prevent a conflict with the local composer.lock.
       - name: Install Coveralls
         if: ${{ success() }}
-        run: composer global require php-coveralls/php-coveralls:"^2.5.3" --no-interaction --with-all-dependencies
+        run: composer global require php-coveralls/php-coveralls:"^2.6.0" --no-interaction --with-all-dependencies
 
       - name: Upload coverage results to Coveralls
         if: ${{ success() }}
