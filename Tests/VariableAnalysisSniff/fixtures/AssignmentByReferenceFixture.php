@@ -55,7 +55,7 @@ function doubleUsedThenUsedAssignmentByReference() {
   return $var;
 }
 
-function somefunc($choice, &$arr1, &$arr_default) {
+function somefunc1($choice, &$arr1, &$arr_default) {
   $var = &$arr_default;
 
   if ($choice) {
@@ -65,10 +65,20 @@ function somefunc($choice, &$arr1, &$arr_default) {
   echo $var;
 }
 
-function somefunc($choice, &$arr1, &$arr_default) {
+function somefunc2($choice, &$arr1, &$arr_default) {
   if ($choice) {
     $var = &$arr_default; // unused variable $var
     $var = &$arr1;
     echo $var;
   }
+}
+
+function assignByRef2($field_id, $form) {
+  $wrapper_id = $field_id . '_wrapper';
+  if (!isset($form[$field_id]) && isset($form[$wrapper_id])) {
+    $element = &$form[$wrapper_id][$field_id];
+  } else {
+    $element = &$form[$field_id];
+  }
+  $element['test'] = 'test';
 }
