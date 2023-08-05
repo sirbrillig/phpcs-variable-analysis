@@ -1154,17 +1154,18 @@ class VariableAnalysisSniff implements Sniff
 			// are inside a conditional block because in that case the condition may
 			// never activate.
 			$scopeInfo = $this->getOrCreateScopeInfo($currScope);
-			$ifPtr = Helpers::getClosestIfPositionIfBeforeOtherConditions($tokens[$referencePtr]['conditions']);
+			$conditionPointer = Helpers::getClosestConditionPositionIfBeforeOtherConditions($tokens[$referencePtr]['conditions']);
 			$lastAssignmentPtr = $varInfo->firstDeclared;
-			if (! $ifPtr && $lastAssignmentPtr) {
+			if (! $conditionPointer && $lastAssignmentPtr) {
 				Helpers::debug("processVariableAsAssignment: considering close of scope for '{$varName}' due to reference reassignment");
 				$this->processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo);
 			}
-			if ($ifPtr && $lastAssignmentPtr && $ifPtr < $lastAssignmentPtr) {
-				Helpers::debug("processVariableAsAssignment: considering close of scope for '{$varName}' due to reference reassignment ignoring recent IF");
+			if ($conditionPointer && $lastAssignmentPtr && $conditionPointer < $lastAssignmentPtr) {
+				// We may be inside a condition but the last assignment was also inside this condition.
+				Helpers::debug("processVariableAsAssignment: considering close of scope for '{$varName}' due to reference reassignment ignoring recent condition");
 				$this->processScopeCloseForVariable($phpcsFile, $varInfo, $scopeInfo);
 			}
-			if ($ifPtr && $lastAssignmentPtr && $ifPtr > $lastAssignmentPtr) {
+			if ($conditionPointer && $lastAssignmentPtr && $conditionPointer > $lastAssignmentPtr) {
 				Helpers::debug("processVariableAsAssignment: not considering close of scope for '{$varName}' due to reference reassignment because it is conditional");
 			}
 			// The referenced variable may have a different name, but we don't
