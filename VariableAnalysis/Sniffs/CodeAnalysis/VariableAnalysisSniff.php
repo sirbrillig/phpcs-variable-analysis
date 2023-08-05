@@ -1852,10 +1852,15 @@ class VariableAnalysisSniff implements Sniff
 
 		$regexp = Constants::getDoubleQuotedVarRegexp();
 		if (! empty($regexp) && !preg_match_all($regexp, $token['content'], $matches)) {
+			Helpers::debug('processVariableInString: no variables found', $token);
 			return;
 		}
 		Helpers::debug('examining token for variable in string', $token);
 
+		if (empty($matches)) {
+			Helpers::debug('processVariableInString: no variables found after search', $token);
+			return;
+		}
 		foreach ($matches[1] as $varName) {
 			$varName = Helpers::normalizeVarName($varName);
 
