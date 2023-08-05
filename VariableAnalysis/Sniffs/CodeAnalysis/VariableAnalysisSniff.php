@@ -460,7 +460,7 @@ class VariableAnalysisSniff implements Sniff
 		if (in_array($varName, $validUnusedVariableNames)) {
 			$scopeInfo->variables[$varName]->ignoreUnused = true;
 		}
-		if (isset($this->ignoreUnusedRegexp) && preg_match($this->ignoreUnusedRegexp, $varName) === 1) {
+		if (! empty($this->ignoreUnusedRegexp) && preg_match($this->ignoreUnusedRegexp, $varName) === 1) {
 			$scopeInfo->variables[$varName]->ignoreUnused = true;
 		}
 		if ($scopeInfo->scopeStartIndex === 0 && $this->allowUndefinedVariablesInFileScope) {
@@ -469,7 +469,7 @@ class VariableAnalysisSniff implements Sniff
 		if (in_array($varName, $validUndefinedVariableNames)) {
 			$scopeInfo->variables[$varName]->ignoreUndefined = true;
 		}
-		if (isset($this->validUndefinedVariableRegexp) && preg_match($this->validUndefinedVariableRegexp, $varName) === 1) {
+		if (! empty($this->validUndefinedVariableRegexp) && preg_match($this->validUndefinedVariableRegexp, $varName) === 1) {
 			$scopeInfo->variables[$varName]->ignoreUndefined = true;
 		}
 		Helpers::debug("getOrCreateVariableInfo: scope for '{$varName}' is now", $scopeInfo);
@@ -1850,7 +1850,8 @@ class VariableAnalysisSniff implements Sniff
 		$tokens = $phpcsFile->getTokens();
 		$token  = $tokens[$stackPtr];
 
-		if (!preg_match_all(Constants::getDoubleQuotedVarRegexp(), $token['content'], $matches)) {
+		$regexp = Constants::getDoubleQuotedVarRegexp();
+		if (! empty($regexp) && !preg_match_all($regexp, $token['content'], $matches)) {
 			return;
 		}
 		Helpers::debug('examining token for variable in string', $token);
@@ -1923,7 +1924,8 @@ class VariableAnalysisSniff implements Sniff
 			}
 			if ($argumentFirstToken['code'] === T_DOUBLE_QUOTED_STRING) {
 				// Double-quoted string literal.
-				if (preg_match(Constants::getDoubleQuotedVarRegexp(), $argumentFirstToken['content'])) {
+				$regexp = Constants::getDoubleQuotedVarRegexp();
+				if (! empty($regexp) && preg_match($regexp, $argumentFirstToken['content'])) {
 					// Bail if the string needs variable expansion, that's runtime stuff.
 					continue;
 				}

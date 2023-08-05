@@ -928,6 +928,9 @@ class Helpers
 	 */
 	public static function splitStringToArray($pattern, $value)
 	{
+		if (empty($pattern)) {
+			return [];
+		}
 		$result = preg_split($pattern, $value);
 		return is_array($result) ? $result : [];
 	}
