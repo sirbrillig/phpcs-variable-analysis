@@ -128,21 +128,26 @@ class Helpers
 	}
 
 	/**
-	 * Return true if the token conditions are within an if block before they are
-	 * within a class or function.
+	 * Return true if the token conditions are within an IF/ELSE/ELSEIF block
+	 * before they are within a class or function.
 	 *
 	 * @param (int|string)[] $conditions
 	 *
 	 * @return int|string|null
 	 */
-	public static function getClosestIfPositionIfBeforeOtherConditions(array $conditions)
+	public static function getClosestConditionPositionIfBeforeOtherConditions(array $conditions)
 	{
 		$conditionsInsideOut = array_reverse($conditions, true);
 		if (empty($conditions)) {
 			return null;
 		}
 		$scopeCode = reset($conditionsInsideOut);
-		if ($scopeCode === T_IF) {
+		$conditionalCodes = [
+			T_IF,
+			T_ELSE,
+			T_ELSEIF,
+		];
+		if (in_array($scopeCode, $conditionalCodes, true)) {
 			return key($conditionsInsideOut);
 		}
 		return null;
@@ -923,6 +928,9 @@ class Helpers
 	 */
 	public static function splitStringToArray($pattern, $value)
 	{
+		if (empty($pattern)) {
+			return [];
+		}
 		$result = preg_split($pattern, $value);
 		return is_array($result) ? $result : [];
 	}
