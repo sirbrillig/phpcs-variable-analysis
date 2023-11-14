@@ -15,7 +15,7 @@ Plugin for PHP_CodeSniffer static analysis tool that adds analysis of problemati
 
 ### Requirements
 
-VariableAnalysis requires PHP 5.4 or higher and [PHP CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) version 3.5.6 or higher.
+VariableAnalysis requires PHP 5.4 or higher and [PHP CodeSniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer) version 3.5.6 or higher.
 
 ### With PHPCS Composer Installer
 
@@ -34,7 +34,7 @@ Then install these standards.
 composer require --dev sirbrillig/phpcs-variable-analysis
 ```
 
-You can then include the sniffs by adding a line like the following to [your phpcs.xml file](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Advanced-Usage#using-a-default-configuration-file).
+You can then include the sniffs by adding a line like the following to [your phpcs.xml file](https://github.com/PHPCSStandards/PHP_CodeSniffer/wiki/Advanced-Usage#using-a-default-configuration-file).
 
 ```
 <rule ref="VariableAnalysis"/>
@@ -44,13 +44,13 @@ It should just work after that!
 
 ### Standalone
 
-1. Install PHP_CodeSniffer (PHPCS) by following its [installation instructions](https://github.com/squizlabs/PHP_CodeSniffer#installation) (via Composer, Phar file, PEAR, or Git checkout).
+1. Install PHP_CodeSniffer (PHPCS) by following its [installation instructions](https://github.com/PHPCSStandards/PHP_CodeSniffer#installation) (via Composer, Phar file, PEAR, or Git checkout).
 
    Do ensure that PHP_CodeSniffer's version matches our [requirements](#requirements).
 
 2. Install VariableAnalysis. Download either the zip or tar.gz file from [the VariableAnalysis latest release page](https://github.com/sirbrillig/phpcs-variable-analysis/releases/latest). Expand the file and rename the resulting directory to `phpcs-variable-analysis`. Move the directory to a place where you'd like to keep all your PHPCS standards.
 
-3. Add the paths of the newly installed standards to the [PHP_CodeSniffer installed_paths configuration](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Configuration-Options#setting-the-installed-standard-paths). The following command should append the new standards to your existing standards (be sure to supply the actual paths to the directories you created above).
+3. Add the paths of the newly installed standards to the [PHP_CodeSniffer installed_paths configuration](https://github.com/PHPCSStandards/PHP_CodeSniffer/wiki/Configuration-Options#setting-the-installed-standard-paths). The following command should append the new standards to your existing standards (be sure to supply the actual paths to the directories you created above).
 
         phpcs --config-set installed_paths "$(phpcs --config-show|grep installed_paths|awk '{ print $2 }'),/path/to/phpcs-variable-analysis"
 
@@ -78,7 +78,7 @@ The available options are as follows:
 - `sitePassByRefFunctions` (string, default `null`): a list of custom functions which pass in variables to be initialized by reference (eg `preg_match()`) and therefore should not require those variables to be defined ahead of time. The list is space separated and each entry is of the form `functionName:1,2`. The function name comes first followed by a colon and a comma-separated list of argument numbers (starting from 1) which should be considered variable definitions. The special value `...` in the arguments list will cause all arguments after the last number to be considered variable definitions.
 - `allowWordPressPassByRefFunctions` (bool, default `false`): if set to true, a list of common WordPress pass-by-reference functions will be added to the list of PHP ones so that passing undefined variables to these functions (to be initialized by reference) will be allowed.
 
-To set these these options, you must use XML in your ruleset. For details, see the [phpcs customizable sniff properties page](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Customisable-Sniff-Properties). Here is an example that ignores all variables that start with an underscore:
+To set these these options, you must use XML in your ruleset. For details, see the [phpcs customizable sniff properties page](https://github.com/PHPCSStandards/PHP_CodeSniffer/wiki/Customisable-Sniff-Properties). Here is an example that ignores all variables that start with an underscore:
 
 ```xml
 <rule ref="VariableAnalysis.CodeAnalysis.VariableAnalysis">
