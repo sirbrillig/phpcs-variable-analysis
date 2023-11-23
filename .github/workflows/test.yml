@@ -30,6 +30,7 @@ jobs:
         # - PHP 8.0 needs PHPCS 3.5.7+ to run without errors.
         # - PHP 8.1 needs PHPCS 3.6.1+ to run without errors.
         # - PHP 8.2 needs PHPCS 3.6.1+ to run without errors.
+        # - PHP 8.3 needs PHPCS 3.8.0+ to run without errors (though the errors don't affect this package).
         #
         # The matrix is set up so as not to duplicate the builds which are run for code coverage.
         php: ['5.5', '5.6', '7.0', '7.1', '7.2', '7.3']
@@ -37,6 +38,9 @@ jobs:
 
         include:
           # Make the matrix complete without duplicating builds run in code coverage.
+          - php: '8.3'
+            phpcs_version: '3.6.1'
+
           - php: '8.2'
             phpcs_version: '3.6.1'
 
@@ -54,12 +58,12 @@ jobs:
             phpcs_version: 'dev-master'
 
           # Experimental builds.
-          - php: '8.3' # Nightly.
+          - php: '8.4' # Nightly.
             phpcs_version: 'dev-master'
 
     name: "Test: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
 
-    continue-on-error: ${{ matrix.php == '8.3' }}
+    continue-on-error: ${{ matrix.php == '8.4' }}
 
     steps:
       - name: Checkout code
@@ -93,7 +97,7 @@ jobs:
       # Install dependencies and handle caching in one go.
       # @link https://github.com/marketplace/actions/install-php-dependencies-with-composer
       - name: Install Composer dependencies - normal
-        if: ${{ matrix.php != '8.3' }}
+        if: ${{ matrix.php != '8.4' }}
         uses: "ramsey/composer-install@v2"
         with:
           # Bust the cache at least once a month - output format: YYYY-MM.
@@ -101,7 +105,7 @@ jobs:
 
       # For the PHP "nightly", we need to install with ignore platform reqs as not all dependencies allow it yet.
       - name: Install Composer dependencies - with ignore platform
-        if: ${{ matrix.php == '8.3' }}
+        if: ${{ matrix.php == '8.4' }}
         uses: "ramsey/composer-install@v2"
         with:
           composer-options: --ignore-platform-req=php
@@ -121,7 +125,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - php: '8.2'
+          - php: '8.3'
             phpcs_version: 'dev-master'
           - php: '7.4'
             phpcs_version: '3.5.6'
