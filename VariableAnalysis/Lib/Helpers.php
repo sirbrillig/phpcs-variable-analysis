@@ -37,6 +37,9 @@ class Helpers
 	}
 
 	/**
+	 * Find the position of the square bracket containing the token at $stackPtr,
+	 * if any.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
@@ -44,8 +47,26 @@ class Helpers
 	 */
 	public static function findContainingOpeningSquareBracket(File $phpcsFile, $stackPtr)
 	{
+		// Find the previous bracket within this same statement.
 		$previousStatementPtr = self::getPreviousStatementPtr($phpcsFile, $stackPtr);
-		return self::getIntOrNull($phpcsFile->findPrevious([T_OPEN_SHORT_ARRAY, T_OPEN_SQUARE_BRACKET], $stackPtr - 1, $previousStatementPtr));
+		$openBracketPosition = self::getIntOrNull($phpcsFile->findPrevious([T_OPEN_SHORT_ARRAY, T_OPEN_SQUARE_BRACKET], $stackPtr - 1, $previousStatementPtr));
+		if (empty($openBracketPosition)) {
+			return null;
+		}
+		// Make sure we are inside the pair of brackets we found.
+		$tokens = $phpcsFile->getTokens();
+		$openBracketToken = $tokens[$openBracketPosition];
+		if (empty($openBracketToken) || empty($tokens[$openBracketToken['bracket_closer']])) {
+			return null;
+		}
+		$closeBracketPosition = $openBracketToken['bracket_closer'];
+		if (empty($closeBracketPosition)) {
+			return null;
+		}
+		if ($stackPtr > $closeBracketPosition) {
+			return null;
+		}
+		return $openBracketPosition;
 	}
 
 	/**
@@ -835,10 +856,17 @@ class Helpers
 			$parents = isset($tokens[$listOpenerIndex]['nested_parenthesis']) ? $tokens[$listOpenerIndex]['nested_parenthesis'] : [];
 			// There's no record of nested brackets for short lists; we'll have to find the parent ourselves
 			if (empty($parents)) {
-				$parentSquareBracket = self::findContainingOpeningSquareBracket($phpcsFile, $listOpenerIndex);
-				if (is_int($parentSquareBracket)) {
-					// Collect the opening index, but we don't actually need the closing paren index so just make that 0
-					$parents = [$parentSquareBracket => 0];
+				$parentSquareBracketPtr = self::findContainingOpeningSquareBracket($phpcsFile, $listOpenerIndex);
+				if (is_int($parentSquareBracketPtr)) {
+					// Make sure that the parent is really a parent by checking that its
+					// closing index is outside of the current bracket's closing index.
+					$parentSquareBracketToken = $tokens[$parentSquareBracketPtr];
+					$parentSquareBracketClosePtr = $parentSquareBracketToken['bracket_closer'];
+					if ($parentSquareBracketClosePtr && $parentSquareBracketClosePtr > $closePtr) {
+						self::debug("found enclosing bracket for {$listOpenerIndex}: {$parentSquareBracketPtr}");
+						// Collect the opening index, but we don't actually need the closing paren index so just make that 0
+						$parents = [$parentSquareBracketPtr => 0];
+					}
 				}
 			}
 			// If we have no parents, this is not a nested assignment and therefore is not an assignment
