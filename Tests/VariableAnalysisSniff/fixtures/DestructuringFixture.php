@@ -48,3 +48,13 @@ function function_with_nested_destructure_using_short_list() {
     echo $foo;
     echo $bar;
 }
+
+function function_with_short_destructuring_assignment_and_array_arg(int $baz) {
+	[$bar] = doSomething([$baz]);
+	return $bar;
+}
+
+function function_with_destructuring_assignment_and_array_arg(int $baz) {
+	list($bar) = doSomething([$baz]);
+	return $bar;
+}
