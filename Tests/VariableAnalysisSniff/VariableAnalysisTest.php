@@ -194,6 +194,8 @@ class VariableAnalysisTest extends BaseTestCase
 			115,
 			116,
 			174,
+			202,
+			203,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}

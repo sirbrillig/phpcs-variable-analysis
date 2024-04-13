@@ -1561,6 +1561,15 @@ class Helpers
 			return false;
 		}
 		$prev2Token = $tokens[$prev2Index];
+		// If the token that might be a visibility keyword is a nullable typehint,
+		// ignore it and move back one token further eg: `public ?boolean $foobar`.
+		if ($prev2Token['code'] === 'PHPCS_T_NULLABLE') {
+			$prev2Index = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prev2Index - 1), $functionIndex, true);
+			if (! is_int($prev2Index)) {
+				return false;
+			}
+		}
+		$prev2Token = $tokens[$prev2Index];
 		if (in_array($prev2Token['code'], Tokens::$scopeModifiers, true)) {
 			return true;
 		}

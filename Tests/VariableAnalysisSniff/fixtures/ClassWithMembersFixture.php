@@ -195,3 +195,30 @@ class ClassWithReadonlyConstructorPromotion {
     return $this->message;
   }
 }
+
+class ClassWithNullableConstructorPromotion {
+  public function __construct(
+        public ?string $name = 'Brent',
+        $unused, // Unused variable $unused
+        ?string $unused2, // Unused variable $unused2
+        public ?string $role,
+        private ?string $role2,
+        protected ?string $role3,
+        public $nickname,
+        private $nickname2,
+        protected $nickname3
+  ) {
+  }
+}
+
+class ClassWithReadonlyNullableConstructorPromotion {
+  public function __construct(
+    private readonly ?string $message,
+    private readonly $name,
+    public readonly ?bool $key
+  ) {}
+
+  public function getMessage(): string {
+    return $this->message;
+  }
+}
