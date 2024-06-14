@@ -245,6 +245,13 @@ class VariableAnalysisSniff implements Sniff
 			$this->scopeManager->recordScopeStartAndEnd($phpcsFile, 0);
 		}
 
+		// Find and process variables to perform two jobs: to record variable
+		// definition or use, and to report variables as undefined if they are used
+		// without having been first defined.
+		if ($token['code'] === T_VARIABLE) {
+			$this->processVariable($phpcsFile, $stackPtr);
+		}
+
 		// Report variables defined but not used in the current scope as unused
 		// variables if the current token closes scopes.
 		$this->searchForAndProcessClosingScopesAt($phpcsFile, $stackPtr);
@@ -253,13 +260,10 @@ class VariableAnalysisSniff implements Sniff
 		// expression of a for loop if the current token closes a loop.
 		$this->processClosingForLoopsAt($phpcsFile, $stackPtr);
 
-		// Find and process variables to perform two jobs: to record variable
-		// definition or use, and to report variables as undefined if they are used
-		// without having been first defined.
 		if ($token['code'] === T_VARIABLE) {
-			$this->processVariable($phpcsFile, $stackPtr);
 			return;
 		}
+
 		if (($token['code'] === T_DOUBLE_QUOTED_STRING) || ($token['code'] === T_HEREDOC)) {
 			$this->processVariableInString($phpcsFile, $stackPtr);
 			return;
