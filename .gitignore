@@ -2,6 +2,7 @@
 /vendor/
 /build/
 phpunit.xml
+phpunitlte9.xml
 .phpunit.result.cache
 .phpcs.xml
 phpcs.xml
