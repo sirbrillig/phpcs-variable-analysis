@@ -4,7 +4,7 @@ namespace VariableAnalysis\Tests\VariableAnalysisSniff;
 
 use VariableAnalysis\Tests\BaseTestCase;
 
-class UnusedFollowedByRequire extends BaseTestCase
+class UnusedFollowedByRequireTest extends BaseTestCase
 {
 	public function testUnusedFollowedByRequireWarnsByDefault()
 	{
