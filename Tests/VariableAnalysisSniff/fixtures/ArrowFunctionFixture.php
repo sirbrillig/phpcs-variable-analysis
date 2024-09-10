@@ -166,3 +166,8 @@ function arrowFunctionWithQuotes($allowedReferrers) {
     && $permissionName !== CustomPermission::ALL_CONFIG
   );
 }
+
+function arrowFunctionNestedAsExpressionWithNoWarnings() {
+    $ids = fn($posts) => array_map(fn($post) => $post->id, $posts);
+    echo $ids([]);
+}
