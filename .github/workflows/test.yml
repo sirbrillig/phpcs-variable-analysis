@@ -109,9 +109,9 @@ jobs:
           # On stable PHPCS versions, allow for PHP deprecation notices.
           # Unit tests don't need to fail on those for stable releases where those issues won't get fixed anymore.
           if [ "${{ matrix.phpcs_version }}" != "4.x-dev" ]; then
-            echo 'PHP_INI=error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, display_startup_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
+            echo 'PHP_INI=error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, display_startup_errors=On, zend.assertions=1' >> "$GITHUB_OUTPUT"
           else
-            echo 'PHP_INI=error_reporting=-1, display_errors=On, display_startup_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
+            echo 'PHP_INI=error_reporting=-1, display_errors=On, display_startup_errors=On, zend.assertions=1' >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install PHP
@@ -140,15 +140,15 @@ jobs:
 
       - name: Grab PHPUnit version
         id: phpunit_version
-        run: echo "VERSION=$(vendor/bin/phpunit --version | grep --only-matching --max-count=1 --extended-regexp '\b[0-9]+\.[0-9]+')" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(vendor/bin/phpunit --version | grep --only-matching --max-count=1 --extended-regexp '\b[0-9]+\.[0-9]+')" >> "$GITHUB_OUTPUT"
 
       - name: Determine PHPUnit config file to use
         id: phpunit_config
         run: |
           if [ "${{ startsWith( steps.phpunit_version.outputs.VERSION, '10.' ) || startsWith( steps.phpunit_version.outputs.VERSION, '11.' ) }}" == "true" ]; then
-            echo 'FILE=phpunit.xml.dist' >> $GITHUB_OUTPUT
+            echo 'FILE=phpunit.xml.dist' >> "$GITHUB_OUTPUT"
           else
-            echo 'FILE=phpunitlte9.xml.dist' >> $GITHUB_OUTPUT
+            echo 'FILE=phpunitlte9.xml.dist' >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run the unit tests
@@ -187,9 +187,9 @@ jobs:
           # On stable PHPCS versions, allow for PHP deprecation notices.
           # Unit tests don't need to fail on those for stable releases where those issues won't get fixed anymore.
           if [ "${{ matrix.phpcs_version }}" != "4.x-dev" ]; then
-            echo 'PHP_INI=error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, display_startup_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
+            echo 'PHP_INI=error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, display_startup_errors=On, zend.assertions=1' >> "$GITHUB_OUTPUT"
           else
-            echo 'PHP_INI=error_reporting=-1, display_errors=On, display_startup_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
+            echo 'PHP_INI=error_reporting=-1, display_errors=On, display_startup_errors=On, zend.assertions=1' >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install PHP
@@ -213,7 +213,7 @@ jobs:
 
       - name: Grab PHPUnit version
         id: phpunit_version
-        run: echo "VERSION=$(vendor/bin/phpunit --version | grep --only-matching --max-count=1 --extended-regexp '\b[0-9]+\.[0-9]+')" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(vendor/bin/phpunit --version | grep --only-matching --max-count=1 --extended-regexp '\b[0-9]+\.[0-9]+')" >> "$GITHUB_OUTPUT"
 
       - name: "DEBUG: Show grabbed version"
         run: echo ${{ steps.phpunit_version.outputs.VERSION }}
@@ -222,14 +222,14 @@ jobs:
         id: phpunit_config
         run: |
           if [ "${{ startsWith( steps.phpunit_version.outputs.VERSION, '9.' ) && steps.phpunit_version.outputs.VERSION >= '9.3' }}" == "true" ]; then
-            echo 'FILE=phpunitlte9.xml.dist' >> $GITHUB_OUTPUT
-            echo 'EXTRA_ARGS=--coverage-cache ./build/phpunit-cache' >> $GITHUB_OUTPUT
+            echo 'FILE=phpunitlte9.xml.dist' >> "$GITHUB_OUTPUT"
+            echo 'EXTRA_ARGS=--coverage-cache ./build/phpunit-cache' >> "$GITHUB_OUTPUT"
           elif [ "${{ startsWith( steps.phpunit_version.outputs.VERSION, '10.' ) || startsWith( steps.phpunit_version.outputs.VERSION, '11.' ) }}" == "true" ]; then
-            echo 'FILE=phpunit.xml.dist' >> $GITHUB_OUTPUT
-            echo 'EXTRA_ARGS=' >> $GITHUB_OUTPUT
+            echo 'FILE=phpunit.xml.dist' >> "$GITHUB_OUTPUT"
+            echo 'EXTRA_ARGS=' >> "$GITHUB_OUTPUT"
           else
-            echo 'FILE=phpunitlte9.xml.dist' >> $GITHUB_OUTPUT
-            echo 'EXTRA_ARGS=' >> $GITHUB_OUTPUT
+            echo 'FILE=phpunitlte9.xml.dist' >> "$GITHUB_OUTPUT"
+            echo 'EXTRA_ARGS=' >> "$GITHUB_OUTPUT"
           fi
 
       # PHPUnit 9.3 started using PHP-Parser for code coverage which can cause interference.
