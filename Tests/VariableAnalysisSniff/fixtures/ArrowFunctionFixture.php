@@ -166,3 +166,12 @@ function arrowFunctionWithQuotes($allowedReferrers) {
     && $permissionName !== CustomPermission::ALL_CONFIG
   );
 }
+
+function arrowFunctionWithNestedArrowFunction() {
+	$fn = fn($outerArrowArg) => [
+    $outerArrowArg,
+    fn($insideArg) => $insideArg,
+    $outerArrowArg,
+	];
+	$fn();
+}
