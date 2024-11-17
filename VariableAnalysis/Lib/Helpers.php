@@ -1632,7 +1632,6 @@ class Helpers
 				return ($tokens[$i]['code'] === T_VARIABLE);
 			}
 		}
-		return false;
 	}
 
 	/**
