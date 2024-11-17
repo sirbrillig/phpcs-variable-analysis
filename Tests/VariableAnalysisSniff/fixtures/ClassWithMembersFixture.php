@@ -222,3 +222,13 @@ class ClassWithReadonlyNullableConstructorPromotion {
     return $this->message;
   }
 }
+
+class ClassWithNamespacedConstructorPropertyPromotion
+{
+    public function __construct(
+        public \App\Models\User $user,
+        public readonly \App\Models\Blog $blog,
+        private \App\Models\Game $game,
+        protected ?\App\Models\Flag $flag,
+    ) {}
+}
