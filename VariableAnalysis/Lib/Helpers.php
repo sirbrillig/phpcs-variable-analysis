@@ -1584,6 +1584,18 @@ class Helpers
 		if ($token['code'] === T_STRING) {
 			return true;
 		}
+		if ($token['code'] === T_TRUE) {
+			return true;
+		}
+		if ($token['code'] === T_FALSE) {
+			return true;
+		}
+		if ($token['code'] === T_NULL) {
+			return true;
+		}
+		if ($token['type'] === 'T_TYPE_UNION') {
+			return true;
+		}
 		if (in_array($token['code'], Tokens::$emptyTokens)) {
 			return true;
 		}
