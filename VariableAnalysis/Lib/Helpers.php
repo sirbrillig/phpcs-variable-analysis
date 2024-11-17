@@ -1535,6 +1535,7 @@ class Helpers
 	 */
 	public static function isConstructorPromotion(File $phpcsFile, $stackPtr)
 	{
+		// If we are not in a function's parameters, this is not promotion.
 		$functionIndex = self::getFunctionIndexForFunctionParameter($phpcsFile, $stackPtr);
 		if (! $functionIndex) {
 			return false;
@@ -1542,52 +1543,82 @@ class Helpers
 
 		$tokens = $phpcsFile->getTokens();
 
-		// If the previous token is a visibility keyword, this is constructor
-		// promotion. eg: `public $foobar`.
-		$prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), $functionIndex, true);
-		if (! is_int($prevIndex)) {
+		// Move backwards from the token, ignoring whitespace, typehints, and the
+		// 'readonly' keyword, and return true if the previous token is a
+		// visibility keyword (eg: `public`).
+		for ($i = $stackPtr - 1; $i > $functionIndex; $i--) {
+			if (in_array($tokens[$i]['code'], Tokens::$scopeModifiers, true)) {
+				return true;
+			}
+			if (in_array($tokens[$i]['code'], Tokens::$emptyTokens, true)) {
+				continue;
+			}
+			if ($tokens[$i]['content'] === 'readonly') {
+				continue;
+			}
+			if (self::isTokenPartOfTypehint($phpcsFile, $i)) {
+				continue;
+			}
 			return false;
 		}
-		$prevToken = $tokens[$prevIndex];
-		if (in_array($prevToken['code'], Tokens::$scopeModifiers, true)) {
+		return false;
+	}
+
+	/**
+	 * Return false if the token is definitely not part of a typehint
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return bool
+	 */
+	private static function isTokenPossiblyPartOfTypehint(File $phpcsFile, $stackPtr) {
+		$tokens = $phpcsFile->getTokens();
+		$token = $tokens[$stackPtr];
+		if ($token['code'] === 'PHPCS_T_NULLABLE') {
 			return true;
 		}
+		if ($token['code'] === T_NS_SEPARATOR) {
+			return true;
+		}
+		if ($token['code'] === T_STRING) {
+			return true;
+		}
+		if (in_array($token['code'], Tokens::$emptyTokens)) {
+			return true;
+		}
+		return false;
+	}
 
-		// If the previous token is not a visibility keyword, but the one before it
-		// is, the previous token was probably a typehint and this is constructor
-		// promotion. eg: `public boolean $foobar`.
-		$prev2Index = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prevIndex - 1), $functionIndex, true);
-		if (! is_int($prev2Index)) {
+	/**
+	 * Return true if the token is inside a typehint
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return bool
+	 */
+	public static function isTokenPartOfTypehint(File $phpcsFile, $stackPtr) {
+		$tokens = $phpcsFile->getTokens();
+		$token = $tokens[$stackPtr];
+
+		if (! self::isTokenPossiblyPartOfTypehint($phpcsFile, $stackPtr)) {
 			return false;
 		}
-		$prev2Token = $tokens[$prev2Index];
-		// If the token that might be a visibility keyword is a nullable typehint,
-		// ignore it and move back one token further eg: `public ?boolean $foobar`.
-		if ($prev2Token['code'] === 'PHPCS_T_NULLABLE') {
-			$prev2Index = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prev2Index - 1), $functionIndex, true);
-			if (! is_int($prev2Index)) {
+
+		// Examine every following token, ignoring everything that might be part of
+		// a typehint. If we find a variable at the end, this is part of a
+		// typehint.
+		$i = $stackPtr;
+		while (true) {
+			$i += 1;
+			if (! isset($tokens[$i])) {
 				return false;
 			}
+			if (! self::isTokenPossiblyPartOfTypehint($phpcsFile, $i)) {
+				return ($tokens[$i]['code'] === T_VARIABLE);
+			}
 		}
-		$prev2Token = $tokens[$prev2Index];
-		if (in_array($prev2Token['code'], Tokens::$scopeModifiers, true)) {
-			return true;
-		}
-
-		// If the previous token is not a visibility keyword, but the one two
-		// before it is, and one of the tokens is `readonly`, the previous token
-		// was probably a typehint and this is constructor promotion. eg: `public
-		// readonly boolean $foobar`.
-		$prev3Index = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prev2Index - 1), $functionIndex, true);
-		if (! is_int($prev3Index)) {
-			return false;
-		}
-		$prev3Token = $tokens[$prev3Index];
-		$wasPreviousReadonly = $prevToken['content'] === 'readonly' || $prev2Token['content'] === 'readonly';
-		if (in_array($prev3Token['code'], Tokens::$scopeModifiers, true) && $wasPreviousReadonly) {
-			return true;
-		}
-
 		return false;
 	}
 
