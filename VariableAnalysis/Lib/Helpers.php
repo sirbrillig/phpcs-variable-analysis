@@ -1572,7 +1572,8 @@ class Helpers
 	 *
 	 * @return bool
 	 */
-	private static function isTokenPossiblyPartOfTypehint(File $phpcsFile, $stackPtr) {
+	private static function isTokenPossiblyPartOfTypehint(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 		if ($token['code'] === 'PHPCS_T_NULLABLE') {
@@ -1610,7 +1611,8 @@ class Helpers
 	 *
 	 * @return bool
 	 */
-	public static function isTokenPartOfTypehint(File $phpcsFile, $stackPtr) {
+	public static function isTokenPartOfTypehint(File $phpcsFile, $stackPtr)
+	{
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 
