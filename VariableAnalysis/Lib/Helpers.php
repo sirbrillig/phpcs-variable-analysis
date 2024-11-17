@@ -1594,7 +1594,7 @@ class Helpers
 		if ($token['code'] === T_NULL) {
 			return true;
 		}
-		if ($token['type'] === 'T_TYPE_UNION') {
+		if ($token['content'] === '|') {
 			return true;
 		}
 		if (in_array($token['code'], Tokens::$emptyTokens)) {
