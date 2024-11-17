@@ -230,5 +230,6 @@ class ClassWithNamespacedConstructorPropertyPromotion
         public readonly \App\Models\Blog $blog,
         private \App\Models\Game $game,
         protected ?\App\Models\Flag $flag,
+        protected true|false|int|string|null|\App\Models\Favorite $favorite,
     ) {}
 }
