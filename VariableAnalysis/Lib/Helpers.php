@@ -1614,7 +1614,6 @@ class Helpers
 	public static function isTokenPartOfTypehint(File $phpcsFile, $stackPtr)
 	{
 		$tokens = $phpcsFile->getTokens();
-		$token = $tokens[$stackPtr];
 
 		if (! self::isTokenPossiblyPartOfTypehint($phpcsFile, $stackPtr)) {
 			return false;
