@@ -608,6 +608,17 @@ class Helpers
 			if ($token['content'] === 'fn' && self::isArrowFunction($phpcsFile, $index)) {
 				return $index;
 			}
+			// If we find a token that would close an arrow function scope before we
+			// find a token that would open an arrow function scope, then we've found
+			// a nested arrow function and we should ignore it, move back before THAT
+			// arrow function's scope, and continue to search.
+			$arrowFunctionStartIndex = $phpcsFile->findPrevious([T_FN], $index, $enclosingScopeIndex);
+			if (is_int($arrowFunctionStartIndex)) {
+				$openClose = self::getArrowFunctionOpenClose($phpcsFile, $arrowFunctionStartIndex);
+				if ($openClose && $openClose['scope_closer'] === $index) {
+					$index = $openClose['scope_opener'];
+				}
+			}
 		}
 		return null;
 	}
@@ -646,6 +657,15 @@ class Helpers
 	}
 
 	/**
+	 * Find the opening and closing scope positions for an arrow function if the
+	 * given position is the start of the arrow function (the `fn` keyword
+	 * token).
+	 *
+	 * Returns null if the passed token is not an arrow function keyword.
+	 *
+	 * If the token is an arrow function keyword, the scope opener is returned as
+	 * the provided position.
+	 *
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
