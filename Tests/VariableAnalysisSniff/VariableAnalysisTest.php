@@ -522,6 +522,8 @@ class VariableAnalysisTest extends BaseTestCase
 			23,
 			26,
 			36,
+			41,
+			42,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
@@ -543,6 +545,8 @@ class VariableAnalysisTest extends BaseTestCase
 		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[26][66][0]['source']);
 		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[36][5][0]['source']);
 		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[36][23][0]['source']);
+		$this->assertSame(self::UNUSED_ERROR_CODE, $warnings[41][22][0]['source']);
+		$this->assertSame(self::UNDEFINED_ERROR_CODE, $warnings[42][39][0]['source']);
 	}
 
 	public function testTraitAllowsThis()

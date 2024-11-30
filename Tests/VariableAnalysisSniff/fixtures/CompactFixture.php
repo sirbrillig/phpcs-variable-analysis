@@ -35,3 +35,14 @@ function foo() {
     $a = 'Hello';
     $c = compact( $a, $b ); // Unused variable c and undefined variable b
 }
+
+function function_with_arrow_function_and_compact() {
+	$make_array = fn ($arg) => compact('arg');
+	$make_nothing = fn ($arg) => []; // Unused variable $arg
+	$make_no_variable = fn () => compact('arg') // Undefined variable $arg
+	echo $make_array('hello');
+	echo $make_nothing('hello');
+	echo $make_no_variable();
+	$make_array_multiple = fn ($arg1, $arg2, $arg3) => compact('arg1', 'arg2', 'arg3');
+	echo $make_array_multiple();
+}
