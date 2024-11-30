@@ -864,29 +864,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	protected function processVariableAsClassProperty(File $phpcsFile, $stackPtr)
 	{
-		$propertyDeclarationKeywords = [
-			T_PUBLIC,
-			T_PRIVATE,
-			T_PROTECTED,
-			T_VAR,
-		];
-		$stopAtPtr = $stackPtr - 2;
-		$visibilityPtr = $phpcsFile->findPrevious($propertyDeclarationKeywords, $stackPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
-		if ($visibilityPtr) {
-			return true;
-		}
-		$staticPtr = $phpcsFile->findPrevious(T_STATIC, $stackPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
-		if (! $staticPtr) {
-			return false;
-		}
-		$stopAtPtr = $staticPtr - 2;
-		$visibilityPtr = $phpcsFile->findPrevious($propertyDeclarationKeywords, $staticPtr - 1, $stopAtPtr > 0 ? $stopAtPtr : 0);
-		if ($visibilityPtr) {
-			return true;
-		}
-		// it's legal to use `static` to define properties as well as to
-		// define variables, so make sure we are not in a function before
-		// assuming it's a property.
+		// Make sure we are not in a class method before assuming it's a property.
 		$tokens = $phpcsFile->getTokens();
 
 		/** @var array{conditions?: (int|string)[], content?: string}|null */
