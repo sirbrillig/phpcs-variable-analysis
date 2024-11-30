@@ -44,7 +44,7 @@ $anonClass = new class() { // should trigger unused warning
 
 class ClassWithAnonymousClassAndTypeHints
 {
-		int $main_id = 1;
+		readonly int $main_id;
 		public int $id = 1;
 		public \My\Data|bool $data;
 
@@ -52,7 +52,7 @@ class ClassWithAnonymousClassAndTypeHints
 		{
 				return new class
 				{
-						int $main_id = 1;
+						readonly int $main_id;
 						public int $id = 123456;
 						public \My\Data|bool $data;
 				};
