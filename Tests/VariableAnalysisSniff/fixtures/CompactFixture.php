@@ -39,10 +39,13 @@ function foo() {
 function function_with_arrow_function_and_compact() {
 	$make_array = fn ($arg) => compact('arg');
 	$make_nothing = fn ($arg) => []; // Unused variable $arg
-	$make_no_variable = fn () => compact('arg') // Undefined variable $arg
+	$make_no_variable = fn () => compact('arg');
 	echo $make_array('hello');
 	echo $make_nothing('hello');
 	echo $make_no_variable();
 	$make_array_multiple = fn ($arg1, $arg2, $arg3) => compact('arg1', 'arg2', 'arg3');
 	echo $make_array_multiple();
+	$outside_var = 'hello world';
+	$use_outside_var = fn($inside_var) => compact('outside_var', 'inside_var');
+	echo $use_outside_var();
 }
