@@ -446,6 +446,64 @@ class Helpers
 	}
 
 	/**
+	 * Return the variable names of each variable targetted by a `compact()` call.
+	 *
+	 * @param File                   $phpcsFile
+	 * @param int                    $stackPtr
+	 * @param array<int, array<int>> $arguments The stack pointers of each argument; see findFunctionCallArguments
+	 *
+	 * @return string[]
+	 */
+	public static function getVariableNamesFromCompact(File $phpcsFile, $stackPtr, $arguments)
+	{
+		$tokens = $phpcsFile->getTokens();
+		$variableNames = [];
+
+		foreach ($arguments as $argumentPtrs) {
+			$argumentPtrs = array_values(array_filter($argumentPtrs, function ($argumentPtr) use ($tokens) {
+				return isset(Tokens::$emptyTokens[$tokens[$argumentPtr]['code']]) === false;
+			}));
+			if (empty($argumentPtrs)) {
+				continue;
+			}
+			if (!isset($tokens[$argumentPtrs[0]])) {
+				continue;
+			}
+			$argumentFirstToken = $tokens[$argumentPtrs[0]];
+			if ($argumentFirstToken['code'] === T_ARRAY) {
+				// It's an array argument, recurse.
+				$arrayArguments = Helpers::findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
+				$variableNames = array_merge($variableNames, self::getVariableNamesFromCompact($phpcsFile, $stackPtr, $arrayArguments));
+				continue;
+			}
+			if (count($argumentPtrs) > 1) {
+				// Complex argument, we can't handle it, ignore.
+				continue;
+			}
+			if ($argumentFirstToken['code'] === T_CONSTANT_ENCAPSED_STRING) {
+				// Single-quoted string literal, ie compact('whatever').
+				// Substr is to strip the enclosing single-quotes.
+				$varName = substr($argumentFirstToken['content'], 1, -1);
+				$variableNames[] = $varName;
+				continue;
+			}
+			if ($argumentFirstToken['code'] === T_DOUBLE_QUOTED_STRING) {
+				// Double-quoted string literal.
+				$regexp = Constants::getDoubleQuotedVarRegexp();
+				if (! empty($regexp) && preg_match($regexp, $argumentFirstToken['content'])) {
+					// Bail if the string needs variable expansion, that's runtime stuff.
+					continue;
+				}
+				// Substr is to strip the enclosing double-quotes.
+				$varName = substr($argumentFirstToken['content'], 1, -1);
+				$variableNames[] = $varName;
+				continue;
+			}
+		}
+		return $variableNames;
+	}
+
+	/**
 	 * Return the token index of the scope start for a token
 	 *
 	 * For a variable within a function body, or a variable within a function
