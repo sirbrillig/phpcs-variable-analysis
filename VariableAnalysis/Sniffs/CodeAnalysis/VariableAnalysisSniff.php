@@ -1887,7 +1887,8 @@ class VariableAnalysisSniff implements Sniff
 			if ($currScope === null) {
 				continue;
 			}
-			$this->markVariableReadAndWarnIfUndefined($phpcsFile, $variable->name, $variable->firstRead, $currScope);
+			$variablePosition = $variable->firstRead ? $variable->firstRead : $stackPtr;
+			$this->markVariableReadAndWarnIfUndefined($phpcsFile, $variable->name, $variablePosition, $currScope);
 		}
 	}
 
