@@ -1882,7 +1882,7 @@ class VariableAnalysisSniff implements Sniff
 		Helpers::debug("processCompact at {$stackPtr}");
 		$arguments = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);
 		$variables = Helpers::getVariablesInsideCompact($phpcsFile, $stackPtr, $arguments);
-		foreach ( $variables as $variable ) {
+		foreach ($variables as $variable) {
 			$currScope = Helpers::findVariableScope($phpcsFile, $stackPtr, $variable->name);
 			if ($currScope === null) {
 				continue;

@@ -4,6 +4,7 @@ namespace VariableAnalysis\Lib;
 
 use PHP_CodeSniffer\Files\File;
 use VariableAnalysis\Lib\ScopeInfo;
+use VariableAnalysis\Lib\Constants;
 use VariableAnalysis\Lib\ForLoopInfo;
 use VariableAnalysis\Lib\EnumInfo;
 use VariableAnalysis\Lib\ScopeType;
@@ -472,7 +473,7 @@ class Helpers
 			$argumentFirstToken = $tokens[$argumentPtrs[0]];
 			if ($argumentFirstToken['code'] === T_ARRAY) {
 				// It's an array argument, recurse.
-				$arrayArguments = Helpers::findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
+				$arrayArguments = self::findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
 				$variablePositionsAndNames = array_merge($variablePositionsAndNames, self::getVariablesInsideCompact($phpcsFile, $stackPtr, $arrayArguments));
 				continue;
 			}
