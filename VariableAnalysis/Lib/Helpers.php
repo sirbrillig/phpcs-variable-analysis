@@ -446,18 +446,18 @@ class Helpers
 	}
 
 	/**
-	 * Return the variable names of each variable targetted by a `compact()` call.
+	 * Return the variable names and positions of each variable targetted by a `compact()` call.
 	 *
 	 * @param File                   $phpcsFile
 	 * @param int                    $stackPtr
 	 * @param array<int, array<int>> $arguments The stack pointers of each argument; see findFunctionCallArguments
 	 *
-	 * @return string[]
+	 * @return array<VariableInfo> each variable's firstRead position and its name; other VariableInfo properties are not set!
 	 */
-	public static function getVariableNamesFromCompact(File $phpcsFile, $stackPtr, $arguments)
+	public static function getVariablesInsideCompact(File $phpcsFile, $stackPtr, $arguments)
 	{
 		$tokens = $phpcsFile->getTokens();
-		$variableNames = [];
+		$variablePositionsAndNames = [];
 
 		foreach ($arguments as $argumentPtrs) {
 			$argumentPtrs = array_values(array_filter($argumentPtrs, function ($argumentPtr) use ($tokens) {
@@ -473,7 +473,7 @@ class Helpers
 			if ($argumentFirstToken['code'] === T_ARRAY) {
 				// It's an array argument, recurse.
 				$arrayArguments = Helpers::findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
-				$variableNames = array_merge($variableNames, self::getVariableNamesFromCompact($phpcsFile, $stackPtr, $arrayArguments));
+				$variablePositionsAndNames = array_merge($variablePositionsAndNames, self::getVariablesInsideCompact($phpcsFile, $stackPtr, $arrayArguments));
 				continue;
 			}
 			if (count($argumentPtrs) > 1) {
@@ -484,7 +484,9 @@ class Helpers
 				// Single-quoted string literal, ie compact('whatever').
 				// Substr is to strip the enclosing single-quotes.
 				$varName = substr($argumentFirstToken['content'], 1, -1);
-				$variableNames[] = $varName;
+				$variable = new VariableInfo($varName);
+				$variable->firstRead = $argumentPtrs[0];
+				$variablePositionsAndNames[] = $variable;
 				continue;
 			}
 			if ($argumentFirstToken['code'] === T_DOUBLE_QUOTED_STRING) {
@@ -496,11 +498,13 @@ class Helpers
 				}
 				// Substr is to strip the enclosing double-quotes.
 				$varName = substr($argumentFirstToken['content'], 1, -1);
-				$variableNames[] = $varName;
+				$variable = new VariableInfo($varName);
+				$variable->firstRead = $argumentPtrs[0];
+				$variablePositionsAndNames[] = $variable;
 				continue;
 			}
 		}
-		return $variableNames;
+		return $variablePositionsAndNames;
 	}
 
 	/**

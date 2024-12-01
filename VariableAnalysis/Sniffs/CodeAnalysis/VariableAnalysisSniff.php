@@ -1880,16 +1880,14 @@ class VariableAnalysisSniff implements Sniff
 	protected function processCompact(File $phpcsFile, $stackPtr)
 	{
 		Helpers::debug("processCompact at {$stackPtr}");
-
 		$arguments = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);
-		$variableNames = Helpers::getVariableNamesFromCompact($phpcsFile, $stackPtr, $arguments);
-
-		foreach ( $variableNames as $variableName ) {
-			$currScope = Helpers::findVariableScope($phpcsFile, $stackPtr, $variableName);
+		$variables = Helpers::getVariablesInsideCompact($phpcsFile, $stackPtr, $arguments);
+		foreach ( $variables as $variable ) {
+			$currScope = Helpers::findVariableScope($phpcsFile, $stackPtr, $variable->name);
 			if ($currScope === null) {
 				continue;
 			}
-			$this->markVariableReadAndWarnIfUndefined($phpcsFile, $variableName, $stackPtr, $currScope);
+			$this->markVariableReadAndWarnIfUndefined($phpcsFile, $variable->name, $variable->firstRead, $currScope);
 		}
 	}
 
