@@ -429,17 +429,19 @@ class Helpers
 		$varName = isset($varName) ? $varName : self::normalizeVarName($token['content']);
 
 		$enclosingScopeIndex = self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
-		$arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr, $enclosingScopeIndex);
-		$isTokenInsideArrowFunctionBody = is_int($arrowFunctionIndex);
-		if ($isTokenInsideArrowFunctionBody) {
-			// Get the list of variables defined by the arrow function
-			// If this matches any of them, the scope is the arrow function,
-			// otherwise, it uses the enclosing scope.
-			if ($arrowFunctionIndex) {
-				$variableNames = self::getVariablesDefinedByArrowFunction($phpcsFile, $arrowFunctionIndex);
-				self::debug('findVariableScope: looking for', $varName, 'in arrow function variables', $variableNames);
-				if (in_array($varName, $variableNames, true)) {
-					return $arrowFunctionIndex;
+		if ($enclosingScopeIndex) {
+			$arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr, $enclosingScopeIndex);
+			$isTokenInsideArrowFunctionBody = is_int($arrowFunctionIndex);
+			if ($isTokenInsideArrowFunctionBody) {
+				// Get the list of variables defined by the arrow function
+				// If this matches any of them, the scope is the arrow function,
+				// otherwise, it uses the enclosing scope.
+				if ($arrowFunctionIndex) {
+					$variableNames = self::getVariablesDefinedByArrowFunction($phpcsFile, $arrowFunctionIndex);
+					self::debug('findVariableScope: looking for', $varName, 'in arrow function variables', $variableNames);
+					if (in_array($varName, $variableNames, true)) {
+						return $arrowFunctionIndex;
+					}
 				}
 			}
 		}
