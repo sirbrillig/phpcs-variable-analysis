@@ -137,5 +137,5 @@ jobs:
         run: echo "PHPCS_PERF_SECS=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php | grep -Eo 'TOTAL RUN TIME[ ]+[0-9.]+'|awk '{ print $4 }')" >> $GITHUB_OUTPUT
 
       - name: Compare performance to baseline
-        if: ${{ fromJSON( steps.phpunit_version.outputs.PHPCS_PERF_SECS ) > 0.6 }}
+        if: ${{ fromJSON( steps.performance_report.outputs.PHPCS_PERF_SECS ) > 0.6 }}
         run: exit 1
