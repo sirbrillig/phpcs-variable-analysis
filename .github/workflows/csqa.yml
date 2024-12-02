@@ -136,4 +136,4 @@ jobs:
         run: _PHPCS_RUNTIME=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php | grep -Eo 'TOTAL RUN TIME[ ]+[0-9.]+'|awk '{ print $4 }')
 
       - name: Compare performance to baseline
-        run: if awk "BEGIN {exit !($_PHPC_RUNTIME > 0.6)}"; then exit 1; fi
+        run: if awk "BEGIN {exit !($_PHPCS_RUNTIME > 0.6)}"; then exit 1; fi
