@@ -134,7 +134,7 @@ jobs:
 
       - name: Run performance report
         id: performance_report
-        run: echo "PHPCS_PERF_SECS=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php | grep -Eo 'TOTAL RUN TIME[ ]+[0-9.]+'|awk '{ print $4 }')" >> $GITHUB_OUTPUT
+        run: echo "PHPCS_PERF_SECS=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php | grep -Eo 'TOTAL SNIFF PROCESSING TIME[ ]+[0-9.]+'|awk '{ print $5 }')" >> $GITHUB_OUTPUT
 
       - name: Log performance
         run: echo "${{ fromJSON( steps.performance_report.outputs.PHPCS_PERF_SECS ) }}"
