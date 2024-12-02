@@ -133,7 +133,9 @@ jobs:
         run: wget https://raw.githubusercontent.com/WordPress/WordPress/refs/heads/master/wp-includes/PHPMailer/PHPMailer.php
 
       - name: Run performance report
-        run: _PHPCS_RUNTIME=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php | grep -Eo 'TOTAL RUN TIME[ ]+[0-9.]+'|awk '{ print $4 }')
+        id: performance_report
+        run: echo "PHPCS_PERF_SECS=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php | grep -Eo 'TOTAL RUN TIME[ ]+[0-9.]+'|awk '{ print $4 }')" >> $GITHUB_OUTPUT
 
       - name: Compare performance to baseline
-        run: if awk "BEGIN {exit !($_PHPCS_RUNTIME > 0.6)}"; then exit 1; fi
+        if: ${{ fromJSON( steps.phpunit_version.outputs.PHPCS_PERF_SECS ) > 0.6 }}
+        run: exit 1
