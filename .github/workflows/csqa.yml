@@ -140,5 +140,5 @@ jobs:
         run: echo "${{ fromJSON( steps.performance_report.outputs.PHPCS_PERF_SECS ) }}"
 
       - name: Compare performance to baseline
-        if: ${{ fromJSON( steps.performance_report.outputs.PHPCS_PERF_SECS ) > 0.6 }}
+        if: ${{ fromJSON( steps.performance_report.outputs.PHPCS_PERF_SECS ) > 0.2 }}
         run: exit 1
