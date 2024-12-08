@@ -137,7 +137,7 @@ jobs:
         run: echo "PHPCS_PERF_SECS=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php | grep -Eo 'TOTAL SNIFF PROCESSING TIME[ ]+[0-9.]+'|awk '{ print $5 }')" >> $GITHUB_OUTPUT
 
       - name: Log performance
-        run: echo "${{ fromJSON( steps.performance_report.outputs.PHPCS_PERF_SECS ) }}"
+        run: echo "${{ steps.performance_report.outputs.PHPCS_PERF_SECS }}"
 
       # fromJSON is used to convert strings to numbers in github actions.
       # @link https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/evaluate-expressions-in-workflows-and-actions#operators
