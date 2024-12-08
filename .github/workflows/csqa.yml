@@ -147,7 +147,11 @@ jobs:
       - name: Parse performance report
         id: parse_performance_report
         run: |
-          TOTAL_SECS=$(echo ${{ steps.performance_report.outputs.PHPCS_PERF_REPORT }}| grep -Eo 'TOTAL SNIFF PROCESSING TIME[ ]+[0-9.]+'|awk '{ print $5 }')
+          PHPCS_OUTPUT=$(cat <<-EOF
+          ${{ steps.performance_report.outputs.PHPCS_PERF_REPORT }}
+          EOF
+          )"
+          TOTAL_SECS=$(echo ${PHPCS_OUTPUT}| grep -Eo 'TOTAL SNIFF PROCESSING TIME[ ]+[0-9.]+'|awk '{ print $5 }')
           echo "Performance time was ${TOTAL_SECS} (max ${{ env.MAX_PHPCS_PERF_SECS }})"
           echo "PHPCS_PERF_SECS=${TOTAL_SECS}" >> $GITHUB_OUTPUT
 
