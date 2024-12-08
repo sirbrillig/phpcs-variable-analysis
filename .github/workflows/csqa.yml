@@ -139,6 +139,8 @@ jobs:
       - name: Log performance
         run: echo "${{ fromJSON( steps.performance_report.outputs.PHPCS_PERF_SECS ) }}"
 
+      # fromJSON is used to convert strings to numbers in github actions.
+      # @link https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/evaluate-expressions-in-workflows-and-actions#operators
       - name: Compare performance to baseline
         if: ${{ fromJSON( steps.performance_report.outputs.PHPCS_PERF_SECS ) > 0.6 }}
         run: exit 1
