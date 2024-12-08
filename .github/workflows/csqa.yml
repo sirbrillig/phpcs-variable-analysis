@@ -140,7 +140,7 @@ jobs:
         run: |
           PHPCS_OUTPUT=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php)
           echo "${PHPCS_OUTPUT}"
-          echo "PHPCS_PERF_REPORT=\"${PHPCS_OUTPUT}\"" >> $GITHUB_OUTPUT
+          echo "PHPCS_PERF_REPORT=${PHPCS_OUTPUT}" >> $GITHUB_OUTPUT
 
       - name: Parse performance report
         id: parse_performance_report
