@@ -133,7 +133,7 @@ jobs:
           custom-cache-suffix: $(date -u "+%Y-%m")
 
       - name: Download performance test fixture
-        run: wget https://raw.githubusercontent.com/WordPress/WordPress/refs/heads/master/wp-includes/PHPMailer/PHPMailer.php
+        run: wget https://raw.githubusercontent.com/PHPMailer/PHPMailer/refs/tags/v6.9.3/src/PHPMailer.php
 
       - name: Run performance report
         id: performance_report
