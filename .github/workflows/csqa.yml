@@ -140,17 +140,13 @@ jobs:
         run: |
           PHPCS_OUTPUT=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php)
           echo "${PHPCS_OUTPUT}"
-          echo "PHPCS_PERF_REPORT=${PHPCS_OUTPUT}" >> $GITHUB_OUTPUT
-
-      - name: Parse performance report
-        id: parse_performance_report
-        run: |
-          TOTAL_SECS=$(echo ${{ steps.performance_report.outputs.PHPCS_PERF_REPORT }}| grep -Eo 'TOTAL SNIFF PROCESSING TIME[ ]+[0-9.]+'|awk '{ print $5 }')
+          TOTAL_SECS=$(echo ${PHPCS_OUTPUT}| grep -Eo 'TOTAL SNIFF PROCESSING TIME[ ]+[0-9.]+'|awk '{ print $5 }')
+          echo "-----"
           echo "Performance time was ${TOTAL_SECS} (max ${{ env.MAX_PHPCS_PERF_SECS }})"
           echo "PHPCS_PERF_SECS=${TOTAL_SECS}" >> $GITHUB_OUTPUT
 
       # fromJSON is used to convert strings to numbers in github actions.
       # @link https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/evaluate-expressions-in-workflows-and-actions#operators
       - name: Compare performance to baseline
-        if: ${{ fromJSON( steps.parse_performance_report.outputs.PHPCS_PERF_SECS ) > fromJSON( env.MAX_PHPCS_PERF_SECS ) }}
+        if: ${{ fromJSON( steps.performance_report.outputs.PHPCS_PERF_SECS ) > fromJSON( env.MAX_PHPCS_PERF_SECS ) }}
         run: exit 1
