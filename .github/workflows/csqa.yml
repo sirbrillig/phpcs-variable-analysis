@@ -138,9 +138,7 @@ jobs:
       - name: Run performance report
         id: performance_report
         run: |
-          set -x
           PHPCS_OUTPUT=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php)
-          set +x
           echo "${PHPCS_OUTPUT}"
           TOTAL_SECS=$(echo ${PHPCS_OUTPUT}| grep -Eo 'TOTAL SNIFF PROCESSING TIME[ ]+[0-9.]+'|awk '{ print $5 }')
           echo "-----"
