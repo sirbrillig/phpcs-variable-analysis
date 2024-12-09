@@ -139,7 +139,7 @@ jobs:
       - name: Run performance report
         id: performance_report
         run: |
-          PHPCS_OUTPUT=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.foobar)
+          PHPCS_OUTPUT=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php)
           echo "${PHPCS_OUTPUT}"
           echo "${PHPCS_OUTPUT}" > ${{ env.PHPCS_OUTPUT_FILE }}
 
