@@ -105,3 +105,53 @@ jobs:
 
       - name: Run Static Analysis
         run: composer static-analysis
+
+  perf-guard:
+    name: "Basic Performance Guard"
+    runs-on: ubuntu-latest
+
+    env:
+      MAX_PHPCS_PERF_SECS: 0.4
+      PHPCS_OUTPUT_FILE: "phpcs-report-file"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          coverage: none
+
+      # Install dependencies and handle caching in one go.
+      # Dependencies need to be installed to make sure the PHPUnit classes are recognized.
+      # @link https://github.com/marketplace/actions/install-php-dependencies-with-composer
+      - name: Install Composer dependencies
+        uses: "ramsey/composer-install@v3"
+        with:
+          # Bust the cache at least once a month - output format: YYYY-MM.
+          custom-cache-suffix: $(date -u "+%Y-%m")
+
+      - name: Download performance test fixture
+        run: wget https://raw.githubusercontent.com/PHPMailer/PHPMailer/refs/tags/v6.9.3/src/PHPMailer.php
+
+      - name: Run performance report
+        id: performance_report
+        run: |
+          PHPCS_OUTPUT=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php)
+          echo "${PHPCS_OUTPUT}"
+          echo "${PHPCS_OUTPUT}" > ${{ env.PHPCS_OUTPUT_FILE }}
+
+      - name: Parse performance report
+        id: parse_performance_report
+        run: |
+          TOTAL_SECS=$(cat ${{ env.PHPCS_OUTPUT_FILE }} | grep -Eo 'TOTAL SNIFF PROCESSING TIME[ ]+[0-9.]+'|awk '{ print $5 }')
+          echo "Performance time was ${TOTAL_SECS} (max ${{ env.MAX_PHPCS_PERF_SECS }})"
+          echo "PHPCS_PERF_SECS=${TOTAL_SECS}" >> $GITHUB_OUTPUT
+
+      # fromJSON is used to convert strings to numbers in github actions.
+      # @link https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/evaluate-expressions-in-workflows-and-actions#operators
+      - name: Compare performance to baseline
+        if: ${{ fromJSON( steps.parse_performance_report.outputs.PHPCS_PERF_SECS ) > fromJSON( env.MAX_PHPCS_PERF_SECS ) }}
+        run: exit 1
