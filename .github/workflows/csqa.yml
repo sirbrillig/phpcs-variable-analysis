@@ -140,12 +140,12 @@ jobs:
         id: performance_report
         run: |
           PHPCS_OUTPUT=$(./vendor/bin/phpcs --standard=VariableAnalysis --report=Performance ./PHPMailer.php)
-          echo "${PHPCS_OUTPUT}" > ${env.PHPCS_OUTPUT_FILE}
+          echo "${PHPCS_OUTPUT}" > ${{ env.PHPCS_OUTPUT_FILE }}
 
       - name: Parse performance report
         id: parse_performance_report
         run: |
-          TOTAL_SECS=$(cat ${env.PHPCS_OUTPUT_FILE} | grep -Eo 'TOTAL SNIFF PROCESSING TIME[ ]+[0-9.]+'|awk '{ print $5 }')
+          TOTAL_SECS=$(cat ${{ env.PHPCS_OUTPUT_FILE }} | grep -Eo 'TOTAL SNIFF PROCESSING TIME[ ]+[0-9.]+'|awk '{ print $5 }')
           echo "Performance time was ${TOTAL_SECS} (max ${{ env.MAX_PHPCS_PERF_SECS }})"
           echo "PHPCS_PERF_SECS=${TOTAL_SECS}" >> $GITHUB_OUTPUT
 
