@@ -447,7 +447,7 @@ class Helpers
 			}
 		}
 
-		return self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
+		return $enclosingScopeIndex;
 	}
 
 	/**
