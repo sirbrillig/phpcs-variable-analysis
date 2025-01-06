@@ -175,3 +175,14 @@ function arrowFunctionWithNestedArrowFunction() {
 	];
 	$fn();
 }
+
+// Arrow function in global scope
+array_map(
+	fn(
+		$dir,
+		string $bar,
+		\My\Class|bool $foo, // Unused variable $foo
+		\My\Class|bool $baz,
+	) => PREFIX_DIR . $dir . $bar . $baz,
+	PHP_ERROR_LOGS['ignore_dirs']
+);

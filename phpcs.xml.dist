@@ -30,7 +30,7 @@
 
     <!--
     #############################################################################
-    USE THE PHPCSDev, ImportDetection and VariableAnalysis RULESETS
+    USE THE PHPCSDev, VariableAnalysis RULESETS
     #############################################################################
     -->
 
@@ -59,7 +59,6 @@
         <exclude name="Generic.Files.LineLength.TooLong" />
     </rule>
 
-    <rule ref="ImportDetection" />
     <rule ref="VariableAnalysis"/>
 
 
