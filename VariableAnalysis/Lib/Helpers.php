@@ -429,7 +429,8 @@ class Helpers
 		$varName = isset($varName) ? $varName : self::normalizeVarName($token['content']);
 
 		$enclosingScopeIndex = self::findVariableScopeExceptArrowFunctions($phpcsFile, $stackPtr);
-		if ($enclosingScopeIndex) {
+
+		if (!is_null($enclosingScopeIndex)) {
 			$arrowFunctionIndex = self::getContainingArrowFunctionIndex($phpcsFile, $stackPtr, $enclosingScopeIndex);
 			$isTokenInsideArrowFunctionBody = is_int($arrowFunctionIndex);
 			if ($isTokenInsideArrowFunctionBody) {
