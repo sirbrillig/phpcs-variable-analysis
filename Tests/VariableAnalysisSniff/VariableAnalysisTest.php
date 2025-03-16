@@ -298,6 +298,7 @@ class VariableAnalysisTest extends BaseTestCase
 			77,
 			81,
 			98,
+			106,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
@@ -331,6 +332,36 @@ class VariableAnalysisTest extends BaseTestCase
 		$this->assertSame($expectedWarnings, $lines);
 	}
 
+	public function testFunctionWithReferenceWarningsAllowsCustomFunctionsNamespaced()
+	{
+		$fixtureFile = $this->getFixture('FunctionWithReferenceFixture.php');
+		$phpcsFile = $this->prepareLocalFileForSniffs($fixtureFile);
+		$this->setSniffProperty($phpcsFile, 'sitePassByRefFunctions', '\My\Functions\my_reference_function:2,3 another_reference_function:2,...');
+		$phpcsFile->process();
+		$lines = $this->getWarningLineNumbersFromFile($phpcsFile);
+		$expectedWarnings = [
+			10,
+			11,
+			12,
+			13,
+			14,
+			16,
+			29,
+			41,
+			42,
+			43,
+			46,
+			52,
+			56,
+			57,
+			63,
+			76,
+			81,
+			98,
+		];
+		$this->assertSame($expectedWarnings, $lines);
+	}
+
 	public function testFunctionWithReferenceWarningsAllowsWordPressFunctionsIfSet()
 	{
 		$fixtureFile = $this->getFixture('FunctionWithReferenceFixture.php');
@@ -357,6 +388,7 @@ class VariableAnalysisTest extends BaseTestCase
 			76,
 			77,
 			98,
+			106,
 		];
 		$this->assertSame($expectedWarnings, $lines);
 	}
