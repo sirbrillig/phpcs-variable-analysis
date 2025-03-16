@@ -1507,6 +1507,9 @@ class VariableAnalysisSniff implements Sniff
 		if (! $refArgs) {
 			// Check again with the fully namespaced function name.
 			$functionName = Helpers::getFunctionNameWithNamespace($phpcsFile, $functionPtr);
+			if (! $functionName) {
+				return false;
+			}
 			$refArgs = $this->getPassByReferenceFunction($functionName);
 			if (! $refArgs) {
 				return false;
