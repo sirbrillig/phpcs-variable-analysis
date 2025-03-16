@@ -156,9 +156,9 @@ class VariableAnalysisSniff implements Sniff
 	/**
 	 * A cache for getPassByReferenceFunctions
 	 *
-	 * @var array<array<int|string>>
+	 * @var array<array<int|string>>|null
 	 */
-	private $passByRefFunctionsCache;
+	private $passByRefFunctionsCache = null;
 
 	public function __construct()
 	{
@@ -211,7 +211,7 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	private function getPassByReferenceFunctions()
 	{
-		if (isset($this->passByRefFunctionsCache)) {
+		if (! is_null($this->passByRefFunctionsCache)) {
 			return $this->passByRefFunctionsCache;
 		}
 		$passByRefFunctions = Constants::getPassByReferenceFunctions();
