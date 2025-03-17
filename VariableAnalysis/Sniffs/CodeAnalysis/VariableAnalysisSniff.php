@@ -153,6 +153,13 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	public $allowUnusedVariablesBeforeRequire = false;
 
+	/**
+	 * A cache for getPassByReferenceFunctions
+	 *
+	 * @var array<array<int|string>>|null
+	 */
+	private $passByRefFunctionsCache = null;
+
 	public function __construct()
 	{
 		$this->scopeManager = new ScopeManager();
@@ -195,6 +202,18 @@ class VariableAnalysisSniff implements Sniff
 	 */
 	private function getPassByReferenceFunction($functionName)
 	{
+		$passByRefFunctions = $this->getPassByReferenceFunctions();
+		return isset($passByRefFunctions[$functionName]) ? $passByRefFunctions[$functionName] : [];
+	}
+
+	/**
+	 * @return array<array<int|string>>
+	 */
+	private function getPassByReferenceFunctions()
+	{
+		if (! is_null($this->passByRefFunctionsCache)) {
+			return $this->passByRefFunctionsCache;
+		}
 		$passByRefFunctions = Constants::getPassByReferenceFunctions();
 		if (!empty($this->sitePassByRefFunctions)) {
 			$lines = Helpers::splitStringToArray('/\s+/', trim($this->sitePassByRefFunctions));
@@ -206,7 +225,8 @@ class VariableAnalysisSniff implements Sniff
 		if ($this->allowWordPressPassByRefFunctions) {
 			$passByRefFunctions = array_merge($passByRefFunctions, Constants::getWordPressPassByReferenceFunctions());
 		}
-		return isset($passByRefFunctions[$functionName]) ? $passByRefFunctions[$functionName] : [];
+		$this->passByRefFunctionsCache = $passByRefFunctions;
+		return $passByRefFunctions;
 	}
 
 	/**
@@ -1485,7 +1505,15 @@ class VariableAnalysisSniff implements Sniff
 		$functionName = $tokens[$functionPtr]['content'];
 		$refArgs = $this->getPassByReferenceFunction($functionName);
 		if (! $refArgs) {
-			return false;
+			// Check again with the fully namespaced function name.
+			$functionName = Helpers::getFunctionNameWithNamespace($phpcsFile, $functionPtr);
+			if (! $functionName) {
+				return false;
+			}
+			$refArgs = $this->getPassByReferenceFunction($functionName);
+			if (! $refArgs) {
+				return false;
+			}
 		}
 
 		$argPtrs = Helpers::findFunctionCallArguments($phpcsFile, $stackPtr);

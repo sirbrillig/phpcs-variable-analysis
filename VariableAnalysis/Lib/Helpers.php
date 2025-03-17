@@ -1659,6 +1659,41 @@ class Helpers
 	}
 
 	/**
+	 * If looking at a function call token, return a string for the full function
+	 * name including any inline namespace.
+	 *
+	 * So for example, if the call looks like `\My\Namespace\doSomething($bar)`
+	 * and `$stackPtr` refers to `doSomething`, this will return
+	 * `\My\Namespace\doSomething`.
+	 *
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
+	 *
+	 * @return string|null
+	 */
+	public static function getFunctionNameWithNamespace(File $phpcsFile, $stackPtr)
+	{
+		$tokens = $phpcsFile->getTokens();
+
+		if (! isset($tokens[$stackPtr])) {
+			return null;
+		}
+		$startOfScope = self::findVariableScope($phpcsFile, $stackPtr);
+		$functionName = $tokens[$stackPtr]['content'];
+
+		// Move backwards from the token, collecting namespace separators and
+		// strings, until we encounter whitespace or something else.
+		$partOfNamespace = [T_NS_SEPARATOR, T_STRING];
+		for ($i = $stackPtr - 1; $i > $startOfScope; $i--) {
+			if (! in_array($tokens[$i]['code'], $partOfNamespace, true)) {
+				break;
+			}
+			$functionName = "{$tokens[$i]['content']}{$functionName}";
+		}
+		return $functionName;
+	}
+
+	/**
 	 * Return false if the token is definitely not part of a typehint
 	 *
 	 * @param File $phpcsFile

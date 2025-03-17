@@ -100,3 +100,8 @@ function function_with_foreach_with_reference($derivatives, $base_plugin_definit
   }
   return $derivatives;
 }
+
+function function_with_ignored_reference_call_with_namespace() {
+    $foo = 'bar';
+    \My\Functions\my_reference_function($foo, $baz, $bip); // Undefined variable $bar, Undefined variable $bip
+}
