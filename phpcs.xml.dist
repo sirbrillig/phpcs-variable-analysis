@@ -30,33 +30,26 @@
 
     <!--
     #############################################################################
-    USE THE PHPCSDev, VariableAnalysis RULESETS
+    USE THE PSR12, VariableAnalysis RULESETS
     #############################################################################
     -->
 
     <!-- Set minimum PHP version supported to PHP 5.4. -->
     <config name="testVersion" value="5.4-"/>
 
-    <rule ref="PHPCSDev">
+    <rule ref="PSR12">
         <!-- This code base uses tab indentation instead of spaces. -->
         <exclude name="Generic.WhiteSpace.DisallowTabIndent"/>
 
-        <!-- Don't enforce lining up the assignment operators in assignment blocks. -->
-        <exclude name="Generic.Formatting.MultipleStatementAlignment.NotSameWarning"/>
-
-        <!-- Don't enforce lining up the double arrows in array declarations.
-             Possibly enforce this later once the sniff has been replaced by a better, more configurable version. -->
-        <exclude name="Squiz.Arrays.ArrayDeclaration.DoubleArrowNotAligned"/>
-
-        <!-- Don't enforce documentation (yet). -->
-        <exclude name="Generic.Commenting.DocComment"/>
-        <exclude name="PEAR.Commenting.ClassComment"/>
-        <exclude name="PEAR.Commenting.FileComment"/>
-        <exclude name="PEAR.Commenting.InlineComment"/>
-
         <!-- WIP: This is part of PSR12 and should probably be enforced,
              but the codebase needs work before it can be enabled. -->
-        <exclude name="Generic.Files.LineLength.TooLong" />
+        <exclude name="Generic.Files.LineLength"/>
+
+        <!-- Disable excessive function spacing requirements -->
+        <exclude name="Squiz.WhiteSpace.FunctionSpacing"/>
+
+        <!-- Project supports PHP 5.4+ which doesn't have constant visibility -->
+        <exclude name="PSR12.Properties.ConstantVisibility"/>
     </rule>
 
     <rule ref="VariableAnalysis"/>
