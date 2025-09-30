@@ -35,7 +35,7 @@ jobs:
         #
         # The matrix is set up so as not to duplicate the builds which are run for code coverage.
         php: ["5.5", "5.6", "7.0", "7.1", "7.2", "7.3"]
-        phpcs_version: ["3.5.6", "4.0.0", "4.x-dev"]
+        phpcs_version: ["3.5.7", "4.0.0", "4.x-dev"]
 
         exclude:
           # PHPCS 4.x requires PHP 7.2+
@@ -169,12 +169,12 @@ jobs:
           - php: "8.4"
             phpcs_version: "4.x-dev"
           - php: "7.4"
-            phpcs_version: "3.5.6"
+            phpcs_version: "3.5.7"
 
           - php: "7.2"
             phpcs_version: "4.x-dev"
           - php: "5.4"
-            phpcs_version: "3.5.6"
+            phpcs_version: "3.5.7"
 
     name: "Coverage: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
 
