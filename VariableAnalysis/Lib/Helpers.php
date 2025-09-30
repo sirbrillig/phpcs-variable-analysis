@@ -632,24 +632,6 @@ class Helpers
 	/**
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
-	 *
-	 * @return bool
-	 */
-	public static function isTokenInsideArrowFunctionDefinition(File $phpcsFile, $stackPtr)
-	{
-		$tokens = $phpcsFile->getTokens();
-		$token = $tokens[$stackPtr];
-		$openParenIndices = isset($token['nested_parenthesis']) ? $token['nested_parenthesis'] : [];
-		if (empty($openParenIndices)) {
-			return false;
-		}
-		$openParenPtr = $openParenIndices[0];
-		return self::isArrowFunction($phpcsFile, $openParenPtr - 1);
-	}
-
-	/**
-	 * @param File $phpcsFile
-	 * @param int  $stackPtr
 	 * @param int  $enclosingScopeIndex
 	 *
 	 * @return ?int

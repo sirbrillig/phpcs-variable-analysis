@@ -28,9 +28,6 @@
     <PossiblyInvalidOperand>
       <code><![CDATA[$message]]></code>
     </PossiblyInvalidOperand>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[isTokenInsideArrowFunctionDefinition]]></code>
-    </PossiblyUnusedMethod>
     <UnusedVariable>
       <code><![CDATA[$isNestedAssignment]]></code>
     </UnusedVariable>
