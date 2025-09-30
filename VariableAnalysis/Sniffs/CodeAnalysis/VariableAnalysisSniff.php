@@ -1508,17 +1508,17 @@ class VariableAnalysisSniff implements Sniff
 		// tokens contain the full namespaced name. Extract just the base name for the
 		// first check so that 'my_function' in the config can match '\My\Namespace\my_function'.
 		$functionBaseName = $functionName;
-		if (defined('T_NAME_FULLY_QUALIFIED') && $tokens[$functionPtr]['code'] === T_NAME_FULLY_QUALIFIED) {
+		if ($tokens[$functionPtr]['code'] === T_NAME_FULLY_QUALIFIED) {
 			$lastBackslashPos = strrpos($functionName, '\\');
 			if ($lastBackslashPos !== false) {
 				$functionBaseName = substr($functionName, $lastBackslashPos + 1);
 			}
-		} elseif (defined('T_NAME_QUALIFIED') && $tokens[$functionPtr]['code'] === T_NAME_QUALIFIED) {
+		} elseif ($tokens[$functionPtr]['code'] === T_NAME_QUALIFIED) {
 			$lastBackslashPos = strrpos($functionName, '\\');
 			if ($lastBackslashPos !== false) {
 				$functionBaseName = substr($functionName, $lastBackslashPos + 1);
 			}
-		} elseif (defined('T_NAME_RELATIVE') && $tokens[$functionPtr]['code'] === T_NAME_RELATIVE) {
+		} elseif ($tokens[$functionPtr]['code'] === T_NAME_RELATIVE) {
 			$lastBackslashPos = strrpos($functionName, '\\');
 			if ($lastBackslashPos !== false) {
 				$functionBaseName = substr($functionName, $lastBackslashPos + 1);

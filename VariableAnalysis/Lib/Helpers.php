@@ -322,16 +322,12 @@ class Helpers
 			if (is_int($functionPtr)) {
 				$functionTokenCode = $tokens[$functionPtr]['code'];
 				// In PHPCS 4.x, function names can be T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED, or T_NAME_RELATIVE
-				$validFunctionTokens = [T_STRING];
-				if (defined('T_NAME_FULLY_QUALIFIED')) {
-					$validFunctionTokens[] = T_NAME_FULLY_QUALIFIED;
-				}
-				if (defined('T_NAME_QUALIFIED')) {
-					$validFunctionTokens[] = T_NAME_QUALIFIED;
-				}
-				if (defined('T_NAME_RELATIVE')) {
-					$validFunctionTokens[] = T_NAME_RELATIVE;
-				}
+				$validFunctionTokens = [
+					T_STRING,
+					T_NAME_FULLY_QUALIFIED,
+					T_NAME_QUALIFIED,
+					T_NAME_RELATIVE,
+				];
 				if (in_array($functionTokenCode, $validFunctionTokens, true)) {
 					return $functionPtr;
 				}
@@ -560,17 +556,10 @@ class Helpers
 			T_DOUBLE_QUOTED_STRING,
 			T_HEREDOC,
 			T_STRING,
+			T_NAME_FULLY_QUALIFIED,
+			T_NAME_QUALIFIED,
+			T_NAME_RELATIVE,
 		];
-		// In PHPCS 4.x, function names can be T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED, or T_NAME_RELATIVE
-		if (defined('T_NAME_FULLY_QUALIFIED')) {
-			$allowedTypes[] = T_NAME_FULLY_QUALIFIED;
-		}
-		if (defined('T_NAME_QUALIFIED')) {
-			$allowedTypes[] = T_NAME_QUALIFIED;
-		}
-		if (defined('T_NAME_RELATIVE')) {
-			$allowedTypes[] = T_NAME_RELATIVE;
-		}
 		if (! in_array($tokens[$stackPtr]['code'], $allowedTypes, true)) {
 			throw new \Exception("Cannot find variable scope for non-variable {$tokens[$stackPtr]['type']}");
 		}
@@ -1705,28 +1694,25 @@ class Helpers
 
 		// In PHPCS 4.x, T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED, and T_NAME_RELATIVE
 		// tokens already contain the full namespaced name, so we can return early.
-		if (defined('T_NAME_FULLY_QUALIFIED') && $tokens[$stackPtr]['code'] === T_NAME_FULLY_QUALIFIED) {
+		if ($tokens[$stackPtr]['code'] === T_NAME_FULLY_QUALIFIED) {
 			return $functionName;
 		}
-		if (defined('T_NAME_QUALIFIED') && $tokens[$stackPtr]['code'] === T_NAME_QUALIFIED) {
+		if ($tokens[$stackPtr]['code'] === T_NAME_QUALIFIED) {
 			return $functionName;
 		}
-		if (defined('T_NAME_RELATIVE') && $tokens[$stackPtr]['code'] === T_NAME_RELATIVE) {
+		if ($tokens[$stackPtr]['code'] === T_NAME_RELATIVE) {
 			return $functionName;
 		}
 
 		// Move backwards from the token, collecting namespace separators and
 		// strings, until we encounter whitespace or something else.
-		$partOfNamespace = [T_NS_SEPARATOR, T_STRING];
-		if (defined('T_NAME_QUALIFIED')) {
-			$partOfNamespace[] = T_NAME_QUALIFIED;
-		}
-		if (defined('T_NAME_RELATIVE')) {
-			$partOfNamespace[] = T_NAME_RELATIVE;
-		}
-		if (defined('T_NAME_FULLY_QUALIFIED')) {
-			$partOfNamespace[] = T_NAME_FULLY_QUALIFIED;
-		}
+		$partOfNamespace = [
+			T_NS_SEPARATOR,
+			T_STRING,
+			T_NAME_QUALIFIED,
+			T_NAME_RELATIVE,
+			T_NAME_FULLY_QUALIFIED,
+		];
 		for ($i = $stackPtr - 1; $i > $startOfScope; $i--) {
 			if (! in_array($tokens[$i]['code'], $partOfNamespace, true)) {
 				break;
@@ -1751,13 +1737,13 @@ class Helpers
 		if ($token['code'] === 'PHPCS_T_NULLABLE') {
 			return true;
 		}
-		if (defined('T_NAME_QUALIFIED') && $token['code'] === T_NAME_QUALIFIED) {
+		if ($token['code'] === T_NAME_QUALIFIED) {
 			return true;
 		}
-		if (defined('T_NAME_RELATIVE') && $token['code'] === T_NAME_RELATIVE) {
+		if ($token['code'] === T_NAME_RELATIVE) {
 			return true;
 		}
-		if (defined('T_NAME_FULLY_QUALIFIED') && $token['code'] === T_NAME_FULLY_QUALIFIED) {
+		if ($token['code'] === T_NAME_FULLY_QUALIFIED) {
 			return true;
 		}
 		if ($token['code'] === T_NS_SEPARATOR) {
