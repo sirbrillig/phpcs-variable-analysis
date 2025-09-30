@@ -93,7 +93,7 @@ class Helpers
 		$tokens = $phpcsFile->getTokens();
 		if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
 			/**
-			 * @var array<int|string|null>
+			 * @var list<int|string>
 			 */
 			$openPtrs = array_keys($tokens[$stackPtr]['nested_parenthesis']);
 			return (int)end($openPtrs);
@@ -319,8 +319,18 @@ class Helpers
 		if (is_int($openPtr)) {
 			// First non-whitespace thing and see if it's a T_STRING function name
 			$functionPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $openPtr - 1, null, true, null, true);
-			if (is_int($functionPtr) && $tokens[$functionPtr]['code'] === T_STRING) {
-				return $functionPtr;
+			if (is_int($functionPtr)) {
+				$functionTokenCode = $tokens[$functionPtr]['code'];
+				// In PHPCS 4.x, function names can be T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED, or T_NAME_RELATIVE
+				$validFunctionTokens = [
+					T_STRING,
+					T_NAME_FULLY_QUALIFIED,
+					T_NAME_QUALIFIED,
+					T_NAME_RELATIVE,
+				];
+				if (in_array($functionTokenCode, $validFunctionTokens, true)) {
+					return $functionPtr;
+				}
 			}
 		}
 		return null;
@@ -364,9 +374,6 @@ class Helpers
 			if (self::findContainingOpeningBracket($phpcsFile, $nextPtr) === $openPtr) {
 				// Comma is at our level of brackets, it's an argument delimiter.
 				$range = range($lastArgComma + 1, $nextPtr - 1);
-				$range = array_filter($range, function ($element) {
-					return is_int($element);
-				});
 				array_push($argPtrs, $range);
 				$lastArgComma = $nextPtr;
 			}
@@ -394,7 +401,8 @@ class Helpers
 
 		// Is the next non-whitespace an assignment?
 		$nextPtr = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true, null, true);
-		if (is_int($nextPtr)
+		if (
+			is_int($nextPtr)
 			&& isset(Tokens::$assignmentTokens[$tokens[$nextPtr]['code']])
 			// Ignore double arrow to prevent triggering on `foreach ( $array as $k => $v )`.
 			&& $tokens[$nextPtr]['code'] !== T_DOUBLE_ARROW
@@ -548,6 +556,9 @@ class Helpers
 			T_DOUBLE_QUOTED_STRING,
 			T_HEREDOC,
 			T_STRING,
+			T_NAME_FULLY_QUALIFIED,
+			T_NAME_QUALIFIED,
+			T_NAME_RELATIVE,
 		];
 		if (! in_array($tokens[$stackPtr]['code'], $allowedTypes, true)) {
 			throw new \Exception("Cannot find variable scope for non-variable {$tokens[$stackPtr]['type']}");
@@ -616,24 +627,6 @@ class Helpers
 
 		// If we can't find a scope, let's use the first token of the file.
 		return 0;
-	}
-
-	/**
-	 * @param File $phpcsFile
-	 * @param int  $stackPtr
-	 *
-	 * @return bool
-	 */
-	public static function isTokenInsideArrowFunctionDefinition(File $phpcsFile, $stackPtr)
-	{
-		$tokens = $phpcsFile->getTokens();
-		$token = $tokens[$stackPtr];
-		$openParenIndices = isset($token['nested_parenthesis']) ? $token['nested_parenthesis'] : [];
-		if (empty($openParenIndices)) {
-			return false;
-		}
-		$openParenPtr = $openParenIndices[0];
-		return self::isArrowFunction($phpcsFile, $openParenPtr - 1);
 	}
 
 	/**
@@ -1290,7 +1283,7 @@ class Helpers
 			return null;
 		}
 		/**
-		 * @var array<int|string|null>
+		 * @var list<int|string>
 		 */
 		$startingParenthesis = array_keys($token['nested_parenthesis']);
 		$startOfArguments = end($startingParenthesis);
@@ -1681,9 +1674,27 @@ class Helpers
 		$startOfScope = self::findVariableScope($phpcsFile, $stackPtr);
 		$functionName = $tokens[$stackPtr]['content'];
 
+		// In PHPCS 4.x, T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED, and T_NAME_RELATIVE
+		// tokens already contain the full namespaced name, so we can return early.
+		if ($tokens[$stackPtr]['code'] === T_NAME_FULLY_QUALIFIED) {
+			return $functionName;
+		}
+		if ($tokens[$stackPtr]['code'] === T_NAME_QUALIFIED) {
+			return $functionName;
+		}
+		if ($tokens[$stackPtr]['code'] === T_NAME_RELATIVE) {
+			return $functionName;
+		}
+
 		// Move backwards from the token, collecting namespace separators and
 		// strings, until we encounter whitespace or something else.
-		$partOfNamespace = [T_NS_SEPARATOR, T_STRING];
+		$partOfNamespace = [
+			T_NS_SEPARATOR,
+			T_STRING,
+			T_NAME_QUALIFIED,
+			T_NAME_RELATIVE,
+			T_NAME_FULLY_QUALIFIED,
+		];
 		for ($i = $stackPtr - 1; $i > $startOfScope; $i--) {
 			if (! in_array($tokens[$i]['code'], $partOfNamespace, true)) {
 				break;
@@ -1706,6 +1717,15 @@ class Helpers
 		$tokens = $phpcsFile->getTokens();
 		$token = $tokens[$stackPtr];
 		if ($token['code'] === 'PHPCS_T_NULLABLE') {
+			return true;
+		}
+		if ($token['code'] === T_NAME_QUALIFIED) {
+			return true;
+		}
+		if ($token['code'] === T_NAME_RELATIVE) {
+			return true;
+		}
+		if ($token['code'] === T_NAME_FULLY_QUALIFIED) {
 			return true;
 		}
 		if ($token['code'] === T_NS_SEPARATOR) {

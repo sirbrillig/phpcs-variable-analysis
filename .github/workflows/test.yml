@@ -34,40 +34,60 @@ jobs:
         # - PHP 8.4 needs PHPCS 3.11.0+ to run without errors (though the errors don't affect this package).
         #
         # The matrix is set up so as not to duplicate the builds which are run for code coverage.
-        php: ['5.5', '5.6', '7.0', '7.1', '7.2', '7.3']
-        phpcs_version: ['3.5.6', 'dev-master']
+        php: ["5.5", "5.6", "7.0", "7.1", "7.2", "7.3"]
+        phpcs_version: ["3.5.7", "4.0.0", "4.x-dev"]
+
+        exclude:
+          # PHPCS 4.x requires PHP 7.2+
+          - php: "5.5"
+            phpcs_version: "4.0.0"
+          - php: "5.5"
+            phpcs_version: "4.x-dev"
+          - php: "5.6"
+            phpcs_version: "4.0.0"
+          - php: "5.6"
+            phpcs_version: "4.x-dev"
+          - php: "7.0"
+            phpcs_version: "4.0.0"
+          - php: "7.0"
+            phpcs_version: "4.x-dev"
+          - php: "7.1"
+            phpcs_version: "4.0.0"
+          - php: "7.1"
+            phpcs_version: "4.x-dev"
 
         include:
-          # Make the matrix complete without duplicating builds run in code coverage.
-          - php: '8.4'
-            phpcs_version: '3.6.1'
+          - php: "8.4"
+            phpcs_version: "4.0.0"
+          - php: "8.4"
+            phpcs_version: "3.6.1"
 
-          - php: '8.3'
-            phpcs_version: 'dev-master'
-          - php: '8.3'
-            phpcs_version: '3.6.1'
+          - php: "8.3"
+            phpcs_version: "4.x-dev"
+          - php: "8.3"
+            phpcs_version: "3.6.1"
 
-          - php: '8.2'
-            phpcs_version: 'dev-master'
-          - php: '8.2'
-            phpcs_version: '3.6.1'
+          - php: "8.2"
+            phpcs_version: "4.x-dev"
+          - php: "8.2"
+            phpcs_version: "3.6.1"
 
-          - php: '8.1'
-            phpcs_version: 'dev-master'
-          - php: '8.1'
-            phpcs_version: '3.6.1'
+          - php: "8.1"
+            phpcs_version: "4.x-dev"
+          - php: "8.1"
+            phpcs_version: "3.6.1"
 
-          - php: '8.0'
-            phpcs_version: 'dev-master'
-          - php: '8.0'
-            phpcs_version: '3.5.7'
+          - php: "8.0"
+            phpcs_version: "4.x-dev"
+          - php: "8.0"
+            phpcs_version: "3.5.7"
 
-          - php: '7.4'
-            phpcs_version: 'dev-master'
+          - php: "7.4"
+            phpcs_version: "4.x-dev"
 
           # Experimental builds.
-          - php: '8.5' # Nightly.
-            phpcs_version: 'dev-master'
+          - php: "8.5" # Nightly.
+            phpcs_version: "4.x-dev"
 
     name: "Test: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
 
@@ -82,7 +102,7 @@ jobs:
         run: |
           # On stable PHPCS versions, allow for PHP deprecation notices.
           # Unit tests don't need to fail on those for stable releases where those issues won't get fixed anymore.
-          if [ "${{ matrix.phpcs_version }}" != "dev-master" ]; then
+          if [ "${{ matrix.phpcs_version }}" != "4.x-dev" ]; then
             echo 'PHP_INI=error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
           else
             echo 'PHP_INI=error_reporting=-1, display_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
@@ -95,7 +115,7 @@ jobs:
           ini-values: ${{ steps.set_ini.outputs.PHP_INI }}
           coverage: none
 
-      - name: 'Composer: adjust dependencies'
+      - name: "Composer: adjust dependencies"
         run: |
           # Remove dev dependencies which are not compatible with all supported PHP versions.
           composer remove --dev --no-update sirbrillig/phpcs-import-detection phpstan/phpstan
@@ -146,15 +166,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - php: '8.4'
-            phpcs_version: 'dev-master'
-          - php: '7.4'
-            phpcs_version: '3.5.6'
+          - php: "8.4"
+            phpcs_version: "4.x-dev"
+          - php: "7.4"
+            phpcs_version: "3.5.7"
 
-          - php: '5.4'
-            phpcs_version: 'dev-master'
-          - php: '5.4'
-            phpcs_version: '3.5.6'
+          - php: "7.2"
+            phpcs_version: "4.x-dev"
+          - php: "5.4"
+            phpcs_version: "3.5.7"
 
     name: "Coverage: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
 
@@ -167,7 +187,7 @@ jobs:
         run: |
           # On stable PHPCS versions, allow for PHP deprecation notices.
           # Unit tests don't need to fail on those for stable releases where those issues won't get fixed anymore.
-          if [ "${{ matrix.phpcs_version }}" != "dev-master" ]; then
+          if [ "${{ matrix.phpcs_version }}" != "4.x-dev" ]; then
             echo 'PHP_INI=error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
           else
             echo 'PHP_INI=error_reporting=-1, display_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
@@ -180,7 +200,7 @@ jobs:
           ini-values: ${{ steps.set_ini.outputs.PHP_INI }}
           coverage: xdebug
 
-      - name: 'Composer: adjust dependencies'
+      - name: "Composer: adjust dependencies"
         run: |
           # Remove dev dependencies which are not compatible with all supported PHP/PHPCS versions.
           composer remove --dev --no-update phpcsstandards/phpcsdevcs sirbrillig/phpcs-import-detection phpstan/phpstan

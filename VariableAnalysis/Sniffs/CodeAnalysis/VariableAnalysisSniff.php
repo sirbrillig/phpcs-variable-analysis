@@ -1503,7 +1503,34 @@ class VariableAnalysisSniff implements Sniff
 
 		// Is our function a known pass-by-reference function?
 		$functionName = $tokens[$functionPtr]['content'];
-		$refArgs = $this->getPassByReferenceFunction($functionName);
+
+		// In PHPCS 4.x, T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED, and T_NAME_RELATIVE
+		// tokens contain the full namespaced name. Extract just the base name for the
+		// first check so that 'my_function' in the config can match '\My\Namespace\my_function'.
+		$functionBaseName = $functionName;
+		if ($tokens[$functionPtr]['code'] === T_NAME_FULLY_QUALIFIED) {
+			$lastBackslashPos = strrpos($functionName, '\\');
+			if ($lastBackslashPos !== false) {
+				$functionBaseName = substr($functionName, $lastBackslashPos + 1);
+			}
+		} elseif ($tokens[$functionPtr]['code'] === T_NAME_QUALIFIED) {
+			$lastBackslashPos = strrpos($functionName, '\\');
+			if ($lastBackslashPos !== false) {
+				$functionBaseName = substr($functionName, $lastBackslashPos + 1);
+			}
+		} elseif ($tokens[$functionPtr]['code'] === T_NAME_RELATIVE) {
+			$lastBackslashPos = strrpos($functionName, '\\');
+			if ($lastBackslashPos !== false) {
+				$functionBaseName = substr($functionName, $lastBackslashPos + 1);
+			}
+		}
+
+		// Ensure we have a string (should always be true, but helps static analyzers).
+		if (! is_string($functionBaseName) || $functionBaseName === '') {
+			return false;
+		}
+
+		$refArgs = $this->getPassByReferenceFunction($functionBaseName);
 		if (! $refArgs) {
 			// Check again with the fully namespaced function name.
 			$functionName = Helpers::getFunctionNameWithNamespace($phpcsFile, $functionPtr);

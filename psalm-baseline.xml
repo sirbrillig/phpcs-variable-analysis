@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="6.13.1@1e3b7f0a8ab32b23197b91107adc0a7ed8a05b51">
+  <file src="VariableAnalysis/Lib/EnumInfo.php">
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$enumIndex]]></code>
+    </PossiblyUnusedProperty>
+  </file>
+  <file src="VariableAnalysis/Lib/ForLoopInfo.php">
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$conditionEnd]]></code>
+      <code><![CDATA[$conditionStart]]></code>
+      <code><![CDATA[$forIndex]]></code>
+      <code><![CDATA[$initEnd]]></code>
+      <code><![CDATA[$initStart]]></code>
+    </PossiblyUnusedProperty>
+  </file>
+  <file src="VariableAnalysis/Lib/Helpers.php">
+    <InvalidArgument>
+      <code><![CDATA[$closePtr]]></code>
+    </InvalidArgument>
+    <InvalidOperand>
+      <code><![CDATA[$closePtr]]></code>
+    </InvalidOperand>
+    <PossiblyFalseArgument>
+      <code><![CDATA[$varName]]></code>
+      <code><![CDATA[$varName]]></code>
+    </PossiblyFalseArgument>
+    <PossiblyInvalidOperand>
+      <code><![CDATA[$message]]></code>
+    </PossiblyInvalidOperand>
+    <UnusedVariable>
+      <code><![CDATA[$isNestedAssignment]]></code>
+    </UnusedVariable>
+  </file>
+  <file src="VariableAnalysis/Lib/VariableInfo.php">
+    <PossiblyUnusedProperty>
+      <code><![CDATA[$typeHint]]></code>
+    </PossiblyUnusedProperty>
+  </file>
+  <file src="VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function process(File $phpcsFile, $stackPtr)]]></code>
+      <code><![CDATA[public function register()]]></code>
+    </MissingOverrideAttribute>
+    <UnusedClass>
+      <code><![CDATA[VariableAnalysisSniff]]></code>
+    </UnusedClass>
+  </file>
+</files>
