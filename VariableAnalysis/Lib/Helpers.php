@@ -647,7 +647,7 @@ class Helpers
 
 		// We found the closest arrow function before this token. If the token is
 		// within the scope of that arrow function, then return it.
-		if ($stackPtr > $arrowFunctionInfo['scope_opener'] && $stackPtr < $arrowFunctionInfo['scope_closer']) {
+		if ($stackPtr >= $arrowFunctionInfo['scope_opener'] && $stackPtr <= $arrowFunctionInfo['scope_closer']) {
 			return $arrowFunctionIndex;
 		}
 
@@ -697,28 +697,7 @@ class Helpers
 	public static function isArrowFunction(File $phpcsFile, $stackPtr)
 	{
 		$tokens = $phpcsFile->getTokens();
-		if (defined('T_FN') && $tokens[$stackPtr]['code'] === T_FN) {
-			return true;
-		}
-		if ($tokens[$stackPtr]['content'] !== 'fn') {
-			return false;
-		}
-		// Make sure next non-space token is an open parenthesis
-		$openParenIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
-		if (! is_int($openParenIndex) || $tokens[$openParenIndex]['code'] !== T_OPEN_PARENTHESIS) {
-			return false;
-		}
-		// Find the associated close parenthesis
-		$closeParenIndex = $tokens[$openParenIndex]['parenthesis_closer'];
-		// Make sure the next token is a fat arrow
-		$fatArrowIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $closeParenIndex + 1, null, true);
-		if (! is_int($fatArrowIndex)) {
-			return false;
-		}
-		if ($tokens[$fatArrowIndex]['code'] !== T_DOUBLE_ARROW && $tokens[$fatArrowIndex]['type'] !== 'T_FN_ARROW') {
-			return false;
-		}
-		return true;
+		return $tokens[$stackPtr]['code'] === T_FN;
 	}
 
 	/**
@@ -739,108 +718,18 @@ class Helpers
 	public static function getArrowFunctionOpenClose(File $phpcsFile, $stackPtr)
 	{
 		$tokens = $phpcsFile->getTokens();
-		if ($tokens[$stackPtr]['content'] !== 'fn') {
-			return null;
-		}
-		// Make sure next non-space token is an open parenthesis
-		$openParenIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
-		if (! is_int($openParenIndex) || $tokens[$openParenIndex]['code'] !== T_OPEN_PARENTHESIS) {
-			return null;
-		}
-		// Find the associated close parenthesis
-		$closeParenIndex = $tokens[$openParenIndex]['parenthesis_closer'];
-		// Make sure the next token is a fat arrow or a return type
-		$fatArrowIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $closeParenIndex + 1, null, true);
-		if (! is_int($fatArrowIndex)) {
-			return null;
-		}
-		if (
-			$tokens[$fatArrowIndex]['code'] !== T_DOUBLE_ARROW &&
-			$tokens[$fatArrowIndex]['type'] !== 'T_FN_ARROW' &&
-			$tokens[$fatArrowIndex]['code'] !== T_COLON
-		) {
+
+		if ($tokens[$stackPtr]['code'] !== T_FN) {
 			return null;
 		}
 
-		// Find the scope closer
-		$scopeCloserIndex = null;
-		$foundCurlyPairs = 0;
-		$foundArrayPairs = 0;
-		$foundParenPairs = 0;
-		$arrowBodyStart = $tokens[$stackPtr]['parenthesis_closer'] + 1;
-		$lastToken = self::getLastNonEmptyTokenIndexInFile($phpcsFile);
-		for ($index = $arrowBodyStart; $index < $lastToken; $index++) {
-			$token = $tokens[$index];
-			if (empty($token['code'])) {
-				$scopeCloserIndex = $index;
-				break;
-			}
-
-			$code = $token['code'];
-
-			// A semicolon is always a closer.
-			if ($code === T_SEMICOLON) {
-				$scopeCloserIndex = $index;
-				break;
-			}
-
-			// Track pair opening tokens.
-			if ($code === T_OPEN_CURLY_BRACKET) {
-				$foundCurlyPairs += 1;
-				continue;
-			}
-			if ($code === T_OPEN_SHORT_ARRAY || $code === T_OPEN_SQUARE_BRACKET) {
-				$foundArrayPairs += 1;
-				continue;
-			}
-			if ($code === T_OPEN_PARENTHESIS) {
-				$foundParenPairs += 1;
-				continue;
-			}
-
-			// A pair closing is only an arrow func closer if there was no matching opening token.
-			if ($code === T_CLOSE_CURLY_BRACKET) {
-				if ($foundCurlyPairs === 0) {
-					$scopeCloserIndex = $index;
-					break;
-				}
-				$foundCurlyPairs -= 1;
-				continue;
-			}
-			if ($code === T_CLOSE_SHORT_ARRAY || $code === T_CLOSE_SQUARE_BRACKET) {
-				if ($foundArrayPairs === 0) {
-					$scopeCloserIndex = $index;
-					break;
-				}
-				$foundArrayPairs -= 1;
-				continue;
-			}
-			if ($code === T_CLOSE_PARENTHESIS) {
-				if ($foundParenPairs === 0) {
-					$scopeCloserIndex = $index;
-					break;
-				}
-				$foundParenPairs -= 1;
-				continue;
-			}
-
-			// A comma is a closer only if we are not inside an opening token.
-			if ($code === T_COMMA) {
-				if (empty($foundArrayPairs) && empty($foundParenPairs) && empty($foundCurlyPairs)) {
-					$scopeCloserIndex = $index;
-					break;
-				}
-				continue;
-			}
-		}
-
-		if (! is_int($scopeCloserIndex)) {
+		if (!isset($tokens[$stackPtr]['scope_closer'])) {
 			return null;
 		}
 
 		return [
-			'scope_opener' => $stackPtr,
-			'scope_closer' => $scopeCloserIndex,
+			'scope_opener' => $tokens[$stackPtr]['scope_opener'],
+			'scope_closer' => $tokens[$stackPtr]['scope_closer'],
 		];
 	}
 
