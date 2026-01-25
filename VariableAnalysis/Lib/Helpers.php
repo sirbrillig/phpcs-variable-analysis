@@ -11,6 +11,7 @@ use VariableAnalysis\Lib\ScopeType;
 use VariableAnalysis\Lib\VariableInfo;
 use PHP_CodeSniffer\Util\Tokens;
 use PHPCSUtils\Utils\Context;
+use PHPCSUtils\Utils\Lists;
 use PHPCSUtils\Utils\Parentheses;
 
 class Helpers
@@ -734,64 +735,6 @@ class Helpers
 	}
 
 	/**
-	 * Determine if a token is a list opener for list assignment/destructuring.
-	 *
-	 * The index provided can be either the opening square brace of a short list
-	 * assignment like the first character of `[$a] = $b;` or the `list` token of
-	 * an expression like `list($a) = $b;` or the opening parenthesis of that
-	 * expression.
-	 *
-	 * @param File $phpcsFile
-	 * @param int  $listOpenerIndex
-	 *
-	 * @return bool
-	 */
-	private static function isListAssignment(File $phpcsFile, $listOpenerIndex)
-	{
-		$tokens = $phpcsFile->getTokens();
-		// Match `[$a] = $b;` except for when the previous token is a parenthesis.
-		if ($tokens[$listOpenerIndex]['code'] === T_OPEN_SHORT_ARRAY) {
-			return true;
-		}
-		// Match `list($a) = $b;`
-		if ($tokens[$listOpenerIndex]['code'] === T_LIST) {
-			return true;
-		}
-
-		// If $listOpenerIndex is the open parenthesis of `list($a) = $b;`, then
-		// match that too.
-		if ($tokens[$listOpenerIndex]['code'] === T_OPEN_PARENTHESIS) {
-			$previousTokenPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $listOpenerIndex - 1, null, true);
-			if (
-				isset($tokens[$previousTokenPtr])
-				&& $tokens[$previousTokenPtr]['code'] === T_LIST
-			) {
-				return true;
-			}
-			return true;
-		}
-
-		// If the list opener token is a square bracket that is preceeded by a
-		// close parenthesis that has an owner which is a scope opener, then this
-		// is a list assignment and not an array access.
-		//
-		// Match `if (true) [$a] = $b;`
-		if ($tokens[$listOpenerIndex]['code'] === T_OPEN_SQUARE_BRACKET) {
-			$previousTokenPtr = $phpcsFile->findPrevious(Tokens::$emptyTokens, $listOpenerIndex - 1, null, true);
-			if (
-				isset($tokens[$previousTokenPtr])
-				&& $tokens[$previousTokenPtr]['code'] === T_CLOSE_PARENTHESIS
-				&& isset($tokens[$previousTokenPtr]['parenthesis_owner'])
-				&& isset(Tokens::$scopeOpeners[$tokens[$tokens[$previousTokenPtr]['parenthesis_owner']]['code']])
-			) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * Return a list of indices for variables assigned within a list assignment.
 	 *
 	 * The index provided can be either the opening square brace of a short list
@@ -806,74 +749,44 @@ class Helpers
 	 */
 	public static function getListAssignments(File $phpcsFile, $listOpenerIndex)
 	{
-		$tokens = $phpcsFile->getTokens();
-		self::debug('getListAssignments', $listOpenerIndex, $tokens[$listOpenerIndex]);
+		self::debug('getListAssignments', $listOpenerIndex, $phpcsFile->getTokens()[$listOpenerIndex]);
 
-		// First find the end of the list
-		$closePtr = null;
-		if (isset($tokens[$listOpenerIndex]['parenthesis_closer'])) {
-			$closePtr = $tokens[$listOpenerIndex]['parenthesis_closer'];
-		}
-		if (isset($tokens[$listOpenerIndex]['bracket_closer'])) {
-			$closePtr = $tokens[$listOpenerIndex]['bracket_closer'];
-		}
-		if (! $closePtr) {
+		// Use PHPCSUtils to get detailed assignment information
+		try {
+			$assignments = \PHPCSUtils\Utils\Lists::getAssignments($phpcsFile, $listOpenerIndex);
+		} catch (\PHPCSUtils\Exceptions\UnexpectedTokenType $e) {
+			// Not a list token
 			return null;
 		}
 
-		// Find the assignment (equals sign) which, if this is a list assignment, should be the next non-space token
-		$assignPtr = $phpcsFile->findNext(Tokens::$emptyTokens, $closePtr + 1, null, true);
-
-		// If the next token isn't an assignment, check for nested brackets because we might be a nested assignment
-		if (! is_int($assignPtr) || $tokens[$assignPtr]['code'] !== T_EQUAL) {
-			// Collect the enclosing list open/close tokens ($parents is an assoc array keyed by opener index and the value is the closer index)
-			$parents = isset($tokens[$listOpenerIndex]['nested_parenthesis']) ? $tokens[$listOpenerIndex]['nested_parenthesis'] : [];
-			// There's no record of nested brackets for short lists; we'll have to find the parent ourselves
-			if (empty($parents)) {
-				$parentSquareBracketPtr = self::findContainingOpeningSquareBracket($phpcsFile, $listOpenerIndex);
-				if (is_int($parentSquareBracketPtr)) {
-					// Make sure that the parent is really a parent by checking that its
-					// closing index is outside of the current bracket's closing index.
-					$parentSquareBracketToken = $tokens[$parentSquareBracketPtr];
-					$parentSquareBracketClosePtr = $parentSquareBracketToken['bracket_closer'];
-					if ($parentSquareBracketClosePtr && $parentSquareBracketClosePtr > $closePtr) {
-						self::debug("found enclosing bracket for {$listOpenerIndex}: {$parentSquareBracketPtr}");
-						// Collect the opening index, but we don't actually need the closing paren index so just make that 0
-						$parents = [$parentSquareBracketPtr => 0];
-					}
-				}
-			}
-			// If we have no parents, this is not a nested assignment and therefore is not an assignment
-			if (empty($parents)) {
-				return null;
-			}
-
-			// Recursively check to see if the parent is a list assignment (we only need to check one level due to the recursion)
-			$isNestedAssignment = null;
-			$parentListOpener = array_keys(array_reverse($parents, true))[0];
-			$isNestedAssignment = self::getListAssignments($phpcsFile, $parentListOpener);
-			if ($isNestedAssignment === null) {
-				return null;
-			}
+		if (empty($assignments)) {
+			return null;
 		}
 
+		// Extract just the variable token positions for backward compatibility
 		$variablePtrs = [];
-
-		$currentPtr = $listOpenerIndex;
-		$variablePtr = 0;
-		while ($currentPtr < $closePtr && is_int($variablePtr)) {
-			$variablePtr = $phpcsFile->findNext([T_VARIABLE], $currentPtr + 1, $closePtr);
-			if (is_int($variablePtr)) {
-				$variablePtrs[] = $variablePtr;
+		foreach ($assignments as $assignment) {
+			// Skip empty list items like in: list($a, , $b)
+			if ($assignment['is_empty']) {
+				continue;
 			}
-			++$currentPtr;
+
+			// For nested lists, recursively get the assignments
+			if ($assignment['is_nested_list'] && $assignment['assignment_token'] !== false) {
+				$nestedVars = self::getListAssignments($phpcsFile, $assignment['assignment_token']);
+				if (is_array($nestedVars)) {
+					$variablePtrs = array_merge($variablePtrs, $nestedVars);
+				}
+				continue;
+			}
+
+			// For regular variables, use the assignment_token which points to the T_VARIABLE
+			if ($assignment['assignment_token'] !== false && $assignment['variable'] !== false) {
+				$variablePtrs[] = $assignment['assignment_token'];
+			}
 		}
 
-		if (! self::isListAssignment($phpcsFile, $listOpenerIndex)) {
-			return null;
-		}
-
-		return $variablePtrs;
+		return empty($variablePtrs) ? null : $variablePtrs;
 	}
 
 	/**
