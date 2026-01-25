@@ -1064,12 +1064,6 @@ class Helpers
 	{
 		$tokens = $phpcsFile->getTokens();
 		$scopeCloserIndex = isset($tokens[$scopeStartIndex]['scope_closer']) ? $tokens[$scopeStartIndex]['scope_closer'] : 0;
-
-		if (self::isArrowFunction($phpcsFile, $scopeStartIndex)) {
-			$arrowFunctionInfo = self::getArrowFunctionOpenClose($phpcsFile, $scopeStartIndex);
-			$scopeCloserIndex = $arrowFunctionInfo ? $arrowFunctionInfo['scope_closer'] : $scopeCloserIndex;
-		}
-
 		if ($scopeStartIndex === 0) {
 			$scopeCloserIndex = self::getLastNonEmptyTokenIndexInFile($phpcsFile);
 		}
