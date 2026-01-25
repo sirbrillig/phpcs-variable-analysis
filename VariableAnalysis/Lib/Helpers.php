@@ -11,6 +11,7 @@ use VariableAnalysis\Lib\ScopeType;
 use VariableAnalysis\Lib\VariableInfo;
 use PHP_CodeSniffer\Util\Tokens;
 use PHPCSUtils\Utils\Context;
+use PHPCSUtils\Utils\Parentheses;
 
 class Helpers
 {
@@ -91,15 +92,11 @@ class Helpers
 	 */
 	public static function findContainingOpeningBracket(File $phpcsFile, $stackPtr)
 	{
-		$tokens = $phpcsFile->getTokens();
-		if (isset($tokens[$stackPtr]['nested_parenthesis'])) {
-			/**
-			 * @var list<int|string>
-			 */
-			$openPtrs = array_keys($tokens[$stackPtr]['nested_parenthesis']);
-			return (int)end($openPtrs);
-		}
-		return null;
+		// Use PHPCSUtils to get the innermost parenthesis opener
+		$result = Parentheses::getLastOpener($phpcsFile, $stackPtr);
+
+		// PHPCSUtils returns false on failure, but our code expects null
+		return $result !== false ? $result : null;
 	}
 
 	/**
