@@ -10,6 +10,7 @@ use VariableAnalysis\Lib\EnumInfo;
 use VariableAnalysis\Lib\ScopeType;
 use VariableAnalysis\Lib\VariableInfo;
 use PHP_CodeSniffer\Util\Tokens;
+use PHPCSUtils\Utils\Context;
 
 class Helpers
 {
@@ -1333,22 +1334,8 @@ class Helpers
 	 */
 	public static function isVariableInsideIssetOrEmpty(File $phpcsFile, $stackPtr)
 	{
-		$functionIndex = self::getFunctionIndexForFunctionCallArgument($phpcsFile, $stackPtr);
-		if (! is_int($functionIndex)) {
-			return false;
-		}
-		$tokens = $phpcsFile->getTokens();
-		if (! isset($tokens[$functionIndex])) {
-			return false;
-		}
-		$allowedFunctionNames = [
-			'isset',
-			'empty',
-		];
-		if (in_array($tokens[$functionIndex]['content'], $allowedFunctionNames, true)) {
-			return true;
-		}
-		return false;
+		// Use PHPCSUtils which handles all edge cases across PHP/PHPCS versions
+		return Context::inIsset($phpcsFile, $stackPtr) || Context::inEmpty($phpcsFile, $stackPtr);
 	}
 
 	/**
@@ -1397,18 +1384,8 @@ class Helpers
 	 */
 	public static function isVariableInsideUnset(File $phpcsFile, $stackPtr)
 	{
-		$functionIndex = self::getFunctionIndexForFunctionCallArgument($phpcsFile, $stackPtr);
-		if (! is_int($functionIndex)) {
-			return false;
-		}
-		$tokens = $phpcsFile->getTokens();
-		if (! isset($tokens[$functionIndex])) {
-			return false;
-		}
-		if ($tokens[$functionIndex]['content'] === 'unset') {
-			return true;
-		}
-		return false;
+		// Use PHPCSUtils which handles all edge cases across PHP/PHPCS versions
+		return Context::inUnset($phpcsFile, $stackPtr);
 	}
 
 	/**
