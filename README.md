@@ -15,7 +15,7 @@ Plugin for PHP_CodeSniffer static analysis tool that adds analysis of problemati
 
 ### Requirements
 
-VariableAnalysis requires PHP 5.4 or higher and [PHP CodeSniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer) version 3.5.7 or higher.
+VariableAnalysis requires PHP 5.4 or higher and [PHP CodeSniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer) version 3.13.5 or higher.
 
 ### With PHPCS Composer Installer
 
