@@ -170,6 +170,7 @@ class VariableAnalysisSniff implements Sniff
 	 *
 	 * @return (int|string)[]
 	 */
+	#[\Override]
 	public function register()
 	{
 		$types = [
@@ -240,6 +241,7 @@ class VariableAnalysisSniff implements Sniff
 	 *
 	 * @return void
 	 */
+	#[\Override]
 	public function process(File $phpcsFile, $stackPtr)
 	{
 		$tokens = $phpcsFile->getTokens();
