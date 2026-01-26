@@ -28,9 +28,6 @@
     <PossiblyInvalidOperand>
       <code><![CDATA[$message]]></code>
     </PossiblyInvalidOperand>
-    <UnusedVariable>
-      <code><![CDATA[$isNestedAssignment]]></code>
-    </UnusedVariable>
   </file>
   <file src="VariableAnalysis/Lib/VariableInfo.php">
     <PossiblyUnusedProperty>
@@ -38,10 +35,6 @@
     </PossiblyUnusedProperty>
   </file>
   <file src="VariableAnalysis/Sniffs/CodeAnalysis/VariableAnalysisSniff.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function process(File $phpcsFile, $stackPtr)]]></code>
-      <code><![CDATA[public function register()]]></code>
-    </MissingOverrideAttribute>
     <UnusedClass>
       <code><![CDATA[VariableAnalysisSniff]]></code>
     </UnusedClass>
