@@ -281,17 +281,14 @@ class Helpers
 	{
 		$tokens = $phpcsFile->getTokens();
 
-		$nonUseTokenTypes = Tokens::$emptyTokens;
-		$nonUseTokenTypes[] = T_VARIABLE;
-		$nonUseTokenTypes[] = T_ELLIPSIS;
-		$nonUseTokenTypes[] = T_COMMA;
-		$nonUseTokenTypes[] = T_BITWISE_AND;
-		$openParenPtr = self::getIntOrNull($phpcsFile->findPrevious($nonUseTokenTypes, $stackPtr - 1, null, true, null, true));
-		if (! is_int($openParenPtr) || $tokens[$openParenPtr]['code'] !== T_OPEN_PARENTHESIS) {
+		$openParenPtr = self::findContainingOpeningBracket($phpcsFile, $stackPtr);
+		if (! is_int($openParenPtr)) {
 			return null;
 		}
 
-		$usePtr = self::getIntOrNull($phpcsFile->findPrevious(array_values($nonUseTokenTypes), $openParenPtr - 1, null, true, null, true));
+		$usePtr = self::getIntOrNull(
+			$phpcsFile->findPrevious(Tokens::$emptyTokens, $openParenPtr - 1, null, true, null, true)
+		);
 		if (! is_int($usePtr) || $tokens[$usePtr]['code'] !== T_USE) {
 			return null;
 		}
