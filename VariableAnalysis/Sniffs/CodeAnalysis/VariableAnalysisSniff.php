@@ -1549,9 +1549,9 @@ class VariableAnalysisSniff implements Sniff
 
 		// We're within a function call arguments list, find which arg we are.
 		$argPos = false;
-		foreach ($argPtrs as $idx => $ptrs) {
-			if (in_array($stackPtr, $ptrs)) {
-				$argPos = $idx + 1;
+		foreach ($argPtrs as $idx => $param) {
+			if ($stackPtr >= $param['start'] && $stackPtr <= $param['end']) {
+				$argPos = $idx;
 				break;
 			}
 		}
@@ -1572,7 +1572,8 @@ class VariableAnalysisSniff implements Sniff
 
 		// Our argument position matches that of a pass-by-ref argument,
 		// check that we're the only part of the argument expression.
-		foreach ($argPtrs[$argPos - 1] as $ptr) {
+		$param = $argPtrs[$argPos];
+		for ($ptr = (int)$param['start']; $ptr <= (int)$param['end']; $ptr++) {
 			if ($ptr === $stackPtr) {
 				continue;
 			}
