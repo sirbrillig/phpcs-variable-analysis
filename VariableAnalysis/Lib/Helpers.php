@@ -15,6 +15,7 @@ use PHPCSUtils\Utils\Context;
 use PHPCSUtils\Utils\FunctionDeclarations;
 use PHPCSUtils\Utils\Lists;
 use PHPCSUtils\Utils\Parentheses;
+use PHPCSUtils\Utils\PassedParameters;
 
 class Helpers
 {
@@ -336,7 +337,7 @@ class Helpers
 	 * @param File $phpcsFile
 	 * @param int  $stackPtr
 	 *
-	 * @return array<int, array<int>>
+	 * @return array<int|string, array<string, int|string>>
 	 */
 	public static function findFunctionCallArguments(File $phpcsFile, $stackPtr)
 	{
@@ -351,38 +352,7 @@ class Helpers
 			}
 		}
 
-		// $stackPtr is the function name, find our brackets after it
-		$openPtr = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true, null, true);
-		if (($openPtr === false) || ($tokens[$openPtr]['code'] !== T_OPEN_PARENTHESIS)) {
-			return [];
-		}
-
-		if (!isset($tokens[$openPtr]['parenthesis_closer'])) {
-			return [];
-		}
-		$closePtr = $tokens[$openPtr]['parenthesis_closer'];
-
-		$argPtrs = [];
-		$lastPtr = $openPtr;
-		$lastArgComma = $openPtr;
-		$nextPtr = $phpcsFile->findNext([T_COMMA], $lastPtr + 1, $closePtr);
-		while (is_int($nextPtr)) {
-			if (self::findContainingOpeningBracket($phpcsFile, $nextPtr) === $openPtr) {
-				// Comma is at our level of brackets, it's an argument delimiter.
-				$range = range($lastArgComma + 1, $nextPtr - 1);
-				array_push($argPtrs, $range);
-				$lastArgComma = $nextPtr;
-			}
-			$lastPtr = $nextPtr;
-			$nextPtr = $phpcsFile->findNext([T_COMMA], $lastPtr + 1, $closePtr);
-		}
-		$range = range($lastArgComma + 1, $closePtr - 1);
-		$range = array_filter($range, function ($element) {
-			return is_int($element);
-		});
-		array_push($argPtrs, $range);
-
-		return $argPtrs;
+		return PassedParameters::getParameters($phpcsFile, $stackPtr);
 	}
 
 	/**
@@ -457,9 +427,9 @@ class Helpers
 	/**
 	 * Return the variable names and positions of each variable targetted by a `compact()` call.
 	 *
-	 * @param File                   $phpcsFile
-	 * @param int                    $stackPtr
-	 * @param array<int, array<int>> $arguments The stack pointers of each argument; see findFunctionCallArguments
+	 * @param File                                         $phpcsFile
+	 * @param int                                          $stackPtr
+	 * @param array<int|string, array<string, int|string>> $arguments The parameters from PassedParameters::getParameters()
 	 *
 	 * @return array<VariableInfo> each variable's firstRead position and its name; other VariableInfo properties are not set!
 	 */
@@ -468,36 +438,50 @@ class Helpers
 		$tokens = $phpcsFile->getTokens();
 		$variablePositionsAndNames = [];
 
-		foreach ($arguments as $argumentPtrs) {
-			$argumentPtrs = array_values(array_filter($argumentPtrs, function ($argumentPtr) use ($tokens) {
-				return isset(Tokens::$emptyTokens[$tokens[$argumentPtr]['code']]) === false;
-			}));
-			if (empty($argumentPtrs)) {
+		foreach ($arguments as $param) {
+			// Find the first non-empty token in this argument's range.
+			$firstNonEmpty = null;
+			$nonEmptyCount = 0;
+			for ($i = (int)$param['start']; $i <= (int)$param['end']; $i++) {
+				if (!isset(Tokens::$emptyTokens[$tokens[$i]['code']])) {
+					if ($firstNonEmpty === null) {
+						$firstNonEmpty = $i;
+					}
+					$nonEmptyCount++;
+				}
+			}
+
+			if ($firstNonEmpty === null) {
 				continue;
 			}
-			if (!isset($tokens[$argumentPtrs[0]])) {
-				continue;
-			}
-			$argumentFirstToken = $tokens[$argumentPtrs[0]];
+
+			$argumentFirstToken = $tokens[$firstNonEmpty];
+
 			if ($argumentFirstToken['code'] === T_ARRAY) {
 				// It's an array argument, recurse.
-				$arrayArguments = self::findFunctionCallArguments($phpcsFile, $argumentPtrs[0]);
-				$variablePositionsAndNames = array_merge($variablePositionsAndNames, self::getVariablesInsideCompact($phpcsFile, $stackPtr, $arrayArguments));
+				$arrayArguments = PassedParameters::getParameters($phpcsFile, $firstNonEmpty);
+				$variablePositionsAndNames = array_merge(
+					$variablePositionsAndNames,
+					self::getVariablesInsideCompact($phpcsFile, $stackPtr, $arrayArguments)
+				);
 				continue;
 			}
-			if (count($argumentPtrs) > 1) {
+
+			if ($nonEmptyCount > 1) {
 				// Complex argument, we can't handle it, ignore.
 				continue;
 			}
+
 			if ($argumentFirstToken['code'] === T_CONSTANT_ENCAPSED_STRING) {
 				// Single-quoted string literal, ie compact('whatever').
 				// Substr is to strip the enclosing single-quotes.
 				$varName = substr($argumentFirstToken['content'], 1, -1);
 				$variable = new VariableInfo($varName);
-				$variable->firstRead = $argumentPtrs[0];
+				$variable->firstRead = $firstNonEmpty;
 				$variablePositionsAndNames[] = $variable;
 				continue;
 			}
+
 			if ($argumentFirstToken['code'] === T_DOUBLE_QUOTED_STRING) {
 				// Double-quoted string literal.
 				$regexp = Constants::getDoubleQuotedVarRegexp();
@@ -508,9 +492,8 @@ class Helpers
 				// Substr is to strip the enclosing double-quotes.
 				$varName = substr($argumentFirstToken['content'], 1, -1);
 				$variable = new VariableInfo($varName);
-				$variable->firstRead = $argumentPtrs[0];
+				$variable->firstRead = $firstNonEmpty;
 				$variablePositionsAndNames[] = $variable;
-				continue;
 			}
 		}
 		return $variablePositionsAndNames;
