@@ -12,6 +12,7 @@ use VariableAnalysis\Lib\VariableInfo;
 use PHP_CodeSniffer\Util\Tokens;
 use PHPCSUtils\Utils\Conditions;
 use PHPCSUtils\Utils\Context;
+use PHPCSUtils\Utils\FunctionDeclarations;
 use PHPCSUtils\Utils\Lists;
 use PHPCSUtils\Utils\Parentheses;
 
@@ -1388,31 +1389,15 @@ class Helpers
 	 */
 	public static function isConstructorPromotion(File $phpcsFile, $stackPtr)
 	{
-		// If we are not in a function's parameters, this is not promotion.
 		$functionIndex = self::getFunctionIndexForFunctionParameter($phpcsFile, $stackPtr);
 		if (! $functionIndex) {
 			return false;
 		}
-
-		$tokens = $phpcsFile->getTokens();
-
-		// Move backwards from the token, ignoring whitespace, typehints, and the
-		// 'readonly' keyword, and return true if the previous token is a
-		// visibility keyword (eg: `public`).
-		for ($i = $stackPtr - 1; $i > $functionIndex; $i--) {
-			if (in_array($tokens[$i]['code'], Tokens::$scopeModifiers, true)) {
-				return true;
+		$params = FunctionDeclarations::getParameters($phpcsFile, $functionIndex);
+		foreach ($params as $param) {
+			if ($param['token'] === $stackPtr) {
+				return isset($param['property_visibility']);
 			}
-			if (in_array($tokens[$i]['code'], Tokens::$emptyTokens, true)) {
-				continue;
-			}
-			if ($tokens[$i]['content'] === 'readonly') {
-				continue;
-			}
-			if (self::isTokenPartOfTypehint($phpcsFile, $i)) {
-				continue;
-			}
-			return false;
 		}
 		return false;
 	}
@@ -1468,85 +1453,6 @@ class Helpers
 			$functionName = "{$tokens[$i]['content']}{$functionName}";
 		}
 		return $functionName;
-	}
-
-	/**
-	 * Return false if the token is definitely not part of a typehint
-	 *
-	 * @param File $phpcsFile
-	 * @param int  $stackPtr
-	 *
-	 * @return bool
-	 */
-	private static function isTokenPossiblyPartOfTypehint(File $phpcsFile, $stackPtr)
-	{
-		$tokens = $phpcsFile->getTokens();
-		$token = $tokens[$stackPtr];
-		if ($token['code'] === 'PHPCS_T_NULLABLE') {
-			return true;
-		}
-		if ($token['code'] === T_NAME_QUALIFIED) {
-			return true;
-		}
-		if ($token['code'] === T_NAME_RELATIVE) {
-			return true;
-		}
-		if ($token['code'] === T_NAME_FULLY_QUALIFIED) {
-			return true;
-		}
-		if ($token['code'] === T_NS_SEPARATOR) {
-			return true;
-		}
-		if ($token['code'] === T_STRING) {
-			return true;
-		}
-		if ($token['code'] === T_TRUE) {
-			return true;
-		}
-		if ($token['code'] === T_FALSE) {
-			return true;
-		}
-		if ($token['code'] === T_NULL) {
-			return true;
-		}
-		if ($token['content'] === '|') {
-			return true;
-		}
-		if (in_array($token['code'], Tokens::$emptyTokens)) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Return true if the token is inside a typehint
-	 *
-	 * @param File $phpcsFile
-	 * @param int  $stackPtr
-	 *
-	 * @return bool
-	 */
-	public static function isTokenPartOfTypehint(File $phpcsFile, $stackPtr)
-	{
-		$tokens = $phpcsFile->getTokens();
-
-		if (! self::isTokenPossiblyPartOfTypehint($phpcsFile, $stackPtr)) {
-			return false;
-		}
-
-		// Examine every following token, ignoring everything that might be part of
-		// a typehint. If we find a variable at the end, this is part of a
-		// typehint.
-		$i = $stackPtr;
-		while (true) {
-			$i += 1;
-			if (! isset($tokens[$i])) {
-				return false;
-			}
-			if (! self::isTokenPossiblyPartOfTypehint($phpcsFile, $i)) {
-				return ($tokens[$i]['code'] === T_VARIABLE);
-			}
-		}
 	}
 
 	/**
