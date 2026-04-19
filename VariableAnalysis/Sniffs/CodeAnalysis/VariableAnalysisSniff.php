@@ -892,7 +892,7 @@ class VariableAnalysisSniff implements Sniff
 		/** @var array{conditions?: (int|string)[], content?: string}|null */
 		$token = $tokens[$stackPtr];
 		if ($token && !empty($token['conditions']) && !empty($token['content']) && !Helpers::areConditionsWithinFunctionBeforeClass($token)) {
-			return Helpers::areAnyConditionsAClass($token);
+			return Helpers::areAnyConditionsAClass($phpcsFile, $stackPtr);
 		}
 		return false;
 	}
@@ -1105,7 +1105,7 @@ class VariableAnalysisSniff implements Sniff
 		}
 		$errorClass = $code === T_SELF ? 'SelfOutsideClass' : 'StaticOutsideClass';
 		$staticRefType = $code === T_SELF ? 'self::' : 'static::';
-		if (!empty($token['conditions']) && !empty($token['content']) && Helpers::areAnyConditionsAClass($token)) {
+		if ($token && !empty($token['content']) && Helpers::areAnyConditionsAClass($phpcsFile, $stackPtr)) {
 			return false;
 		}
 		$phpcsFile->addError(
