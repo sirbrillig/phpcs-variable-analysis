@@ -10,6 +10,7 @@ use VariableAnalysis\Lib\EnumInfo;
 use VariableAnalysis\Lib\ScopeType;
 use VariableAnalysis\Lib\VariableInfo;
 use PHP_CodeSniffer\Util\Tokens;
+use PHPCSUtils\Utils\Conditions;
 use PHPCSUtils\Utils\Context;
 use PHPCSUtils\Utils\Lists;
 use PHPCSUtils\Utils\Parentheses;
@@ -101,24 +102,19 @@ class Helpers
 	}
 
 	/**
-	 * @param array{conditions: (int|string)[], content: string} $token
+	 * @param File $phpcsFile
+	 * @param int  $stackPtr
 	 *
 	 * @return bool
 	 */
-	public static function areAnyConditionsAClass(array $token)
+	public static function areAnyConditionsAClass(File $phpcsFile, $stackPtr)
 	{
-		$conditions = $token['conditions'];
 		$classlikeCodes = [T_CLASS, T_ANON_CLASS, T_TRAIT];
 		if (defined('T_ENUM')) {
 			$classlikeCodes[] = T_ENUM;
 		}
 		$classlikeCodes[] = 'PHPCS_T_ENUM';
-		foreach (array_reverse($conditions, true) as $scopeCode) {
-			if (in_array($scopeCode, $classlikeCodes, true)) {
-				return true;
-			}
-		}
-		return false;
+		return Conditions::hasCondition($phpcsFile, $stackPtr, $classlikeCodes);
 	}
 
 	/**
