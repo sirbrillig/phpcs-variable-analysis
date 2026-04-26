@@ -101,7 +101,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Setup ini config
         id: set_ini
@@ -109,13 +111,13 @@ jobs:
           # On stable PHPCS versions, allow for PHP deprecation notices.
           # Unit tests don't need to fail on those for stable releases where those issues won't get fixed anymore.
           if [ "${{ matrix.phpcs_version }}" != "4.x-dev" ]; then
-            echo 'PHP_INI=error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, display_startup_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
+            echo 'PHP_INI=error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, display_startup_errors=On, zend.assertions=1' >> "$GITHUB_OUTPUT"
           else
-            echo 'PHP_INI=error_reporting=-1, display_errors=On, display_startup_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
+            echo 'PHP_INI=error_reporting=-1, display_errors=On, display_startup_errors=On, zend.assertions=1' >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
         with:
           php-version: ${{ matrix.php }}
           ini-values: ${{ steps.set_ini.outputs.PHP_INI }}
@@ -131,7 +133,7 @@ jobs:
       # Install dependencies and handle caching in one go.
       # @link https://github.com/marketplace/actions/install-php-dependencies-with-composer
       - name: Install Composer dependencies
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda" # 4.0.0
         with:
           # For the PHP "nightly", we need to install with ignore platform reqs as not all dependencies may allow it yet.
           composer-options: ${{ matrix.php == '8.6' && '--ignore-platform-req=php+' || '' }}
@@ -140,15 +142,15 @@ jobs:
 
       - name: Grab PHPUnit version
         id: phpunit_version
-        run: echo "VERSION=$(vendor/bin/phpunit --version | grep --only-matching --max-count=1 --extended-regexp '\b[0-9]+\.[0-9]+')" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(vendor/bin/phpunit --version | grep --only-matching --max-count=1 --extended-regexp '\b[0-9]+\.[0-9]+')" >> "$GITHUB_OUTPUT"
 
       - name: Determine PHPUnit config file to use
         id: phpunit_config
         run: |
           if [ "${{ startsWith( steps.phpunit_version.outputs.VERSION, '10.' ) || startsWith( steps.phpunit_version.outputs.VERSION, '11.' ) }}" == "true" ]; then
-            echo 'FILE=phpunit.xml.dist' >> $GITHUB_OUTPUT
+            echo 'FILE=phpunit.xml.dist' >> "$GITHUB_OUTPUT"
           else
-            echo 'FILE=phpunitlte9.xml.dist' >> $GITHUB_OUTPUT
+            echo 'FILE=phpunitlte9.xml.dist' >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run the unit tests
@@ -179,7 +181,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
       - name: Setup ini config
         id: set_ini
@@ -187,13 +191,13 @@ jobs:
           # On stable PHPCS versions, allow for PHP deprecation notices.
           # Unit tests don't need to fail on those for stable releases where those issues won't get fixed anymore.
           if [ "${{ matrix.phpcs_version }}" != "4.x-dev" ]; then
-            echo 'PHP_INI=error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, display_startup_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
+            echo 'PHP_INI=error_reporting=E_ALL & ~E_DEPRECATED, display_errors=On, display_startup_errors=On, zend.assertions=1' >> "$GITHUB_OUTPUT"
           else
-            echo 'PHP_INI=error_reporting=-1, display_errors=On, display_startup_errors=On, zend.assertions=1' >> $GITHUB_OUTPUT
+            echo 'PHP_INI=error_reporting=-1, display_errors=On, display_startup_errors=On, zend.assertions=1' >> "$GITHUB_OUTPUT"
           fi
 
       - name: Install PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # 2.37.0
         with:
           php-version: ${{ matrix.php }}
           ini-values: ${{ steps.set_ini.outputs.PHP_INI }}
@@ -206,14 +210,14 @@ jobs:
           composer require --no-update squizlabs/php_codesniffer:"${{ matrix.phpcs_version }}"
 
       - name: Install Composer dependencies
-        uses: "ramsey/composer-install@v3"
+        uses: "ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda" # 4.0.0
         with:
           # Bust the cache at least once a month - output format: YYYY-MM.
           custom-cache-suffix: $(date -u "+%Y-%m")
 
       - name: Grab PHPUnit version
         id: phpunit_version
-        run: echo "VERSION=$(vendor/bin/phpunit --version | grep --only-matching --max-count=1 --extended-regexp '\b[0-9]+\.[0-9]+')" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(vendor/bin/phpunit --version | grep --only-matching --max-count=1 --extended-regexp '\b[0-9]+\.[0-9]+')" >> "$GITHUB_OUTPUT"
 
       - name: "DEBUG: Show grabbed version"
         run: echo ${{ steps.phpunit_version.outputs.VERSION }}
@@ -222,14 +226,14 @@ jobs:
         id: phpunit_config
         run: |
           if [ "${{ startsWith( steps.phpunit_version.outputs.VERSION, '9.' ) && steps.phpunit_version.outputs.VERSION >= '9.3' }}" == "true" ]; then
-            echo 'FILE=phpunitlte9.xml.dist' >> $GITHUB_OUTPUT
-            echo 'EXTRA_ARGS=--coverage-cache ./build/phpunit-cache' >> $GITHUB_OUTPUT
+            echo 'FILE=phpunitlte9.xml.dist' >> "$GITHUB_OUTPUT"
+            echo 'EXTRA_ARGS=--coverage-cache ./build/phpunit-cache' >> "$GITHUB_OUTPUT"
           elif [ "${{ startsWith( steps.phpunit_version.outputs.VERSION, '10.' ) || startsWith( steps.phpunit_version.outputs.VERSION, '11.' ) }}" == "true" ]; then
-            echo 'FILE=phpunit.xml.dist' >> $GITHUB_OUTPUT
-            echo 'EXTRA_ARGS=' >> $GITHUB_OUTPUT
+            echo 'FILE=phpunit.xml.dist' >> "$GITHUB_OUTPUT"
+            echo 'EXTRA_ARGS=' >> "$GITHUB_OUTPUT"
           else
-            echo 'FILE=phpunitlte9.xml.dist' >> $GITHUB_OUTPUT
-            echo 'EXTRA_ARGS=' >> $GITHUB_OUTPUT
+            echo 'FILE=phpunitlte9.xml.dist' >> "$GITHUB_OUTPUT"
+            echo 'EXTRA_ARGS=' >> "$GITHUB_OUTPUT"
           fi
 
       # PHPUnit 9.3 started using PHP-Parser for code coverage which can cause interference.
@@ -245,7 +249,7 @@ jobs:
 
       - name: Upload coverage results to Coveralls
         if: ${{ success() }}
-        uses: coverallsapp/github-action@v2
+        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2.3.7
         with:
           format: clover
           file: build/logs/clover.xml
@@ -258,6 +262,6 @@ jobs:
 
     steps:
       - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2
+        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2.3.7
         with:
           parallel-finished: true
