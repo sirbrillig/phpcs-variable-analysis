@@ -17,6 +17,8 @@ Plugin for PHP_CodeSniffer static analysis tool that adds analysis of problemati
 
 VariableAnalysis requires PHP 5.4 or higher and [PHP CodeSniffer](https://github.com/PHPCSStandards/PHP_CodeSniffer) version 3.13.5 or higher.
 
+It also depends on [PHPCSUtils](https://github.com/PHPCSStandards/PHPCSUtils) version 1.0 or higher. If you install VariableAnalysis with Composer (the recommended method below), this dependency is installed for you automatically. If you install it standalone, you must install PHPCSUtils yourself; see the [Standalone](#standalone) instructions.
+
 ### With PHPCS Composer Installer
 
 This is the easiest method.
@@ -50,13 +52,17 @@ It should just work after that!
 
 2.  Install VariableAnalysis. Download either the zip or tar.gz file from [the VariableAnalysis latest release page](https://github.com/sirbrillig/phpcs-variable-analysis/releases/latest). Expand the file and rename the resulting directory to `phpcs-variable-analysis`. Move the directory to a place where you'd like to keep all your PHPCS standards.
 
-3.  Add the paths of the newly installed standards to the [PHP_CodeSniffer installed_paths configuration](https://github.com/PHPCSStandards/PHP_CodeSniffer/wiki/Configuration-Options#setting-the-installed-standard-paths). The following command should append the new standards to your existing standards (be sure to supply the actual paths to the directories you created above).
+3.  Install PHPCSUtils, which VariableAnalysis depends on. Download either the zip or tar.gz file from [the PHPCSUtils latest release page](https://github.com/PHPCSStandards/PHPCSUtils/releases/latest). Expand the file and rename the resulting directory to `PHPCSUtils`. Move the directory to the same place where you keep your PHPCS standards.
 
-        phpcs --config-set installed_paths "$(phpcs --config-show|grep installed_paths|awk '{ print $2 }'),/path/to/phpcs-variable-analysis"
+    Do ensure that PHPCSUtils' version matches our [requirements](#requirements).
+
+4.  Add the paths of the newly installed standards to the [PHP_CodeSniffer installed_paths configuration](https://github.com/PHPCSStandards/PHP_CodeSniffer/wiki/Configuration-Options#setting-the-installed-standard-paths). The following command should append the new standards to your existing standards (be sure to supply the actual paths to the directories you created above).
+
+        phpcs --config-set installed_paths "$(phpcs --config-show|grep installed_paths|awk '{ print $2 }'),/path/to/phpcs-variable-analysis,/path/to/PHPCSUtils"
 
     If you do not have any other standards installed, you can do this more easily (again, be sure to supply the actual paths):
 
-        phpcs --config-set installed_paths /path/to/phpcs-variable-analysis
+        phpcs --config-set installed_paths /path/to/phpcs-variable-analysis,/path/to/PHPCSUtils
 
 ## Customization
 
