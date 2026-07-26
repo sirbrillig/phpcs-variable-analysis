@@ -122,6 +122,8 @@ jobs:
           php-version: ${{ matrix.php }}
           ini-values: ${{ steps.set_ini.outputs.PHP_INI }}
           coverage: none
+        env:
+          fail-fast: true
 
       - name: "Composer: adjust dependencies"
         run: |
@@ -202,6 +204,8 @@ jobs:
           php-version: ${{ matrix.php }}
           ini-values: ${{ steps.set_ini.outputs.PHP_INI }}
           coverage: xdebug
+        env:
+          fail-fast: true
 
       - name: "Composer: adjust dependencies"
         run: |
