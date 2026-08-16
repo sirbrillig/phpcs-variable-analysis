@@ -13,10 +13,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Permissions should be configured at the job level.
+permissions: {}
+
 jobs:
   #### TEST STAGE ####
   test:
-    runs-on: ubuntu-latest
+    permissions:
+      contents: read # To clone the repo.
 
     strategy:
       matrix:
@@ -64,6 +68,7 @@ jobs:
     continue-on-error: ${{ matrix.php == '8.6' }}
 
     name: "Test: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -128,9 +133,11 @@ jobs:
   # N.B.: Coverage is only checked on the lowest and highest stable PHP versions
   # and low/high for PHPCS.
   coverage:
+    permissions:
+      contents: read # To clone the repo.
+
     # No use running the coverage builds if there are failing test builds.
     needs: test
-    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -146,6 +153,7 @@ jobs:
             phpcs_version: "3.13.6"
 
     name: "Coverage: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code

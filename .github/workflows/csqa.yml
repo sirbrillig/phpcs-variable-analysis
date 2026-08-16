@@ -16,8 +16,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Permissions should be configured at the job level.
+permissions: {}
+
 jobs:
   checkcs:
+    permissions:
+      contents: read # To clone the repo.
+
     name: "Basic CS and QA checks"
     runs-on: ubuntu-latest
 
@@ -71,6 +77,9 @@ jobs:
         run: cs2pr ./phpcs-report.xml
 
   static-analysis:
+    permissions:
+      contents: read # To clone the repo.
+
     name: "PHPStan & Psalm"
     runs-on: ubuntu-latest
 
@@ -99,6 +108,9 @@ jobs:
         run: composer static-analysis
 
   perf-guard:
+    permissions:
+      contents: read # To clone the repo.
+
     name: "Basic Performance Guard"
     runs-on: ubuntu-latest
 
