@@ -25,79 +25,45 @@ jobs:
         # as well as add extra jobs in `include`.
         # @link https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix
         #
-        # IMPORTANT: test runs shouldn't fail because of PHPCS being incompatible with a PHP version.
-        # - PHPCS will run without errors on PHP 5.4 - 7.4 on all supported PHPCS versions.
-        # - PHP 8.0 needs PHPCS 3.5.7+ to run without errors.
-        # - PHP 8.1 needs PHPCS 3.6.1+ to run without errors.
-        # - PHP 8.2 needs PHPCS 3.6.1+ to run without errors.
-        # - PHP 8.3 needs PHPCS 3.8.0+ to run without errors (though the errors don't affect this package).
-        # - PHP 8.4 needs PHPCS 3.11.0+ to run without errors (though the errors don't affect this package).
-        # - PHP 8.5 needs PHPCS 3.13.4+ to run without errors.
-        #
         # The matrix is set up so as not to duplicate the builds which are run for code coverage.
-        php: ["5.5", "5.6", "7.0", "7.1", "7.2", "7.3"]
-        phpcs_version: ["3.13.5", "4.0.0", "4.x-dev"]
+        php: ["5.5", "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3", "8.4", "8.5"]
+        phpcs_version: ["3.13.6", "4.0.2", "4.x-dev"]
 
         exclude:
           # PHPCS 4.x requires PHP 7.2+
           - php: "5.5"
-            phpcs_version: "4.0.0"
+            phpcs_version: "4.0.2"
           - php: "5.5"
             phpcs_version: "4.x-dev"
           - php: "5.6"
-            phpcs_version: "4.0.0"
+            phpcs_version: "4.0.2"
           - php: "5.6"
             phpcs_version: "4.x-dev"
           - php: "7.0"
-            phpcs_version: "4.0.0"
+            phpcs_version: "4.0.2"
           - php: "7.0"
             phpcs_version: "4.x-dev"
           - php: "7.1"
-            phpcs_version: "4.0.0"
+            phpcs_version: "4.0.2"
           - php: "7.1"
             phpcs_version: "4.x-dev"
 
-        include:
+          # Exclude builds which are run with code coverage, so as not to duplicate these.
           - php: "8.5"
-            phpcs_version: "4.0.0"
-          - php: "8.5"
-            phpcs_version: "3.13.5"
-
-          - php: "8.4"
             phpcs_version: "4.x-dev"
-          - php: "8.4"
-            phpcs_version: "3.13.5"
-
-          - php: "8.3"
-            phpcs_version: "4.x-dev"
-          - php: "8.3"
-            phpcs_version: "3.13.5"
-
-          - php: "8.2"
-            phpcs_version: "4.x-dev"
-          - php: "8.2"
-            phpcs_version: "3.13.5"
-
-          - php: "8.1"
-            phpcs_version: "4.x-dev"
-          - php: "8.1"
-            phpcs_version: "3.13.5"
-
-          - php: "8.0"
-            phpcs_version: "4.x-dev"
-          - php: "8.0"
-            phpcs_version: "3.13.5"
-
           - php: "7.4"
+            phpcs_version: "3.13.6"
+          - php: "7.2"
             phpcs_version: "4.x-dev"
 
+        include:
           # Experimental builds.
           - php: "8.6" # Nightly.
             phpcs_version: "4.x-dev"
 
-    name: "Test: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
-
     continue-on-error: ${{ matrix.php == '8.6' }}
+
+    name: "Test: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
 
     steps:
       - name: Checkout code
@@ -172,12 +138,12 @@ jobs:
           - php: "8.5"
             phpcs_version: "4.x-dev"
           - php: "7.4"
-            phpcs_version: "3.13.5"
+            phpcs_version: "3.13.6"
 
           - php: "7.2"
             phpcs_version: "4.x-dev"
           - php: "5.4"
-            phpcs_version: "3.13.5"
+            phpcs_version: "3.13.6"
 
     name: "Coverage: PHP ${{ matrix.php }} on PHPCS ${{ matrix.phpcs_version }}"
 
